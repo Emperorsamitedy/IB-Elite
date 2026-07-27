@@ -31,7 +31,17 @@ const config: Config = {
         accent: {
           DEFAULT: "hsl(var(--accent))",
           foreground: "hsl(var(--accent-foreground))",
+          deep: "hsl(var(--accent-deep))",
           soft: "hsl(var(--accent-soft))",
+        },
+        ink: {
+          DEFAULT: "hsl(var(--ink))",
+          2: "hsl(var(--ink-2))",
+          foreground: "hsl(var(--ink-foreground))",
+        },
+        highlight: {
+          DEFAULT: "hsl(var(--highlight))",
+          foreground: "hsl(var(--highlight-foreground))",
         },
         success: "hsl(var(--success))",
         warning: "hsl(var(--warning))",
@@ -56,8 +66,9 @@ const config: Config = {
         "2xl": "calc(var(--radius) + 8px)",
       },
       fontFamily: {
-        sans: ["var(--font-geist-sans)", "system-ui", "sans-serif"],
-        mono: ["var(--font-geist-mono)", "monospace"],
+        sans: ["var(--font-grotesk)", "system-ui", "sans-serif"],
+        serif: ["var(--font-serif)", "Georgia", "serif"],
+        mono: ["var(--font-mono)", "ui-monospace", "monospace"],
       },
       fontSize: {
         "2xs": ["0.6875rem", { lineHeight: "1rem" }],
@@ -82,6 +93,10 @@ const config: Config = {
           from: { opacity: "0", transform: "scale(0.97)" },
           to: { opacity: "1", transform: "scale(1)" },
         },
+        "gauge-grow": {
+          from: { transform: "scaleY(0)" },
+          to: { transform: "scaleY(1)" },
+        },
         shimmer: {
           "100%": { transform: "translateX(100%)" },
         },
@@ -94,6 +109,7 @@ const config: Config = {
         "fade-in": "fade-in 0.3s ease-out",
         "fade-up": "fade-up 0.4s cubic-bezier(0.16, 1, 0.3, 1)",
         "scale-in": "scale-in 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+        "gauge-grow": "gauge-grow 0.5s cubic-bezier(0.16, 1, 0.3, 1) both",
         "slide-up": "slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1)",
       },
     },
