@@ -19,7 +19,7 @@ export function Providers({ children }: { children: React.ReactNode }) {
         toastOptions={{
           classNames: {
             toast:
-              "!bg-card !text-card-foreground !border-border !rounded-xl !shadow-lg",
+              "!bg-card !text-card-foreground !border-border !rounded-lg !shadow-lg",
             description: "!text-muted-foreground",
           },
         }}

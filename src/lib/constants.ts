@@ -8,7 +8,7 @@ export const NAV_ITEMS = [
   { href: "/subjects", label: "Subjects", icon: "Library" },
   { href: "/mistakes", label: "Mistakes", icon: "AlertCircle" },
   { href: "/bookmarks", label: "Bookmarks", icon: "Bookmark" },
-  { href: "/tutor", label: "AI Tutor", icon: "Sparkles" },
+  { href: "/tutor", label: "AI Tutor", icon: "MessageSquareText" },
   { href: "/plan", label: "Study Plan", icon: "CalendarRange" },
 ] as const;
 
@@ -17,7 +17,7 @@ export const MOBILE_NAV_ITEMS = [
   { href: "/practice", label: "Practice", icon: "Dumbbell" },
   { href: "/subjects", label: "Subjects", icon: "Library" },
   { href: "/mistakes", label: "Mistakes", icon: "AlertCircle" },
-  { href: "/tutor", label: "Tutor", icon: "Sparkles" },
+  { href: "/tutor", label: "Tutor", icon: "MessageSquareText" },
 ] as const;
 
 export const DIFFICULTIES: {

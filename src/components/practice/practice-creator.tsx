@@ -176,9 +176,16 @@ function Field({
 }) {
   return (
     <div>
-      <div className="mb-2.5 flex items-center justify-between">
-        <span className="text-sm font-medium">{label}</span>
-        {hint && <span className="text-xs text-muted-foreground">{hint}</span>}
+      <div className="mb-3 flex items-baseline gap-3 border-b border-border pb-2">
+        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          {label}
+        </span>
+        <span className="flex-1" />
+        {hint && (
+          <span className="font-mono text-[11px] text-muted-foreground">
+            {hint}
+          </span>
+        )}
       </div>
       {children}
     </div>
@@ -198,11 +205,12 @@ function Chip({
     <button
       type="button"
       onClick={onClick}
+      aria-pressed={active}
       className={cn(
-        "rounded-lg border px-3.5 py-2 text-sm font-medium transition-all",
+        "rounded-md border px-3.5 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         active
-          ? "border-accent bg-accent-soft text-accent"
-          : "border-border text-muted-foreground hover:border-border hover:bg-surface-2 hover:text-foreground",
+          ? "border-ink bg-ink text-ink-foreground dark:border-foreground dark:bg-foreground dark:text-background"
+          : "border-border text-muted-foreground hover:border-foreground hover:text-foreground",
       )}
     >
       {children}
@@ -225,10 +233,10 @@ function ToggleRow({
 }) {
   return (
     <label className="flex cursor-pointer items-center gap-3 p-4">
-      <Icon className="h-5 w-5 text-muted-foreground" />
+      <Icon className="h-4 w-4 text-muted-foreground" />
       <div className="flex-1">
-        <p className="text-sm font-medium">{label}</p>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="font-mono text-xs uppercase tracking-[0.1em]">{label}</p>
+        <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />
     </label>

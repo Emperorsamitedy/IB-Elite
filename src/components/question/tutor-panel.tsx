@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { Sparkles, Send, Lightbulb } from "lucide-react";
+import { MessageSquareText, Send, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/misc";
 import { cn } from "@/lib/utils";
@@ -79,13 +79,13 @@ export function TutorPanel({
 
   return (
     <div className={cn("flex h-full flex-col", className)}>
-      <div className="flex items-center gap-2 border-b border-border px-4 py-3">
-        <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent-soft text-accent">
-          <Sparkles className="h-4 w-4" />
-        </span>
+      <div className="flex items-center gap-2.5 border-b border-border bg-ink-2 px-4 py-3 text-ink-foreground">
+        <MessageSquareText className="h-4 w-4" />
         <div>
-          <p className="text-sm font-semibold leading-none">AI Tutor</p>
-          <p className="mt-0.5 text-2xs text-muted-foreground">
+          <p className="font-mono text-xs uppercase tracking-[0.12em] leading-none">
+            Tutor
+          </p>
+          <p className="mt-1 text-2xs text-ink-foreground/70">
             Guided hints, not answers
           </p>
         </div>
@@ -104,7 +104,7 @@ export function TutorPanel({
           <div
             key={i}
             className={cn(
-              "max-w-[85%] rounded-2xl px-3.5 py-2 text-sm leading-relaxed",
+              "max-w-[85%] rounded-lg px-3.5 py-2 text-sm leading-relaxed",
               m.role === "user"
                 ? "ml-auto rounded-br-sm bg-accent text-accent-foreground"
                 : "rounded-bl-sm border border-border bg-surface",
@@ -134,7 +134,7 @@ export function TutorPanel({
                 key={q}
                 onClick={() => send(q)}
                 disabled={loading}
-                className="rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:bg-surface-2 hover:text-foreground disabled:opacity-50"
+                className="rounded-md border border-border px-2.5 py-1 text-xs text-muted-foreground transition-colors hover:border-foreground hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50"
               >
                 {q}
               </button>
@@ -151,7 +151,7 @@ export function TutorPanel({
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask the tutor…"
-              className="h-10 flex-1 rounded-lg border border-input bg-background px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-ring"
+              className="h-10 flex-1 rounded-md border border-input bg-surface px-3 text-sm outline-none focus:border-accent focus:ring-2 focus:ring-ring/30"
             />
             <Button type="submit" size="icon" disabled={loading || !input.trim()}>
               <Send className="h-4 w-4" />

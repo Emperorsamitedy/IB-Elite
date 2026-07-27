@@ -2,7 +2,6 @@ import Link from "next/link";
 import { FileQuestion } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { EmptyState } from "@/components/ui/misc";
@@ -12,9 +11,9 @@ import type { Difficulty } from "@/lib/types";
 export const metadata = { title: "Question browser" };
 
 const PAGE_SIZE = 20;
-const DIFF_VARIANT: Record<Difficulty, "success" | "warning" | "danger"> = {
+const DIFF_VARIANT: Record<Difficulty, "success" | "outline" | "danger"> = {
   easy: "success",
-  medium: "warning",
+  medium: "outline",
   hard: "danger",
 };
 
@@ -78,12 +77,11 @@ export default async function QuestionBrowserPage({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-2xl font-extrabold tracking-tight">
           Question browser
         </h1>
-        <p className="mt-1 text-muted-foreground">
-          {total} question{total === 1 ? "" : "s"} · filter to find exactly what
-          you need.
+        <p className="mt-1 font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
+          {total} question{total === 1 ? "" : "s"} · filter to the exact one
         </p>
       </div>
 
@@ -95,47 +93,48 @@ export default async function QuestionBrowserPage({
 
       {questions && questions.length > 0 ? (
         <>
-          <div className="flex flex-col gap-2.5">
+          <ul className="divide-y divide-border border-y border-border">
             {questions.map((q) => {
               const topic = q.topics as {
                 name: string;
                 subjects: { name: string } | null;
               } | null;
               return (
-                <Link key={q.id} href={`/questions/${q.id}`}>
-                  <Card interactive>
-                    <CardContent className="flex items-center gap-4 p-4">
-                      <FileQuestion className="h-5 w-5 shrink-0 text-muted-foreground" />
-                      <div className="min-w-0 flex-1">
-                        <p className="line-clamp-1 text-sm font-medium">
-                          {q.title || q.prompt}
-                        </p>
-                        <p className="text-xs text-muted-foreground">
-                          {topic?.subjects?.name} · {topic?.name}
-                        </p>
-                      </div>
-                      <div className="flex shrink-0 items-center gap-2">
-                        <Badge variant="outline">{q.marks}m</Badge>
-                        <Badge
-                          variant={DIFF_VARIANT[q.difficulty]}
-                          className="capitalize"
-                        >
-                          {q.difficulty}
-                        </Badge>
-                      </div>
-                    </CardContent>
-                  </Card>
-                </Link>
+                <li key={q.id}>
+                  <Link
+                    href={`/questions/${q.id}`}
+                    className="group flex items-center gap-4 py-3.5 transition-colors hover:bg-surface-2/60"
+                  >
+                    <span className="w-10 shrink-0 text-right font-mono text-xs font-semibold text-accent">
+                      [{q.marks}]
+                    </span>
+                    <div className="min-w-0 flex-1">
+                      <p className="line-clamp-1 font-serif text-[15px] group-hover:text-accent">
+                        {q.title || q.prompt}
+                      </p>
+                      <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
+                        {topic?.subjects?.name} · {topic?.name}
+                        {q.paper ? ` · ${q.paper}` : ""}
+                      </p>
+                    </div>
+                    <Badge
+                      variant={DIFF_VARIANT[q.difficulty]}
+                      className="shrink-0"
+                    >
+                      {q.difficulty}
+                    </Badge>
+                  </Link>
+                </li>
               );
             })}
-          </div>
+          </ul>
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between">
               <Button variant="outline" size="sm" asChild disabled={page <= 1}>
                 <Link href={buildPage(page - 1)}>Previous</Link>
               </Button>
-              <span className="text-sm text-muted-foreground">
+              <span className="font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
                 Page {page} of {totalPages}
               </span>
               <Button

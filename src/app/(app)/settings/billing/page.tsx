@@ -22,7 +22,7 @@ export default async function BillingPage() {
       </nav>
 
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-2xl font-extrabold tracking-tight">
           Billing & subscription
         </h1>
         <p className="mt-1 text-muted-foreground">

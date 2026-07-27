@@ -3,8 +3,10 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import {
   SessionRunner,
+  type Outcome,
   type SessionQuestion,
 } from "@/components/session/session-runner";
+import type { ConfidenceRating } from "@/lib/types";
 
 export const metadata = { title: "Practice session" };
 
@@ -25,12 +27,12 @@ export default async function SessionPage({
     .maybeSingle();
 
   if (!session) notFound();
-  if (session.status === "completed") redirect("/app");
 
   const { data: rows } = await supabase
     .from("practice_session_questions")
     .select(
       `position,
+       confidence,
        questions(
          id, title, prompt, answer, solution, difficulty, marks,
          question_type, calculator, year, paper, source, license,
@@ -58,12 +60,25 @@ export default async function SessionPage({
 
   if (questions.length === 0) redirect("/practice");
 
+  const outcomes: Outcome[] = (rows ?? [])
+    .map((r) => {
+      const q = r.questions as { id: string } | null;
+      if (!q || !r.confidence) return null;
+      return {
+        questionId: q.id,
+        confidence: r.confidence as ConfidenceRating,
+      };
+    })
+    .filter((o): o is Outcome => o !== null);
+
   return (
     <SessionRunner
       sessionId={session.id}
       questions={questions}
       startIndex={session.current_index}
       timeLimitSeconds={session.time_limit_seconds}
+      initialOutcomes={outcomes}
+      completed={session.status === "completed"}
     />
   );
 }

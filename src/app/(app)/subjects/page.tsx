@@ -2,7 +2,6 @@ import Link from "next/link";
 import { ArrowRight, Library } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
-import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { EmptyState } from "@/components/ui/misc";
 
@@ -27,9 +26,9 @@ export default async function SubjectsPage() {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Subjects</h1>
-        <p className="mt-1 text-muted-foreground">
-          Browse the full curriculum and dive into any topic.
+        <h1 className="text-2xl font-extrabold tracking-tight">Subjects</h1>
+        <p className="mt-1 font-mono text-xs uppercase tracking-[0.1em] text-muted-foreground">
+          Browse the curriculum · open any topic
         </p>
       </div>
 
@@ -41,42 +40,34 @@ export default async function SubjectsPage() {
             const questionCount =
               (s.questions as { count: number }[])?.[0]?.count ?? 0;
             return (
-              <Link key={s.id} href={`/subjects/${s.slug}`}>
-                <Card interactive className="h-full">
-                  <CardContent className="flex h-full flex-col gap-3 p-5">
-                    <div className="flex items-start justify-between">
-                      <span
-                        className="flex h-10 w-10 items-center justify-center rounded-xl"
-                        style={{
-                          backgroundColor: `${s.color}1a`,
-                          color: s.color,
-                        }}
-                      >
-                        <Library className="h-5 w-5" />
-                      </span>
-                      {mineSet.has(s.id) && (
-                        <Badge variant="accent">My subject</Badge>
-                      )}
-                    </div>
-                    <div className="flex-1">
-                      <h2 className="font-semibold">{s.name}</h2>
-                      <p className="text-xs text-muted-foreground">
-                        {s.group_name}
-                      </p>
-                      {s.description && (
-                        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-                          {s.description}
-                        </p>
-                      )}
-                    </div>
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <span>
-                        {topicCount} topics · {questionCount} questions
-                      </span>
-                      <ArrowRight className="h-4 w-4" />
-                    </div>
-                  </CardContent>
-                </Card>
+              <Link
+                key={s.id}
+                href={`/subjects/${s.slug}`}
+                className="group flex h-full flex-col gap-3 rounded-lg border border-border border-l-4 bg-card p-5 transition-colors hover:border-foreground/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background"
+                style={{ borderLeftColor: s.color }}
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="font-bold tracking-tight group-hover:text-accent">
+                      {s.name}
+                    </h2>
+                    <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+                      {s.group_name}
+                    </p>
+                  </div>
+                  {mineSet.has(s.id) && <Badge variant="accent">Mine</Badge>}
+                </div>
+                {s.description && (
+                  <p className="line-clamp-2 flex-1 font-serif text-[15px] leading-relaxed text-muted-foreground">
+                    {s.description}
+                  </p>
+                )}
+                <div className="flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
+                  <span>
+                    {topicCount} topics · {questionCount} questions
+                  </span>
+                  <ArrowRight className="h-4 w-4" />
+                </div>
               </Link>
             );
           })}

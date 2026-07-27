@@ -4,60 +4,78 @@
 
 @layer base {
   :root {
-    /* Neutral surface scale (light) */
-    --background: 0 0% 100%;
-    --surface: 0 0% 99%;
-    --surface-2: 240 5% 96%;
-    --foreground: 240 10% 8%;
-    --muted: 240 5% 96%;
-    --muted-foreground: 240 4% 46%;
-    --border: 240 6% 90%;
-    --input: 240 6% 90%;
-    --ring: 250 84% 60%;
+    /* Paper & ink surface scale (light) */
+    --background: 45 27% 94%; /* warm study paper */
+    --surface: 0 0% 100%;
+    --surface-2: 49 22% 90%;
+    --foreground: 208 44% 13%; /* deep petrol-ink */
+    --muted: 49 22% 90%;
+    --muted-foreground: 213 11% 40%; /* slate */
+    --border: 47 15% 82%; /* rule */
+    --input: 47 15% 82%;
+    --ring: 4 78% 53%;
 
-    /* Brand accent — calm indigo/violet */
-    --accent: 250 84% 60%;
+    /* Brand accent — examiner's marker red */
+    --accent: 4 78% 53%;
     --accent-foreground: 0 0% 100%;
-    --accent-soft: 250 100% 97%;
+    --accent-deep: 4 71% 42%;
+    --accent-soft: 4 78% 96%;
+
+    /* Ink (primary dark surface used for hero/ink buttons) */
+    --ink: 208 44% 13%;
+    --ink-2: 205 42% 18%;
+    --ink-foreground: 45 27% 94%;
+
+    /* Study palette */
+    --highlight: 43 91% 62%; /* highlighter yellow */
+    --highlight-foreground: 208 44% 13%;
 
     /* Semantic */
-    --success: 152 60% 40%;
-    --warning: 38 92% 50%;
-    --danger: 0 72% 51%;
+    --success: 158 51% 37%;
+    --warning: 43 91% 55%;
+    --danger: 4 78% 53%;
     --danger-foreground: 0 0% 100%;
 
     --card: 0 0% 100%;
-    --card-foreground: 240 10% 8%;
+    --card-foreground: 208 44% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 240 10% 8%;
+    --popover-foreground: 208 44% 13%;
 
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
 
   .dark {
-    --background: 240 10% 4%;
-    --surface: 240 8% 6%;
-    --surface-2: 240 6% 10%;
-    --foreground: 0 0% 98%;
-    --muted: 240 6% 12%;
-    --muted-foreground: 240 5% 60%;
-    --border: 240 5% 16%;
-    --input: 240 5% 18%;
-    --ring: 250 90% 66%;
+    --background: 210 45% 9%;
+    --surface: 208 44% 13%;
+    --surface-2: 209 35% 16%;
+    --foreground: 45 27% 94%;
+    --muted: 207 34% 14%;
+    --muted-foreground: 210 14% 63%;
+    --border: 209 25% 20%;
+    --input: 209 25% 20%;
+    --ring: 4 78% 58%;
 
-    --accent: 250 90% 66%;
+    --accent: 4 78% 58%;
     --accent-foreground: 0 0% 100%;
-    --accent-soft: 250 40% 16%;
+    --accent-deep: 4 71% 46%;
+    --accent-soft: 4 40% 20%;
 
-    --success: 152 55% 48%;
-    --warning: 38 92% 55%;
-    --danger: 0 72% 58%;
+    --ink: 208 44% 13%;
+    --ink-2: 209 35% 16%;
+    --ink-foreground: 45 27% 94%;
+
+    --highlight: 43 91% 62%;
+    --highlight-foreground: 208 44% 13%;
+
+    --success: 158 48% 46%;
+    --warning: 43 91% 60%;
+    --danger: 4 78% 60%;
     --danger-foreground: 0 0% 100%;
 
-    --card: 240 8% 7%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 8% 7%;
-    --popover-foreground: 0 0% 98%;
+    --card: 208 44% 13%;
+    --card-foreground: 45 27% 94%;
+    --popover: 208 44% 13%;
+    --popover-foreground: 45 27% 94%;
   }
 }
 
@@ -72,12 +90,11 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-feature-settings: "cv11", "ss01";
-    font-variation-settings: "opsz" 32;
     text-rendering: optimizeLegibility;
   }
   ::selection {
-    background-color: hsl(var(--accent) / 0.25);
+    background-color: hsl(var(--highlight) / 0.55);
+    color: hsl(var(--ink));
   }
   /* Custom scrollbar */
   ::-webkit-scrollbar {
@@ -99,26 +116,42 @@
   .text-balance {
     text-wrap: balance;
   }
-  .bg-grid {
-    background-image: linear-gradient(
-        to right,
-        hsl(var(--border) / 0.5) 1px,
-        transparent 1px
-      ),
-      linear-gradient(to bottom, hsl(var(--border) / 0.5) 1px, transparent 1px);
-    background-size: 56px 56px;
+  .font-serif {
+    font-family: var(--font-serif), Georgia, serif;
   }
-  .bg-radial-fade {
-    -webkit-mask-image: radial-gradient(
-      ellipse 60% 50% at 50% 40%,
-      #000 60%,
-      transparent 100%
+  .font-mono {
+    font-family: var(--font-mono), ui-monospace, monospace;
+  }
+  /* Answer-booklet ruled lines (for ink hero panels) */
+  .bg-ruled {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 37px,
+      hsl(var(--ink-foreground) / 0.05) 37px 38px
     );
-    mask-image: radial-gradient(
-      ellipse 60% 50% at 50% 40%,
-      #000 60%,
-      transparent 100%
-    );
+  }
+  /* Highlighter swipe behind a word */
+  .marker-hl {
+    position: relative;
+    display: inline-block;
+    padding: 0 0.18em;
+    color: hsl(var(--highlight-foreground));
+  }
+  .marker-hl::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 14%;
+    bottom: 10%;
+    background: hsl(var(--highlight));
+    transform: rotate(-1.6deg);
+    border-radius: 2px;
+    z-index: 0;
+  }
+  .marker-hl > * {
+    position: relative;
+    z-index: 1;
   }
 }
 

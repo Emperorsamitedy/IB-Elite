@@ -28,7 +28,7 @@ export default async function NewQuestionPage() {
         <ChevronRight className="h-3.5 w-3.5" />
         <span className="text-foreground">New</span>
       </nav>
-      <h1 className="text-2xl font-semibold tracking-tight">New question</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight">New question</h1>
       <QuestionForm subjects={subjects} />
     </div>
   );

@@ -1,19 +1,9 @@
 import Link from "next/link";
-import {
-  ArrowRight,
-  Search,
-  Target,
-  NotebookPen,
-  Sparkles,
-  CalendarRange,
-  Timer,
-  Check,
-  Zap,
-} from "lucide-react";
+import { ArrowRight, Search, NotebookPen, MessageSquareText } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { CommandStamp } from "@/components/ui/stamp";
+import { Gauge } from "@/components/ui/gauge";
 import { MarketingNav } from "@/components/marketing/marketing-nav";
-import { ProductPreview } from "@/components/marketing/product-preview";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/server";
 import { APP_NAME, PRICING } from "@/lib/constants";
@@ -21,52 +11,46 @@ import { APP_NAME, PRICING } from "@/lib/constants";
 const FEATURES = [
   {
     icon: Search,
-    title: "Find questions instantly",
-    body: "Filter by subject, topic, difficulty, paper and more. The right question is always seconds away.",
-  },
-  {
-    icon: Target,
-    title: "Practise by topic",
-    body: "Build focused sessions in a couple of taps — pick a topic, a difficulty, and go.",
+    title: "Find any question fast",
+    body: "Filter to the exact question by subject, paper, topic and command term. No more scrolling through PDFs.",
   },
   {
     icon: NotebookPen,
-    title: "Learn from mistakes",
-    body: "Every question you get wrong lands in your mistake notebook, ready to revisit and master.",
+    title: "Every mistake, kept",
+    body: "Questions you get wrong land in your notebook automatically — ready to redo until they stick.",
   },
   {
-    icon: Sparkles,
-    title: "AI tutor that teaches",
-    body: "Context-aware hints that guide you to the answer instead of handing it over.",
-  },
-  {
-    icon: CalendarRange,
-    title: "Personalised revision",
-    body: "A study plan built around your subjects, exam dates and weak topics.",
-  },
-  {
-    icon: Timer,
-    title: "Exam countdowns",
-    body: "Always know how many days remain and exactly what to focus on next.",
+    icon: MessageSquareText,
+    title: "A tutor that guides",
+    body: "Ask for a hint, not the answer. The tutor walks you to the mark scheme one step at a time.",
   },
 ];
 
 const STEPS = [
   {
     n: "01",
-    title: "Choose what to revise",
-    body: "Select a subject and topic, or let Atlas recommend your next best session.",
+    title: "Pick what to revise",
+    body: "Choose a subject and topic, or let Atlas set your next best session.",
   },
   {
     n: "02",
-    title: "Practise with focus",
-    body: "Work through curated questions with a clean, distraction-free viewer.",
+    title: "Practise under exam conditions",
+    body: "Work timed, past-paper-style questions in a clean, distraction-free viewer.",
   },
   {
     n: "03",
-    title: "Understand & improve",
-    body: "Ask the AI tutor, save mistakes, and watch your weak topics shrink.",
+    title: "Watch your grade climb",
+    body: "Reveal the mark scheme, log mistakes, and see each subject move up the 7-gauge.",
   },
+];
+
+const CHIP_COLORS = [
+  "#E5372A",
+  "#2F8F6B",
+  "#2B6E8F",
+  "#C6892B",
+  "#7A4FB0",
+  "#B92A5A",
 ];
 
 export default async function LandingPage() {
@@ -83,74 +67,97 @@ export default async function LandingPage() {
 
       <main className="flex-1">
         {/* Hero */}
-        <section className="relative overflow-hidden">
-          <div className="pointer-events-none absolute inset-0 -z-10 bg-grid bg-radial-fade opacity-60" />
-          <div className="container flex flex-col items-center gap-12 py-16 md:py-24">
-            <div className="flex max-w-3xl flex-col items-center text-center">
-              <Badge variant="accent" className="mb-5 animate-fade-in">
-                <Zap className="h-3 w-3" /> Built for IB students
-              </Badge>
-              <h1 className="text-balance text-4xl font-semibold tracking-tight sm:text-5xl md:text-6xl">
-                Stop searching for questions.
-                <br />
-                <span className="text-accent">Start preparing smarter.</span>
-              </h1>
-              <p className="mt-6 max-w-xl text-balance text-lg leading-relaxed text-muted-foreground">
-                A fast, intelligent IB revision platform that helps you find
-                exactly what you need, practise efficiently, understand your
-                mistakes, and build a personalised revision plan.
-              </p>
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Button size="lg" asChild>
-                  <Link href="/register">
-                    Start practising <ArrowRight className="h-4 w-4" />
-                  </Link>
-                </Button>
-                <Button size="lg" variant="outline" asChild>
-                  <a href="#how">See how it works</a>
-                </Button>
+        <section className="container pt-4 md:pt-6">
+          <div className="relative overflow-hidden rounded-2xl bg-ink px-6 py-12 text-ink-foreground sm:px-10 md:px-14 md:py-16">
+            <div className="pointer-events-none absolute inset-0 bg-ruled" />
+            <div className="pointer-events-none absolute inset-y-0 left-[88px] hidden w-px bg-accent/50 md:block" />
+            <div className="relative grid items-center gap-12 md:grid-cols-[1.08fr_.92fr]">
+              <div>
+                <CommandStamp term="Evaluate" />
+                <h1 className="mt-6 text-balance text-[2.75rem] font-black leading-[0.98] tracking-tight sm:text-6xl">
+                  Turn past papers into{" "}
+                  <span className="marker-hl font-mono text-[0.82em] font-semibold">
+                    <span>7s</span>
+                  </span>{" "}
+                  <span className="font-serif font-medium italic text-highlight">
+                    — not stress.
+                  </span>
+                </h1>
+                <p className="mt-6 max-w-md text-lg leading-relaxed text-ink-foreground/75">
+                  Find any IB question by subject, paper and command term.
+                  Practise it, reveal the mark scheme, and see your grade climb 1
+                  to 7.
+                </p>
+                <div className="mt-8 flex flex-wrap items-center gap-4">
+                  <Button size="lg" asChild>
+                    <Link href="/register">
+                      Start practising <ArrowRight className="h-4 w-4" />
+                    </Link>
+                  </Button>
+                  <Button
+                    size="lg"
+                    variant="ghost"
+                    className="border-[1.5px] border-ink-foreground/40 text-ink-foreground hover:bg-ink-foreground/10"
+                    asChild
+                  >
+                    <a href="#how">See how it works</a>
+                  </Button>
+                  <span className="font-mono text-xs text-ink-foreground/55">
+                    Free · no card needed
+                  </span>
+                </div>
               </div>
-              <p className="mt-4 text-xs text-muted-foreground">
-                No credit card required · Free to get started
-              </p>
-            </div>
 
-            <div className="w-full animate-fade-up">
-              <ProductPreview />
+              <SampleQuestionCard />
             </div>
+          </div>
+
+          {/* Stats ribbon */}
+          <div className="mt-6 grid grid-cols-2 overflow-hidden rounded-xl border border-border bg-card md:grid-cols-4">
+            <RibbonCell n="1,200+" label="past-paper-style questions" />
+            <RibbonCell n="1–7" label="graded like the real exam" tone="accent" />
+            <RibbonCell n="6" label="subject groups covered" tone="success" />
+            <RibbonCell n="42" label="days to the May session" />
+          </div>
+
+          {/* Subject chips */}
+          <div className="mt-8 flex flex-wrap gap-2.5">
+            {(subjects ?? []).map((s, i) => (
+              <span
+                key={s.id}
+                className="flex items-center gap-2.5 rounded-full border border-border bg-card py-2 pl-2.5 pr-4 text-sm font-semibold"
+              >
+                <span
+                  className="h-2.5 w-2.5 rounded-[3px]"
+                  style={{ backgroundColor: s.color ?? CHIP_COLORS[i % 6] }}
+                />
+                {s.name}
+              </span>
+            ))}
           </div>
         </section>
 
-        {/* Subjects */}
-        <section id="subjects" className="border-t border-border bg-surface/50">
-          <div className="container py-16 md:py-20">
-            <SectionHeading
-              eyebrow="Subjects"
-              title="Every subject, one calm home"
-              subtitle="Practice curated across the IB curriculum. Pick yours and dive in."
-            />
-            <div className="mt-10 grid grid-cols-2 gap-3 sm:grid-cols-3">
-              {(subjects ?? []).map((s) => (
-                <div
-                  key={s.id}
-                  className="group flex items-center gap-3 rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:shadow-md"
-                >
-                  <span
-                    className="h-9 w-9 shrink-0 rounded-lg"
-                    style={{
-                      backgroundColor: `${s.color}1a`,
-                      border: `1px solid ${s.color}40`,
-                    }}
-                  />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium">{s.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {s.group_name}
-                    </p>
-                  </div>
-                </div>
-              ))}
+        {/* Your standing / 7-gauge signature */}
+        <section id="gauge" className="container py-16 md:py-20">
+          <div className="rounded-2xl border border-border bg-card p-6 sm:p-8">
+            <div className="flex items-baseline justify-between">
+              <p className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+                Your standing · the 7-gauge
+              </p>
+              <p className="font-mono text-xs text-muted-foreground">
+                updates every session ▸
+              </p>
             </div>
+            <div className="mt-6 grid gap-8 sm:grid-cols-3">
+              <GaugePreview label="Mathematics AA HL" value={5} />
+              <GaugePreview label="Economics HL" value={6} />
+              <GaugePreview label="Physics HL" value={3} />
+            </div>
+            <p className="mt-6 max-w-xl font-serif text-[15px] italic leading-relaxed text-muted-foreground">
+              One instrument, everywhere: it shows where each subject stands,
+              how hard a question is, and how confident you felt — all on the
+              scale you&apos;re actually graded on.
+            </p>
           </div>
         </section>
 
@@ -158,21 +165,22 @@ export default async function LandingPage() {
         <section id="features" className="border-t border-border">
           <div className="container py-16 md:py-24">
             <SectionHeading
-              eyebrow="Features"
-              title="Everything you need to revise well"
-              subtitle="No clutter. No noise. Just the tools that move your grade."
+              eyebrow="What you get"
+              title="Built for the way the IB actually works"
             />
-            <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="mt-12 divide-y divide-border border-y border-border">
               {FEATURES.map((f) => (
                 <div
                   key={f.title}
-                  className="group rounded-xl border border-border bg-card p-6 transition-all hover:-translate-y-0.5 hover:shadow-md"
+                  className="grid gap-4 py-8 sm:grid-cols-[1fr_2fr] sm:items-start sm:gap-8"
                 >
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-accent-soft text-accent">
-                    <f.icon className="h-5 w-5" />
+                  <div className="flex items-center gap-3">
+                    <f.icon className="h-5 w-5 text-accent" />
+                    <h3 className="text-lg font-bold tracking-tight">
+                      {f.title}
+                    </h3>
                   </div>
-                  <h3 className="text-base font-semibold">{f.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  <p className="max-w-xl leading-relaxed text-muted-foreground">
                     {f.body}
                   </p>
                 </div>
@@ -182,20 +190,22 @@ export default async function LandingPage() {
         </section>
 
         {/* How it works */}
-        <section id="how" className="border-t border-border bg-surface/50">
+        <section id="how" className="border-t border-border bg-surface-2/40">
           <div className="container py-16 md:py-24">
             <SectionHeading
               eyebrow="How it works"
-              title="From “I need to revise” to solving a question in seconds"
+              title="From “I should revise” to a marked question in seconds"
             />
-            <div className="mt-12 grid gap-8 md:grid-cols-3">
+            <div className="mt-12 grid gap-px overflow-hidden rounded-xl border border-border bg-border md:grid-cols-3">
               {STEPS.map((s) => (
-                <div key={s.n} className="relative">
-                  <span className="font-mono text-sm font-medium text-accent">
+                <div key={s.n} className="bg-card p-7">
+                  <span className="font-mono text-sm font-semibold text-accent">
                     {s.n}
                   </span>
-                  <h3 className="mt-3 text-lg font-semibold">{s.title}</h3>
-                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  <h3 className="mt-4 text-lg font-bold tracking-tight">
+                    {s.title}
+                  </h3>
+                  <p className="mt-2 leading-relaxed text-muted-foreground">
                     {s.body}
                   </p>
                 </div>
@@ -209,8 +219,7 @@ export default async function LandingPage() {
           <div className="container py-16 md:py-24">
             <SectionHeading
               eyebrow="Pricing"
-              title="Simple, student-friendly pricing"
-              subtitle="Start free. Upgrade when you're ready for the full toolkit."
+              title="Start free. Go Pro when you're serious."
             />
             <div className="mx-auto mt-12 grid max-w-3xl gap-4 md:grid-cols-2">
               <PricingCard
@@ -235,7 +244,7 @@ export default async function LandingPage() {
                   "Unlimited practice sessions",
                   "AI tutor with hint ladder",
                   "Personalised study plans",
-                  "Full mistake notebook & analytics",
+                  "Full mistake notebook & the 7-gauge",
                   "Unlimited exam countdowns",
                 ]}
                 cta="Start Pro"
@@ -246,17 +255,17 @@ export default async function LandingPage() {
         </section>
 
         {/* CTA */}
-        <section className="border-t border-border bg-surface/50">
+        <section className="border-t border-border">
           <div className="container py-16 md:py-20">
-            <div className="relative overflow-hidden rounded-2xl border border-border bg-card px-6 py-14 text-center shadow-sm">
-              <div className="pointer-events-none absolute inset-0 -z-10 bg-grid bg-radial-fade opacity-40" />
-              <h2 className="text-balance text-3xl font-semibold tracking-tight">
-                Your revision space is ready.
+            <div className="relative overflow-hidden rounded-2xl bg-ink px-6 py-14 text-center text-ink-foreground">
+              <div className="pointer-events-none absolute inset-0 bg-ruled" />
+              <h2 className="relative text-balance text-3xl font-black tracking-tight sm:text-4xl">
+                Your revision desk is ready.
               </h2>
-              <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-                Join students revising smarter with {APP_NAME}.
+              <p className="relative mx-auto mt-3 max-w-md text-ink-foreground/75">
+                Join students turning past papers into 7s with {APP_NAME}.
               </p>
-              <Button size="lg" className="mt-7" asChild>
+              <Button size="lg" className="relative mt-7" asChild>
                 <Link href="/register">
                   Start practising <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -269,10 +278,10 @@ export default async function LandingPage() {
       <footer className="border-t border-border">
         <div className="container flex flex-col items-center justify-between gap-4 py-8 sm:flex-row">
           <Logo />
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} {APP_NAME}. Built for IB students.
+          <p className="font-mono text-xs text-muted-foreground">
+            © {new Date().getFullYear()} {APP_NAME} · built for IB students
           </p>
-          <div className="flex gap-4 text-xs text-muted-foreground">
+          <div className="flex gap-5 text-sm text-muted-foreground">
             <Link href="/login" className="hover:text-foreground">
               Sign in
             </Link>
@@ -282,6 +291,84 @@ export default async function LandingPage() {
           </div>
         </div>
       </footer>
+    </div>
+  );
+}
+
+function SampleQuestionCard() {
+  return (
+    <div className="overflow-hidden rounded-lg bg-card text-card-foreground shadow-2xl">
+      <div className="flex items-center justify-between bg-ink-2 px-4 py-3 font-mono text-[11px] tracking-wide text-ink-foreground/80">
+        <span>PAPER 2 · SECTION B</span>
+        <span>NO CALCULATOR</span>
+      </div>
+      <div className="grid grid-cols-[56px_1fr]">
+        <div className="flex flex-col items-center gap-4 border-r border-border bg-surface-2 py-4 font-mono text-xs text-muted-foreground">
+          <span className="font-semibold text-accent">[6]</span>
+          <span>3</span>
+          <span className="mt-auto">00:45</span>
+        </div>
+        <div className="p-5">
+          <p className="font-mono text-xs text-muted-foreground">
+            Question 3 · Economics HL
+          </p>
+          <CommandStamp term="Evaluate" arrow={false} className="my-2.5" />
+          <p className="font-serif text-lg leading-snug">
+            Evaluate the extent to which a rise in interest rates reduces
+            inflation in a closed economy.
+          </p>
+          <Button variant="outline" size="sm" className="mt-4">
+            Reveal mark scheme
+          </Button>
+          <div className="mt-4 border-t border-dashed border-border pt-3">
+            <p className="font-mono text-[11px] tracking-wide text-muted-foreground">
+              HOW CONFIDENT? · snaps onto your 7-gauge
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function GaugePreview({ label, value }: { label: string; value: number }) {
+  return (
+    <div>
+      <div className="mb-3 flex items-baseline justify-between gap-2">
+        <span className="text-sm font-semibold">{label}</span>
+        <span className="font-mono text-xs text-muted-foreground">
+          now <b className="text-sm text-accent">{value}</b>/7
+        </span>
+      </div>
+      <Gauge value={value} />
+    </div>
+  );
+}
+
+function RibbonCell({
+  n,
+  label,
+  tone,
+}: {
+  n: string;
+  label: string;
+  tone?: "accent" | "success";
+}) {
+  return (
+    <div className="border-b border-r border-border p-5 last:border-r-0 md:border-b-0">
+      <div
+        className={
+          "font-mono text-2xl font-semibold " +
+          (tone === "accent"
+            ? "text-accent"
+            : tone === "success"
+              ? "text-success"
+              : "text-foreground")
+        }
+      >
+        {n}
+      </div>
+      <div className="mt-1.5 text-sm text-muted-foreground">{label}</div>
     </div>
   );
 }
@@ -296,11 +383,11 @@ function SectionHeading({
   subtitle?: string;
 }) {
   return (
-    <div className="mx-auto max-w-2xl text-center">
-      <p className="text-xs font-semibold uppercase tracking-widest text-accent">
+    <div className="max-w-2xl">
+      <p className="font-mono text-xs uppercase tracking-[0.14em] text-accent">
         {eyebrow}
       </p>
-      <h2 className="mt-3 text-balance text-3xl font-semibold tracking-tight sm:text-4xl">
+      <h2 className="mt-3 text-balance text-3xl font-black tracking-tight sm:text-4xl">
         {title}
       </h2>
       {subtitle && (
@@ -329,26 +416,29 @@ function PricingCard({
 }) {
   return (
     <div
-      className={`relative flex flex-col rounded-2xl border p-6 ${
-        highlighted
-          ? "border-accent/40 bg-card shadow-glow"
-          : "border-border bg-card"
-      }`}
+      className={
+        "relative flex flex-col rounded-xl border bg-card p-6 " +
+        (highlighted ? "border-accent" : "border-border")
+      }
     >
       {highlighted && (
-        <Badge variant="accent" className="absolute -top-3 right-6">
+        <span className="absolute -top-3 right-6 rounded-[3px] bg-accent px-2 py-0.5 font-mono text-[11px] font-semibold uppercase tracking-wide text-accent-foreground">
           Most popular
-        </Badge>
+        </span>
       )}
-      <h3 className="text-sm font-semibold">{name}</h3>
+      <h3 className="font-mono text-sm font-semibold uppercase tracking-wide">
+        {name}
+      </h3>
       <div className="mt-3 flex items-baseline gap-1.5">
-        <span className="text-3xl font-semibold tracking-tight">{price}</span>
+        <span className="font-mono text-4xl font-semibold tracking-tight">
+          {price}
+        </span>
         <span className="text-sm text-muted-foreground">{cadence}</span>
       </div>
       <ul className="mt-6 flex flex-1 flex-col gap-3">
         {features.map((f) => (
           <li key={f} className="flex items-start gap-2.5 text-sm">
-            <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" />
+            <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-[1px] bg-accent" />
             <span className="text-muted-foreground">{f}</span>
           </li>
         ))}

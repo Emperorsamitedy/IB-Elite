@@ -5,17 +5,15 @@ import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
   X,
-  Clock,
   Bookmark,
   BookmarkCheck,
-  Sparkles,
+  MessageSquareText,
   ArrowRight,
-  Trophy,
   RotateCcw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
+import { Gauge } from "@/components/ui/gauge";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   QuestionContent,
@@ -23,7 +21,7 @@ import {
 } from "@/components/question/question-content";
 import { TutorPanel } from "@/components/question/tutor-panel";
 import { CONFIDENCE_OPTIONS } from "@/lib/constants";
-import { cn } from "@/lib/utils";
+import { cn, gradeFromAccuracy } from "@/lib/utils";
 import { toast } from "sonner";
 import {
   rateSessionQuestion,
@@ -37,28 +35,32 @@ export type SessionQuestion = QuestionForViewer & {
   bookmarked: boolean;
 };
 
-type Outcome = { questionId: string; confidence: ConfidenceRating };
+export type Outcome = { questionId: string; confidence: ConfidenceRating };
 
 export function SessionRunner({
   sessionId,
   questions,
   startIndex,
   timeLimitSeconds,
+  initialOutcomes,
+  completed,
 }: {
   sessionId: string;
   questions: SessionQuestion[];
   startIndex: number;
   timeLimitSeconds: number | null;
+  initialOutcomes: Outcome[];
+  completed: boolean;
 }) {
   const [index, setIndex] = React.useState(
     Math.min(startIndex, questions.length - 1),
   );
-  const [outcomes, setOutcomes] = React.useState<Outcome[]>([]);
+  const [outcomes, setOutcomes] = React.useState<Outcome[]>(initialOutcomes);
   const [bookmarks, setBookmarks] = React.useState<Record<string, boolean>>(
     Object.fromEntries(questions.map((q) => [q.id, q.bookmarked])),
   );
   const [tutorOpen, setTutorOpen] = React.useState(false);
-  const [finished, setFinished] = React.useState(false);
+  const [finished, setFinished] = React.useState(completed);
   const [saving, setSaving] = React.useState(false);
   const [remaining, setRemaining] = React.useState(timeLimitSeconds ?? 0);
   const questionStart = React.useRef(Date.now());
@@ -129,7 +131,7 @@ export function SessionRunner({
       <SessionSummary
         questions={questions}
         outcomes={outcomes}
-        timeLimitSeconds={timeLimitSeconds}
+        timeLimitSeconds={completed ? null : timeLimitSeconds}
         remaining={remaining}
       />
     );
@@ -142,24 +144,43 @@ export function SessionRunner({
 
   return (
     <div className="mx-auto flex min-h-[calc(100dvh-8rem)] max-w-3xl flex-col">
-      {/* header */}
+      {/* header — notch tracker + mono apparatus */}
       <div className="mb-5 flex items-center gap-4">
         <Button variant="ghost" size="icon-sm" asChild>
           <Link href="/app" aria-label="Exit session">
             <X className="h-4 w-4" />
           </Link>
         </Button>
-        <div className="flex-1">
-          <Progress value={((index + 1) / questions.length) * 100} />
-        </div>
-        <span className="text-sm font-medium tabular-nums text-muted-foreground">
+        <ol
+          className="flex flex-1 gap-1"
+          aria-label={`Question ${index + 1} of ${questions.length}`}
+        >
+          {questions.map((q, i) => (
+            <li
+              key={q.id}
+              className={cn(
+                "h-1.5 flex-1 rounded-[1px]",
+                i < index
+                  ? "bg-ink dark:bg-foreground"
+                  : i === index
+                    ? "bg-accent"
+                    : "bg-border",
+              )}
+            />
+          ))}
+        </ol>
+        <span className="font-mono text-sm tabular-nums text-muted-foreground">
           {index + 1}/{questions.length}
         </span>
         {timeLimitSeconds !== null && (
-          <Badge variant={remaining < 60 ? "danger" : "default"}>
-            <Clock className="h-3.5 w-3.5" />
+          <span
+            className={cn(
+              "font-mono text-sm tabular-nums",
+              remaining < 60 ? "text-accent" : "text-muted-foreground",
+            )}
+          >
             {mins}:{secs.toString().padStart(2, "0")}
-          </Badge>
+          </span>
         )}
       </div>
 
@@ -172,57 +193,58 @@ export function SessionRunner({
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -12 }}
             transition={{ duration: 0.25 }}
-            className="rounded-2xl border border-border bg-card p-6"
+            className="overflow-hidden rounded-xl border border-border bg-card"
           >
-            <div className="mb-4 flex items-center justify-between">
-              <span className="text-xs font-medium text-muted-foreground">
+            <div className="flex items-center justify-between border-b border-border bg-ink-2 px-4 py-2 text-ink-foreground/80">
+              <span className="font-mono text-[11px] uppercase tracking-[0.08em]">
                 {current.topics?.name}
               </span>
               <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="icon-sm"
+                <button
                   onClick={onBookmark}
                   aria-label="Bookmark"
+                  aria-pressed={Boolean(bookmarks[current.id])}
+                  className="rounded-md p-1.5 transition-colors hover:bg-ink-foreground/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
                   {bookmarks[current.id] ? (
                     <BookmarkCheck className="h-4 w-4 text-accent" />
                   ) : (
                     <Bookmark className="h-4 w-4" />
                   )}
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
+                </button>
+                <button
                   onClick={() => setTutorOpen(true)}
+                  className="flex items-center gap-1.5 rounded-md px-2 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors hover:bg-ink-foreground/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 >
-                  <Sparkles className="h-4 w-4 text-accent" /> Tutor
-                </Button>
+                  <MessageSquareText className="h-4 w-4" /> Tutor
+                </button>
               </div>
             </div>
-            <QuestionContent question={current} />
+            <div className="px-4 pt-4 sm:px-6">
+              <QuestionContent question={current} />
+            </div>
           </motion.div>
         </AnimatePresence>
       </div>
 
-      {/* confidence bar */}
+      {/* confidence bar — marks the question, feeds the 7-gauge */}
       <div className="sticky bottom-0 mt-6 border-t border-border bg-background/95 py-4 backdrop-blur">
-        <p className="mb-2.5 text-center text-xs text-muted-foreground">
-          How did you find this question?
+        <p className="mb-2.5 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+          Mark it
         </p>
-        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        <div className="grid grid-cols-2 overflow-hidden rounded-md border border-border sm:grid-cols-4">
           {CONFIDENCE_OPTIONS.map((opt) => (
             <button
               key={opt.value}
               onClick={() => rate(opt.value)}
               disabled={saving}
               className={cn(
-                "rounded-xl border px-3 py-3 text-sm font-medium transition-all hover:-translate-y-0.5 disabled:opacity-50",
+                "border-b border-r border-border px-3 py-3 font-mono text-xs uppercase tracking-[0.08em] transition-colors last:border-r-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring disabled:opacity-50 sm:border-b-0",
                 answered &&
                   outcomes.find((o) => o.questionId === current.id)
                     ?.confidence === opt.value
-                  ? "border-accent bg-accent-soft"
-                  : "border-border hover:bg-surface-2",
+                  ? "bg-accent font-semibold text-accent-foreground"
+                  : "bg-card hover:bg-surface-2",
               )}
             >
               {opt.label}
@@ -257,21 +279,30 @@ function SessionSummary({
   const timeUsed =
     timeLimitSeconds !== null ? timeLimitSeconds - remaining : null;
 
+  const grade = gradeFromAccuracy(total ? correct / total : 0);
+
   return (
     <div className="mx-auto max-w-2xl">
-      <div className="flex flex-col items-center py-6 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft text-accent">
-          <Trophy className="h-8 w-8" />
-        </div>
-        <h1 className="mt-5 text-2xl font-semibold tracking-tight">
-          Session complete
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          You answered {correct} of {total} correctly.
+      {/* The session lands on the 7-gauge — the one orchestrated moment. */}
+      <div className="rounded-xl border border-border bg-card p-6 sm:p-8">
+        <p className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          Session complete · marked {correct}/{total}
         </p>
+        <div className="mt-4 flex items-end justify-between gap-6">
+          <div>
+            <p className="font-mono text-sm text-muted-foreground">
+              This session scores
+            </p>
+            <p className="mt-1 font-mono text-6xl font-semibold leading-none text-accent">
+              {grade}
+              <span className="text-2xl text-muted-foreground">/7</span>
+            </p>
+          </div>
+          <Gauge value={grade} size="lg" className="w-56" />
+        </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="mt-4 grid grid-cols-3 gap-3">
         <SummaryStat label="Accuracy" value={`${accuracy}%`} />
         <SummaryStat label="Correct" value={`${correct}/${total}`} />
         <SummaryStat
@@ -284,29 +315,31 @@ function SessionSummary({
         />
       </div>
 
-      <div className="mt-6 flex flex-col gap-2">
+      <ul className="mt-8 divide-y divide-border border-y border-border">
         {questions.map((q, i) => {
           const o = outcomes.find((x) => x.questionId === q.id);
           const correctAns = o && o.confidence !== "wrong";
           return (
+            <li key={q.id}>
             <Link
-              key={q.id}
               href={`/questions/${q.id}`}
-              className="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 text-sm transition-colors hover:bg-surface-2"
+              className="flex items-center gap-3 py-3 text-sm transition-colors hover:text-accent"
             >
               <span
                 className={cn(
-                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-xs font-medium",
+                  "flex h-6 w-6 shrink-0 items-center justify-center rounded-[3px] font-mono text-xs font-semibold",
                   o
                     ? correctAns
                       ? "bg-success/15 text-success"
-                      : "bg-danger/15 text-danger"
+                      : "bg-accent/15 text-accent"
                     : "bg-surface-2 text-muted-foreground",
                 )}
               >
                 {i + 1}
               </span>
-              <span className="line-clamp-1 flex-1">{q.prompt}</span>
+              <span className="line-clamp-1 flex-1 font-serif text-[15px]">
+                {q.prompt}
+              </span>
               {o && (
                 <Badge
                   variant={correctAns ? "success" : "danger"}
@@ -316,9 +349,10 @@ function SessionSummary({
                 </Badge>
               )}
             </Link>
+            </li>
           );
         })}
-      </div>
+      </ul>
 
       <div className="mt-8 flex flex-col gap-2 sm:flex-row sm:justify-center">
         <Button asChild>
@@ -338,9 +372,11 @@ function SessionSummary({
 
 function SummaryStat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border border-border bg-card p-4 text-center">
-      <p className="text-2xl font-semibold tracking-tight">{value}</p>
-      <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
+    <div className="rounded-lg border border-border bg-card p-4">
+      <p className="font-mono text-2xl font-semibold tracking-tight">{value}</p>
+      <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
+        {label}
+      </p>
     </div>
   );
 }

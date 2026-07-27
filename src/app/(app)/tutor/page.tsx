@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Sparkles, MessageSquare, AlertCircle, ArrowRight } from "lucide-react";
+import { MessageSquareText, MessageSquare, AlertCircle, ArrowRight } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { getEntitlement, FREE_LIMITS } from "@/lib/subscription";
 import { createClient } from "@/lib/supabase/server";
@@ -36,7 +36,7 @@ export default async function TutorPage() {
     <div className="flex flex-col gap-6">
       <div>
         <div className="flex items-center gap-2">
-          <h1 className="text-2xl font-semibold tracking-tight">AI Tutor</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight">AI Tutor</h1>
           <Badge variant={entitlement.isPro ? "accent" : "outline"}>
             {entitlement.isPro
               ? "Unlimited"
@@ -49,26 +49,24 @@ export default async function TutorPage() {
         </p>
       </div>
 
-      <Card className="border-accent/30 bg-gradient-to-br from-accent-soft/50 to-card">
-        <CardContent className="flex flex-col items-start gap-3 p-6">
-          <span className="flex h-11 w-11 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-            <Sparkles className="h-5 w-5" />
+      <div className="relative overflow-hidden rounded-xl bg-ink px-6 py-7 text-ink-foreground">
+        <div className="pointer-events-none absolute inset-0 bg-ruled" />
+        <div className="relative flex flex-col items-start gap-3">
+          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-ink-foreground/60">
+            How the tutor works
           </span>
-          <div>
-            <h2 className="font-semibold">How the tutor works</h2>
-            <p className="mt-1 text-sm text-muted-foreground">
-              Open any question and tap <strong>Tutor</strong>. Ask for a hint
-              and the tutor guides you one step at a time. Start from a question
-              you found tricky below.
-            </p>
-          </div>
-          <Button asChild>
+          <p className="max-w-xl font-serif text-lg leading-snug">
+            Open any question and press <strong>Tutor</strong>. Ask for a hint
+            and it walks you to the mark scheme one step at a time — it never
+            hands you the answer.
+          </p>
+          <Button asChild className="mt-1">
             <Link href="/questions">
               Browse questions <ArrowRight className="h-4 w-4" />
             </Link>
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
       {mistakes && mistakes.length > 0 && (
         <section>
@@ -93,7 +91,7 @@ export default async function TutorPage() {
                       {q.topics && (
                         <Badge variant="outline">{q.topics.name}</Badge>
                       )}
-                      <Sparkles className="h-4 w-4 text-accent" />
+                      <MessageSquareText className="h-4 w-4 text-accent" />
                     </CardContent>
                   </Card>
                 </Link>
@@ -133,7 +131,7 @@ export default async function TutorPage() {
           </div>
         ) : (
           <EmptyState
-            icon={Sparkles}
+            icon={MessageSquareText}
             title="No tutor sessions yet"
             description="Open a question and ask the tutor for a hint to get started."
           />

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { Check, Sparkles } from "lucide-react";
+import { Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -95,8 +95,8 @@ export function BillingView({
         <Card className="border-accent/30">
           <CardContent className="flex flex-col gap-5 p-6">
             <div className="flex items-center gap-2">
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-accent text-accent-foreground">
-                <Sparkles className="h-4 w-4" />
+              <span className="rounded-[3px] bg-accent px-2 py-1 font-mono text-[11px] font-semibold uppercase tracking-[0.12em] text-accent-foreground">
+                Pro
               </span>
               <div>
                 <p className="font-semibold">Atlas Pro</p>

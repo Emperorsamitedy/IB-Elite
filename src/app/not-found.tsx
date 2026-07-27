@@ -7,11 +7,11 @@ export default function NotFound() {
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-6 px-6 text-center">
       <Logo />
-      <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-accent-soft text-accent">
+      <span className="flex h-14 w-14 items-center justify-center rounded-lg bg-accent-soft text-accent">
         <Compass className="h-7 w-7" />
       </span>
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <h1 className="text-2xl font-extrabold tracking-tight">
           This page wandered off
         </h1>
         <p className="mt-1 text-muted-foreground">

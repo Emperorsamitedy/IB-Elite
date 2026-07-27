@@ -12,7 +12,7 @@ import {
   Dumbbell,
   Bookmark,
   AlertCircle,
-  Sparkles,
+  MessageSquareText,
   CalendarRange,
 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -39,7 +39,7 @@ const QUICK_LINKS = [
   { href: "/subjects", label: "Subjects", icon: Library },
   { href: "/mistakes", label: "Mistake notebook", icon: AlertCircle },
   { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
-  { href: "/tutor", label: "AI tutor", icon: Sparkles },
+  { href: "/tutor", label: "AI tutor", icon: MessageSquareText },
   { href: "/plan", label: "Study plan", icon: CalendarRange },
 ];
 

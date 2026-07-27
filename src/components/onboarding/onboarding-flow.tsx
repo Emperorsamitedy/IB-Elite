@@ -3,10 +3,11 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ArrowRight, ArrowLeft, Sparkles, Plus, X } from "lucide-react";
+import { Check, ArrowRight, ArrowLeft, Plus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Logo } from "@/components/logo";
+import { Gauge } from "@/components/ui/gauge";
 import { Spinner } from "@/components/ui/misc";
 import { GOALS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -132,11 +133,13 @@ export function OnboardingFlow({
                       <button
                         key={s.id}
                         onClick={() => toggleSubject(s)}
+                        aria-pressed={isSel}
+                        style={{ borderLeftColor: s.color }}
                         className={cn(
-                          "group relative flex flex-col items-start gap-1 rounded-xl border p-4 text-left transition-all",
+                          "group relative flex flex-col items-start gap-1 rounded-lg border border-l-4 p-4 text-left transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                           isSel
-                            ? "border-accent bg-accent-soft/60 shadow-sm"
-                            : "border-border hover:border-border hover:bg-surface-2",
+                            ? "border-accent bg-accent-soft/60"
+                            : "border-border hover:bg-surface-2",
                         )}
                       >
                         <span className="flex w-full items-center justify-between">
@@ -152,7 +155,7 @@ export function OnboardingFlow({
                             {isSel && <Check className="h-3 w-3" />}
                           </span>
                         </span>
-                        <span className="text-xs text-muted-foreground">
+                        <span className="font-mono text-[11px] uppercase tracking-[0.08em] text-muted-foreground">
                           {s.group_name}
                         </span>
                         {isSel && s.levels.length > 1 && (
@@ -171,7 +174,7 @@ export function OnboardingFlow({
                                   }))
                                 }
                                 className={cn(
-                                  "rounded-md px-2 py-0.5 text-xs font-medium transition-colors",
+                                  "rounded-[3px] px-2 py-0.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors",
                                   selected[s.id] === l.id
                                     ? "bg-accent text-accent-foreground"
                                     : "bg-surface-2 text-muted-foreground hover:text-foreground",
@@ -221,8 +224,9 @@ export function OnboardingFlow({
                               : [...prev, g.id],
                           )
                         }
+                        aria-pressed={isSel}
                         className={cn(
-                          "flex items-center justify-between rounded-xl border px-4 py-3.5 text-left text-sm font-medium transition-all",
+                          "flex items-center justify-between rounded-lg border px-4 py-3.5 text-left text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
                           isSel
                             ? "border-accent bg-accent-soft/60"
                             : "border-border hover:bg-surface-2",
@@ -248,9 +252,7 @@ export function OnboardingFlow({
 
             {step === 3 && (
               <div className="flex flex-col items-center py-10 text-center">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-accent-soft text-accent">
-                  <Sparkles className="h-8 w-8" />
-                </div>
+                <Gauge value={7} size="lg" className="w-52" />
                 <h1 className="mt-6 text-2xl font-semibold tracking-tight">
                   Your revision space is ready
                   {firstName ? `, ${firstName}` : ""}.
@@ -312,7 +314,7 @@ function StepShell({
 }) {
   return (
     <div>
-      <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight">{title}</h1>
       {subtitle && (
         <p className="mt-1.5 text-sm text-muted-foreground">{subtitle}</p>
       )}

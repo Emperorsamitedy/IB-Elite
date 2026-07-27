@@ -60,7 +60,7 @@ export default async function EditQuestionPage({
         <ChevronRight className="h-3.5 w-3.5" />
         <span className="text-foreground">Edit</span>
       </nav>
-      <h1 className="text-2xl font-semibold tracking-tight">Edit question</h1>
+      <h1 className="text-2xl font-extrabold tracking-tight">Edit question</h1>
       <QuestionForm subjects={subjects} questionId={id} initial={initial} />
     </div>
   );

@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { Logo } from "@/components/logo";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { ArrowLeft, Quote } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import { Gauge } from "@/components/ui/gauge";
 
 export default function AuthLayout({
   children,
@@ -35,19 +36,24 @@ export default function AuthLayout({
         </div>
       </div>
 
-      {/* Brand panel */}
-      <div className="relative hidden overflow-hidden border-l border-border bg-surface lg:block">
-        <div className="absolute inset-0 bg-grid bg-radial-fade opacity-50" />
-        <div className="absolute inset-0 bg-gradient-to-br from-accent/10 via-transparent to-transparent" />
-        <div className="relative flex h-full flex-col justify-center px-14">
-          <Quote className="h-10 w-10 text-accent" />
-          <p className="mt-6 max-w-md text-balance text-2xl font-medium leading-snug tracking-tight">
+      {/* Brand panel — answer booklet, ruled and margined */}
+      <div className="relative hidden overflow-hidden bg-ink text-ink-foreground lg:block">
+        <div className="pointer-events-none absolute inset-0 bg-ruled" />
+        <div className="pointer-events-none absolute inset-y-0 left-14 w-px bg-accent/50" />
+        <div className="relative flex h-full flex-col justify-center pl-20 pr-14">
+          <span className="font-mono text-xs uppercase tracking-[0.14em] text-ink-foreground/60">
+            Year 13 · Economics HL
+          </span>
+          <p className="mt-5 max-w-md text-balance font-serif text-3xl leading-snug">
             Atlas turned my revision from endless searching into focused
-            practice. I finally know exactly what to do next.
+            practice. I know exactly what to do next.
           </p>
-          <p className="mt-6 text-sm text-muted-foreground">
-            An IB student, Year 13
-          </p>
+          <div className="mt-10 w-56">
+            <p className="mb-3 font-mono text-xs uppercase tracking-[0.14em] text-ink-foreground/60">
+              Her standing · 6/7
+            </p>
+            <Gauge value={6} tone="inverse" />
+          </div>
         </div>
       </div>
     </div>

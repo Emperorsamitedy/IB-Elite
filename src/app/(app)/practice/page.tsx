@@ -29,11 +29,14 @@ export default async function PracticePage() {
   return (
     <div className="mx-auto max-w-2xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold tracking-tight">
+        <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+          Cover sheet
+        </span>
+        <h1 className="mt-1 text-2xl font-extrabold tracking-tight">
           Build a practice session
         </h1>
         <p className="mt-1 text-muted-foreground">
-          Pick what to focus on. Start practising in seconds.
+          Choose what to sit. Everything else stays out of your way.
         </p>
       </div>
       <PracticeCreator subjects={ordered} />

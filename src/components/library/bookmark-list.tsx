@@ -4,15 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 import { BookmarkX } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { toggleBookmark } from "@/lib/actions/library";
 import type { Difficulty } from "@/lib/types";
 
-const DIFF_VARIANT: Record<Difficulty, "success" | "warning" | "danger"> = {
+const DIFF_VARIANT: Record<Difficulty, "success" | "outline" | "danger"> = {
   easy: "success",
-  medium: "warning",
+  medium: "outline",
   hard: "danger",
 };
 
@@ -35,36 +34,36 @@ export function BookmarkList({ items }: { items: BookmarkRow[] }) {
     });
 
   return (
-    <div className="flex flex-col gap-2.5">
+    <ul className="divide-y divide-border border-y border-border">
       {rows.map((b) => (
-        <Card key={b.questionId}>
-          <CardContent className="flex items-center gap-4 p-4">
-            <Link href={`/questions/${b.questionId}`} className="min-w-0 flex-1">
-              <p className="line-clamp-1 text-sm font-medium">{b.prompt}</p>
-              <div className="mt-1.5 flex items-center gap-2">
-                {b.topicName && (
-                  <Badge variant="outline">{b.topicName}</Badge>
-                )}
-                <Badge
-                  variant={DIFF_VARIANT[b.difficulty]}
-                  className="capitalize"
-                >
-                  {b.difficulty}
-                </Badge>
-              </div>
-            </Link>
-            <Button
-              variant="ghost"
-              size="icon-sm"
-              disabled={pending}
-              onClick={() => remove(b.questionId)}
-              aria-label="Remove bookmark"
-            >
-              <BookmarkX className="h-4 w-4 text-muted-foreground" />
-            </Button>
-          </CardContent>
-        </Card>
+        <li key={b.questionId} className="flex items-center gap-4 py-3.5">
+          <Link
+            href={`/questions/${b.questionId}`}
+            className="min-w-0 flex-1 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <p className="line-clamp-1 font-serif text-[15px] hover:text-accent">
+              {b.prompt}
+            </p>
+            {b.topicName && (
+              <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
+                {b.topicName}
+              </p>
+            )}
+          </Link>
+          <Badge variant={DIFF_VARIANT[b.difficulty]} className="shrink-0">
+            {b.difficulty}
+          </Badge>
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            disabled={pending}
+            onClick={() => remove(b.questionId)}
+            aria-label="Remove bookmark"
+          >
+            <BookmarkX className="h-4 w-4 text-muted-foreground" />
+          </Button>
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }

@@ -1,6 +1,6 @@
 import "server-only";
 import { createClient } from "@/lib/supabase/server";
-import { estimateMinutes } from "@/lib/utils";
+import { estimateMinutes, gradeFromAccuracy } from "@/lib/utils";
 
 export type TopicStat = {
   topicId: string;
@@ -11,6 +11,14 @@ export type TopicStat = {
   attempts: number;
   correct: number;
   accuracy: number;
+};
+
+export type SubjectStanding = {
+  subjectName: string;
+  subjectSlug: string;
+  attempts: number;
+  accuracy: number;
+  grade: number;
 };
 
 export type Recommendation = {
@@ -104,6 +112,37 @@ export async function getDashboardData(userId: string) {
   const totalAttempts = topicStats.reduce((s, t) => s + t.attempts, 0);
   const totalCorrect = topicStats.reduce((s, t) => s + t.correct, 0);
 
+  // Per-subject standing on the IB 1–7 scale — drives the 7-gauge.
+  const subjectAgg = new Map<
+    string,
+    { subjectName: string; subjectSlug: string; attempts: number; correct: number }
+  >();
+  for (const t of topicStats) {
+    if (!t.subjectSlug) continue;
+    const e = subjectAgg.get(t.subjectSlug) ?? {
+      subjectName: t.subjectName,
+      subjectSlug: t.subjectSlug,
+      attempts: 0,
+      correct: 0,
+    };
+    e.attempts += t.attempts;
+    e.correct += t.correct;
+    subjectAgg.set(t.subjectSlug, e);
+  }
+  const standings: SubjectStanding[] = [...subjectAgg.values()]
+    .map((s) => {
+      const accuracy = s.attempts ? s.correct / s.attempts : 0;
+      return {
+        subjectName: s.subjectName,
+        subjectSlug: s.subjectSlug,
+        attempts: s.attempts,
+        accuracy,
+        grade: gradeFromAccuracy(accuracy),
+      };
+    })
+    .sort((a, b) => b.attempts - a.attempts)
+    .slice(0, 3);
+
   const subjects = (userSubjectsRes.data ?? [])
     .map((r) => r.subjects)
     .filter(Boolean) as {
@@ -153,6 +192,7 @@ export async function getDashboardData(userId: string) {
 
   return {
     subjects,
+    standings,
     exams: examsRes.data ?? [],
     activeSessions: sessionsRes.data ?? [],
     weakTopics,

@@ -54,3 +54,18 @@ export function clamp(n: number, min: number, max: number): number {
 export function estimateMinutes(questionCount: number): number {
   return Math.max(5, Math.round(questionCount * 2.4));
 }
+
+/** Lower accuracy bound for each IB grade band, 1 → 7. */
+const GRADE_BANDS = [0, 0.25, 0.4, 0.55, 0.65, 0.75, 0.85];
+
+/**
+ * Map practice accuracy (0–1) onto the IB 1–7 scale used by the 7-gauge,
+ * following typical IB grade boundaries.
+ */
+export function gradeFromAccuracy(accuracy: number): number {
+  let grade = 1;
+  for (let i = 0; i < GRADE_BANDS.length; i++) {
+    if (accuracy >= GRADE_BANDS[i]) grade = i + 1;
+  }
+  return clamp(grade, 1, 7);
+}

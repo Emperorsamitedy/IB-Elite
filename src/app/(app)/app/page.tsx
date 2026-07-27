@@ -2,7 +2,6 @@ import Link from "next/link";
 import {
   ArrowRight,
   Clock,
-  Sparkles,
   AlertCircle,
   TrendingDown,
   CalendarClock,
@@ -12,11 +11,13 @@ import {
 } from "lucide-react";
 import { requireUser, getProfile } from "@/lib/auth";
 import { getDashboardData } from "@/lib/dashboard";
-import { greeting, daysUntil, pluralize } from "@/lib/utils";
+import { greeting, daysUntil, pluralize, gradeFromAccuracy } from "@/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Gauge } from "@/components/ui/gauge";
+import { CommandStamp } from "@/components/ui/stamp";
 import { EmptyState } from "@/components/ui/misc";
 import { StartSessionButton } from "@/components/app/start-session-button";
 
@@ -27,39 +28,69 @@ export default async function DashboardPage() {
   const profile = await getProfile();
   const data = await getDashboardData(user.id);
   const firstName = profile?.full_name?.split(" ")[0];
+  const nextExam = data.exams[0];
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-          {greeting()}
-          {firstName ? `, ${firstName}` : ""}.
-        </h1>
-        <p className="mt-1 text-muted-foreground">
-          {data.isNewUser
-            ? "Let's set up your first revision session."
-            : "Here's your revision command center."}
-        </p>
+      {/* Header — masthead with mono apparatus */}
+      <div className="flex flex-wrap items-end justify-between gap-4 border-b border-border pb-5">
+        <div>
+          <h1 className="text-2xl font-extrabold tracking-tight sm:text-3xl">
+            {greeting()}
+            {firstName ? `, ${firstName}` : ""}.
+          </h1>
+          <p className="mt-1 text-muted-foreground">
+            {data.isNewUser
+              ? "Set up your first revision session."
+              : "Pick up where you left off."}
+          </p>
+        </div>
+        <dl className="flex gap-6 font-mono text-xs text-muted-foreground">
+          <div>
+            <dt className="uppercase tracking-[0.12em]">Done</dt>
+            <dd className="mt-1 text-lg font-semibold text-foreground">
+              {data.stats.totalAttempts}
+            </dd>
+          </div>
+          <div>
+            <dt className="uppercase tracking-[0.12em]">Accuracy</dt>
+            <dd className="mt-1 text-lg font-semibold text-foreground">
+              {Math.round(data.stats.accuracy * 100)}%
+            </dd>
+          </div>
+          <div>
+            <dt className="uppercase tracking-[0.12em]">Open mistakes</dt>
+            <dd className="mt-1 text-lg font-semibold text-accent">
+              {data.stats.unresolvedMistakes}
+            </dd>
+          </div>
+          {nextExam && (
+            <div>
+              <dt className="uppercase tracking-[0.12em]">Next exam</dt>
+              <dd className="mt-1 text-lg font-semibold text-foreground">
+                {daysUntil(nextExam.exam_date)}d
+              </dd>
+            </div>
+          )}
+        </dl>
       </div>
 
-      {/* Recommendation / empty state */}
+      {/* Next best session — the one bold panel on the page */}
       {data.recommendation ? (
-        <Card className="overflow-hidden border-accent/30 bg-gradient-to-br from-accent-soft/60 to-card">
-          <CardContent className="flex flex-col gap-5 p-6 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative overflow-hidden rounded-xl bg-ink px-6 py-7 text-ink-foreground sm:px-8">
+          <div className="pointer-events-none absolute inset-0 bg-ruled" />
+          <div className="relative flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
             <div className="flex-1">
-              <span className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wider text-accent">
-                <Sparkles className="h-3.5 w-3.5" /> Your next best session
-              </span>
-              <h2 className="mt-2 text-xl font-semibold tracking-tight">
+              <CommandStamp term="Next" />
+              <h2 className="mt-3 text-xl font-bold tracking-tight sm:text-2xl">
                 {data.recommendation.topicName ?? data.recommendation.subjectName}
               </h2>
-              <p className="mt-1 text-sm text-muted-foreground">
+              <p className="mt-1.5 font-mono text-xs text-ink-foreground/70">
                 {data.recommendation.subjectName} ·{" "}
-                {pluralize(data.recommendation.count, "question")} ·{" "}
-                <Clock className="mb-0.5 inline h-3.5 w-3.5" /> ~
-                {data.recommendation.estMinutes} min
+                {pluralize(data.recommendation.count, "question")} · ~
+                {data.recommendation.estMinutes} MIN
               </p>
-              <p className="mt-2 text-sm text-foreground/80">
+              <p className="mt-3 max-w-lg text-sm text-ink-foreground/80">
                 {data.recommendation.reason}
               </p>
             </div>
@@ -75,15 +106,15 @@ export default async function DashboardPage() {
             >
               Start session <ArrowRight className="h-4 w-4" />
             </StartSessionButton>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       ) : (
         <Card>
           <CardContent className="p-6">
             <EmptyState
               icon={Compass}
-              title="Let's create your first revision session"
-              description="Choose a subject, take a quick diagnostic, or explore topics to get started."
+              title="Create your first revision session"
+              description="Choose a subject, or build a session by topic and difficulty."
               action={
                 <div className="flex flex-wrap justify-center gap-2">
                   <Button asChild>
@@ -103,26 +134,40 @@ export default async function DashboardPage() {
         </Card>
       )}
 
-      {/* stats strip */}
-      {!data.isNewUser && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <StatTile
-            label="Questions done"
-            value={String(data.stats.totalAttempts)}
-          />
-          <StatTile
-            label="Accuracy"
-            value={`${Math.round(data.stats.accuracy * 100)}%`}
-          />
-          <StatTile
-            label="Open mistakes"
-            value={String(data.stats.unresolvedMistakes)}
-          />
-          <StatTile label="Subjects" value={String(data.subjects.length)} />
-        </div>
+      {/* The 7-gauge — where each subject stands */}
+      {data.standings.length > 0 && (
+        <section className="rounded-xl border border-border bg-card p-6">
+          <div className="flex items-baseline justify-between">
+            <h2 className="font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+              Your standing · the 7-gauge
+            </h2>
+            <span className="font-mono text-xs text-muted-foreground">
+              from {data.stats.totalAttempts} marked
+            </span>
+          </div>
+          <div className="mt-6 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {data.standings.map((s) => (
+              <Link
+                key={s.subjectSlug}
+                href={`/subjects/${s.subjectSlug}`}
+                className="group rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-4 focus-visible:ring-offset-card"
+              >
+                <div className="mb-3 flex items-baseline justify-between gap-2">
+                  <span className="text-sm font-semibold group-hover:text-accent">
+                    {s.subjectName}
+                  </span>
+                  <span className="font-mono text-xs text-muted-foreground">
+                    now <b className="text-sm text-accent">{s.grade}</b>/7
+                  </span>
+                </div>
+                <Gauge value={s.grade} />
+              </Link>
+            ))}
+          </div>
+        </section>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-8 lg:grid-cols-2">
         {/* Exam countdowns */}
         <Section
           title="Exam countdown"
@@ -130,64 +175,70 @@ export default async function DashboardPage() {
           action={
             <Link
               href="/settings"
-              className="text-xs font-medium text-accent hover:underline"
+              className="font-mono text-xs text-accent hover:underline"
             >
               Manage
             </Link>
           }
         >
           {data.exams.length > 0 ? (
-            <div className="flex flex-col gap-2.5">
+            <ul className="divide-y divide-border border-y border-border">
               {data.exams.slice(0, 4).map((e) => {
                 const days = daysUntil(e.exam_date);
                 const subj = e.subjects as { name: string; slug: string } | null;
                 return (
-                  <div
+                  <li
                     key={e.id}
-                    className="flex items-center justify-between rounded-lg border border-border bg-surface px-4 py-3"
+                    className="flex items-center justify-between py-3"
                   >
                     <span className="text-sm font-medium">
                       {subj?.name ?? "Exam"}
                     </span>
-                    <Badge variant={days <= 14 ? "warning" : "default"}>
-                      {days} {days === 1 ? "day" : "days"} left
-                    </Badge>
-                  </div>
+                    <span
+                      className={
+                        "font-mono text-sm " +
+                        (days <= 14 ? "text-accent" : "text-muted-foreground")
+                      }
+                    >
+                      {days}d
+                    </span>
+                  </li>
                 );
               })}
-            </div>
+            </ul>
           ) : (
             <MutedEmpty text="No exam dates yet. Add them in settings for countdowns." />
           )}
         </Section>
 
-        {/* Weak topics */}
+        {/* Weak topics — gauged, not bar-charted */}
         <Section title="Needs attention" icon={TrendingDown}>
           {data.weakTopics.length > 0 ? (
-            <div className="flex flex-col gap-3">
+            <ul className="divide-y divide-border border-y border-border">
               {data.weakTopics.map((t) => (
-                <Link
-                  key={t.topicId}
-                  href={`/subjects/${t.subjectSlug}/${t.topicSlug}`}
-                  className="group flex flex-col gap-1.5"
-                >
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium group-hover:text-accent">
-                      {t.topicName}
-                    </span>
-                    <span className="text-xs text-muted-foreground">
-                      {Math.round(t.accuracy * 100)}%
-                    </span>
-                  </div>
-                  <Progress
-                    value={t.accuracy * 100}
-                    indicatorClassName={
-                      t.accuracy < 0.5 ? "bg-danger" : "bg-warning"
-                    }
-                  />
-                </Link>
+                <li key={t.topicId}>
+                  <Link
+                    href={`/subjects/${t.subjectSlug}/${t.topicSlug}`}
+                    className="group flex items-center justify-between gap-6 py-3"
+                  >
+                    <div className="min-w-0">
+                      <span className="block truncate text-sm font-medium group-hover:text-accent">
+                        {t.topicName}
+                      </span>
+                      <span className="font-mono text-xs text-muted-foreground">
+                        {t.correct}/{t.attempts} correct
+                      </span>
+                    </div>
+                    <Gauge
+                      value={gradeFromAccuracy(t.accuracy)}
+                      size="sm"
+                      showNumbers={false}
+                      className="w-24 shrink-0"
+                    />
+                  </Link>
+                </li>
               ))}
-            </div>
+            </ul>
           ) : (
             <MutedEmpty text="Practise a few questions and weak topics will surface here." />
           )}
@@ -207,11 +258,11 @@ export default async function DashboardPage() {
                 <Link key={s.id} href={`/session/${s.id}`}>
                   <Card interactive className="h-full">
                     <CardContent className="flex flex-col gap-3 p-4">
-                      <span className="text-sm font-medium">
+                      <span className="text-sm font-semibold">
                         {subj?.name ?? "Practice session"}
                       </span>
                       <Progress value={pct} />
-                      <span className="text-xs text-muted-foreground">
+                      <span className="font-mono text-xs text-muted-foreground">
                         {s.current_index}/{s.total_questions} · resume
                       </span>
                     </CardContent>
@@ -230,47 +281,50 @@ export default async function DashboardPage() {
         action={
           <Link
             href="/mistakes"
-            className="text-xs font-medium text-accent hover:underline"
+            className="font-mono text-xs text-accent hover:underline"
           >
             Open notebook
           </Link>
         }
       >
         {data.recentMistakes.length > 0 ? (
-          <div className="flex flex-col gap-2.5">
-            {data.recentMistakes.map((m) => {
-              const q = m.questions as {
-                id: string;
-                prompt: string;
-                topics: { name: string } | null;
-              } | null;
-              if (!q) return null;
-              return (
-                <Link
-                  key={m.question_id}
-                  href={`/questions/${q.id}`}
-                  className="flex items-center gap-3 rounded-lg border border-border bg-surface px-4 py-3 transition-colors hover:bg-surface-2"
-                >
-                  <span className="line-clamp-1 flex-1 text-sm">
-                    {q.prompt}
-                  </span>
-                  {q.topics && (
-                    <Badge variant="outline" className="shrink-0">
-                      {q.topics.name}
-                    </Badge>
-                  )}
-                </Link>
-              );
-            })}
-            <div className="pt-1">
+          <>
+            <ul className="divide-y divide-border border-y border-border">
+              {data.recentMistakes.map((m) => {
+                const q = m.questions as {
+                  id: string;
+                  prompt: string;
+                  topics: { name: string } | null;
+                } | null;
+                if (!q) return null;
+                return (
+                  <li key={m.question_id}>
+                    <Link
+                      href={`/questions/${q.id}`}
+                      className="flex items-center gap-4 py-3 transition-colors hover:text-accent"
+                    >
+                      <span className="line-clamp-1 flex-1 font-serif text-[15px]">
+                        {q.prompt}
+                      </span>
+                      {q.topics && (
+                        <Badge variant="outline" className="shrink-0">
+                          {q.topics.name}
+                        </Badge>
+                      )}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+            <div className="pt-4">
               <StartSessionButton
-                variant="secondary"
+                variant="outline"
                 input={{ includeMistakes: true, count: 10, mode: "mistakes" }}
               >
-                Practise my mistakes
+                Redo my mistakes
               </StartSessionButton>
             </div>
-          </div>
+          </>
         ) : (
           <MutedEmpty text="No mistakes logged yet. They'll appear here as you practise." />
         )}
@@ -293,8 +347,8 @@ function Section({
   return (
     <section>
       <div className="mb-3 flex items-center justify-between">
-        <h2 className="flex items-center gap-2 text-sm font-semibold">
-          <Icon className="h-4 w-4 text-muted-foreground" />
+        <h2 className="flex items-center gap-2 font-mono text-xs uppercase tracking-[0.14em] text-muted-foreground">
+          <Icon className="h-3.5 w-3.5" />
           {title}
         </h2>
         {action}
@@ -304,20 +358,9 @@ function Section({
   );
 }
 
-function StatTile({ label, value }: { label: string; value: string }) {
-  return (
-    <Card>
-      <CardContent className="p-4">
-        <p className="text-2xl font-semibold tracking-tight">{value}</p>
-        <p className="mt-0.5 text-xs text-muted-foreground">{label}</p>
-      </CardContent>
-    </Card>
-  );
-}
-
 function MutedEmpty({ text }: { text: string }) {
   return (
-    <div className="rounded-lg border border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
+    <div className="border-y border-dashed border-border px-4 py-6 text-center text-sm text-muted-foreground">
       {text}
     </div>
   );

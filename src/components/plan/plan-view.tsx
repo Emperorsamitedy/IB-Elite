@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { CalendarRange, Sparkles, Check, Play } from "lucide-react";
+import { CalendarRange, MessageSquareText, Check, Play } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -44,7 +44,7 @@ export function PlanGenerator({ hasPlan }: { hasPlan: boolean }) {
     <Card>
       <CardContent className="flex flex-col gap-4 p-6">
         <div className="flex items-center gap-2">
-          <Sparkles className="h-4 w-4 text-accent" />
+          <MessageSquareText className="h-4 w-4 text-accent" />
           <h2 className="font-semibold">
             {hasPlan ? "Regenerate your plan" : "Generate your study plan"}
           </h2>
