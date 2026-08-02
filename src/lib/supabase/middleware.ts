@@ -24,6 +24,10 @@ function isPublic(pathname: string) {
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
 
+  // Without Supabase credentials there is no session to read; let the page
+  // render its own setup notice instead of failing every request.
+  if (!env.configured) return response;
+
   const supabase = createServerClient<Database>(
     env.supabaseUrl,
     env.supabaseAnonKey,
