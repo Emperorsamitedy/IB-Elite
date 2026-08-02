@@ -18,11 +18,19 @@ import {
 import type { Difficulty, ContentStatus } from "@/lib/types";
 
 type Level = { id: string; code: string; name: string };
-type Topic = { id: string; name: string };
+type Subtopic = { id: string; name: string };
+type Topic = {
+  id: string;
+  name: string;
+  theme_id: string | null;
+  subtopics: Subtopic[];
+};
+type Theme = { id: string; name: string };
 export type AdminSubject = {
   id: string;
   name: string;
   levels: Level[];
+  themes: Theme[];
   topics: Topic[];
 };
 
@@ -42,6 +50,16 @@ export function QuestionForm({
     initial?.subjectId ?? subjects[0]?.id ?? "",
   );
   const [topicId, setTopicId] = React.useState(initial?.topicId ?? "");
+  const [subtopicId, setSubtopicId] = React.useState<string | null>(
+    initial?.subtopicId ?? null,
+  );
+  const [questionNumber, setQuestionNumber] = React.useState(
+    initial?.questionNumber ?? "",
+  );
+  const [tags, setTags] = React.useState((initial?.tags ?? []).join(", "));
+  const [estimatedMinutes, setEstimatedMinutes] = React.useState<number | null>(
+    initial?.estimatedMinutes ?? null,
+  );
   const [levelId, setLevelId] = React.useState<string | null>(
     initial?.levelId ?? null,
   );
@@ -68,13 +86,29 @@ export function QuestionForm({
   );
 
   const subject = subjects.find((s) => s.id === subjectId);
+  const topic = subject?.topics.find((t) => t.id === topicId);
+  const [themeId, setThemeId] = React.useState<string>(
+    topic?.theme_id ?? subject?.themes[0]?.id ?? "",
+  );
+  const themeTopics = (subject?.topics ?? []).filter(
+    (t) => !themeId || t.theme_id === themeId,
+  );
 
   React.useEffect(() => {
     if (subject && !subject.topics.some((t) => t.id === topicId)) {
-      setTopicId(subject.topics[0]?.id ?? "");
+      setThemeId(subject.themes[0]?.id ?? "");
+      setTopicId("");
+      setSubtopicId(null);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subjectId]);
+
+  React.useEffect(() => {
+    if (topic && !topic.subtopics.some((s) => s.id === subtopicId)) {
+      setSubtopicId(null);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [topicId]);
 
   const submit = () => {
     if (!subjectId || !topicId || prompt.trim().length < 3) {
@@ -84,6 +118,13 @@ export function QuestionForm({
     const values: QuestionFormValues = {
       subjectId,
       topicId,
+      subtopicId,
+      questionNumber: questionNumber || null,
+      tags: tags
+        .split(",")
+        .map((t) => t.trim())
+        .filter(Boolean),
+      estimatedMinutes,
       levelId,
       title: title || null,
       prompt,
@@ -128,12 +169,44 @@ export function QuestionForm({
             </Select>
           </div>
           <div className="flex flex-col gap-1.5">
+            <Label>Theme</Label>
+            <Select
+              value={themeId}
+              onChange={(v) => {
+                setThemeId(v);
+                setTopicId("");
+                setSubtopicId(null);
+              }}
+            >
+              <option value="">All themes</option>
+              {subject?.themes.map((t) => (
+                <option key={t.id} value={t.id}>
+                  {t.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
             <Label>Topic</Label>
             <Select value={topicId} onChange={setTopicId}>
               <option value="">Select topic…</option>
-              {subject?.topics.map((t) => (
+              {themeTopics.map((t) => (
                 <option key={t.id} value={t.id}>
                   {t.name}
+                </option>
+              ))}
+            </Select>
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Subtopic</Label>
+            <Select
+              value={subtopicId ?? ""}
+              onChange={(v) => setSubtopicId(v || null)}
+            >
+              <option value="">None</option>
+              {topic?.subtopics.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.name}
                 </option>
               ))}
             </Select>
@@ -242,6 +315,31 @@ export function QuestionForm({
           <div className="flex flex-col gap-1.5">
             <Label>Paper</Label>
             <Input value={paper} onChange={(e) => setPaper(e.target.value)} />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Question number</Label>
+            <Input
+              value={questionNumber}
+              onChange={(e) => setQuestionNumber(e.target.value)}
+              placeholder="e.g. 4(b)(ii)"
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Estimated minutes</Label>
+            <Input
+              type="number"
+              min={1}
+              value={estimatedMinutes ?? ""}
+              onChange={(e) =>
+                setEstimatedMinutes(
+                  e.target.value ? Number(e.target.value) : null,
+                )
+              }
+            />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label>Tags (comma separated)</Label>
+            <Input value={tags} onChange={(e) => setTags(e.target.value)} />
           </div>
           <label className="flex items-center justify-between rounded-lg border border-border px-3 py-2">
             <span className="text-sm">Calculator allowed</span>

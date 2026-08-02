@@ -23,7 +23,9 @@ export default async function EditQuestionPage({
   const [{ data: subjectsData }, { data: q }] = await Promise.all([
     supabase
       .from("subjects")
-      .select("id, name, levels(id, code, name), topics(id, name)")
+      .select(
+      "id, name, levels(id, code, name), themes(id, name), topics(id, name, theme_id, subtopics(id, name))",
+    )
       .order("sort_order"),
     supabase.from("questions").select("*").eq("id", id).maybeSingle(),
   ]);
@@ -36,6 +38,9 @@ export default async function EditQuestionPage({
     topicId: q.topic_id,
     levelId: q.level_id,
     subtopicId: q.subtopic_id,
+    questionNumber: q.question_number,
+    tags: q.tags,
+    estimatedMinutes: q.estimated_minutes,
     title: q.title,
     prompt: q.prompt,
     answer: q.answer,

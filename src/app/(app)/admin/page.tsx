@@ -88,6 +88,21 @@ export default async function AdminPage() {
           </CardContent>
         </Link>
       </Card>
+
+      <Card interactive>
+        <Link href="/admin/syllabus">
+          <CardContent className="flex items-center justify-between p-6">
+            <div>
+              <p className="font-medium">Manage syllabus</p>
+              <p className="text-sm text-muted-foreground">
+                Themes, topics and subtopics — add, rename, reorder, merge or
+                archive. Navigation follows this tree.
+              </p>
+            </div>
+            <FolderTree className="h-5 w-5 text-muted-foreground" />
+          </CardContent>
+        </Link>
+      </Card>
     </div>
   );
 }

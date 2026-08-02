@@ -14,7 +14,9 @@ export default async function NewQuestionPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("subjects")
-    .select("id, name, levels(id, code, name), topics(id, name)")
+    .select(
+      "id, name, levels(id, code, name), themes(id, name), topics(id, name, theme_id, subtopics(id, name))",
+    )
     .order("sort_order");
 
   const subjects = (data ?? []) as AdminSubject[];

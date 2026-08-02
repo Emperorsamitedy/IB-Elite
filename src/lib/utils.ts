@@ -69,3 +69,11 @@ export function gradeFromAccuracy(accuracy: number): number {
   }
   return clamp(grade, 1, 7);
 }
+
+/** Human duration for study estimates: "35 min", "1h 20m", "4h". */
+export function formatDuration(minutes: number): string {
+  if (minutes < 60) return `${Math.max(1, Math.round(minutes))} min`;
+  const h = Math.floor(minutes / 60);
+  const m = Math.round(minutes % 60);
+  return m ? `${h}h ${m}m` : `${h}h`;
+}

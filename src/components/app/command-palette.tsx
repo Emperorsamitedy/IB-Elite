@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Command } from "cmdk";
 import {
   Search,
@@ -45,7 +45,9 @@ const QUICK_LINKS = [
 
 export function CommandPalette() {
   const router = useRouter();
+  const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
+  const [scoped, setScoped] = React.useState(true);
   const [query, setQuery] = React.useState("");
   const [results, setResults] = React.useState<Results>({
     subjects: [],
@@ -71,6 +73,14 @@ export function CommandPalette() {
     return () => window.removeEventListener("open-command-palette", listener);
   }, []);
 
+  // Searching from inside a subject or topic stays inside it by default.
+  const [, , subjectSlug, topicSlug] = pathname.split("/");
+  const scope =
+    pathname.startsWith("/subjects/") && subjectSlug
+      ? { subject: subjectSlug, topic: topicSlug ?? null }
+      : null;
+  const scopeActive = scoped && scope !== null;
+
   React.useEffect(() => {
     if (query.trim().length < 2) {
       setResults({ subjects: [], topics: [], questions: [] });
@@ -80,7 +90,12 @@ export function CommandPalette() {
     setLoading(true);
     const t = setTimeout(async () => {
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`, {
+        const params = new URLSearchParams({ q: query });
+        if (scopeActive && scope) {
+          params.set("subject", scope.subject);
+          if (scope.topic) params.set("topic", scope.topic);
+        }
+        const res = await fetch(`/api/search?${params.toString()}`, {
           signal: ctrl.signal,
         });
         if (res.ok) setResults(await res.json());
@@ -94,7 +109,8 @@ export function CommandPalette() {
       clearTimeout(t);
       ctrl.abort();
     };
-  }, [query]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [query, scopeActive, scope?.subject, scope?.topic]);
 
   const go = (href: string) => {
     setOpen(false);
@@ -123,9 +139,21 @@ export function CommandPalette() {
               autoFocus
               value={query}
               onValueChange={setQuery}
-              placeholder="Search subjects, topics, questions…"
+              placeholder={
+                scopeActive
+                  ? `Search within ${(scope?.topic ?? scope?.subject ?? "").replace(/-/g, " ")}…`
+                  : "Search subjects, topics, questions…"
+              }
               className="h-12 w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
             />
+            {scope && (
+              <button
+                onClick={() => setScoped((s) => !s)}
+                className="shrink-0 whitespace-nowrap border border-border px-2 py-1 font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              >
+                {scopeActive ? "This subject" : "Everywhere"}
+              </button>
+            )}
           </div>
           <Command.List className="max-h-[22rem] overflow-y-auto p-2">
             {!query && (
@@ -197,7 +225,11 @@ export function CommandPalette() {
             )}
           </Command.List>
           <div className="flex items-center justify-between border-t border-border px-3 py-2 text-2xs text-muted-foreground">
-            <span>Search across your revision space</span>
+            <span>
+              {scopeActive
+                ? "Scoped search — results stay inside this subject"
+                : "Search across your revision space"}
+            </span>
             <kbd className="rounded border border-border bg-surface-2 px-1.5 py-0.5 font-mono">
               esc
             </kbd>

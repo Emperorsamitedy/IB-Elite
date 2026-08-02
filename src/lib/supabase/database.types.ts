@@ -528,6 +528,7 @@ export type Database = {
           calculator: boolean | null
           created_at: string
           difficulty: Database["public"]["Enums"]["difficulty"]
+          estimated_minutes: number | null
           id: string
           is_ai_generated: boolean
           level_id: string | null
@@ -535,12 +536,14 @@ export type Database = {
           marks: number
           paper: string | null
           prompt: string
+          question_number: string | null
           question_type: string
           solution: string | null
           source: string | null
           status: Database["public"]["Enums"]["content_status"]
           subject_id: string
           subtopic_id: string | null
+          tags: string[]
           title: string | null
           topic_id: string
           updated_at: string
@@ -551,6 +554,7 @@ export type Database = {
           calculator?: boolean | null
           created_at?: string
           difficulty?: Database["public"]["Enums"]["difficulty"]
+          estimated_minutes?: number | null
           id?: string
           is_ai_generated?: boolean
           level_id?: string | null
@@ -558,12 +562,14 @@ export type Database = {
           marks?: number
           paper?: string | null
           prompt: string
+          question_number?: string | null
           question_type?: string
           solution?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["content_status"]
           subject_id: string
           subtopic_id?: string | null
+          tags?: string[]
           title?: string | null
           topic_id: string
           updated_at?: string
@@ -574,6 +580,7 @@ export type Database = {
           calculator?: boolean | null
           created_at?: string
           difficulty?: Database["public"]["Enums"]["difficulty"]
+          estimated_minutes?: number | null
           id?: string
           is_ai_generated?: boolean
           level_id?: string | null
@@ -581,12 +588,14 @@ export type Database = {
           marks?: number
           paper?: string | null
           prompt?: string
+          question_number?: string | null
           question_type?: string
           solution?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["content_status"]
           subject_id?: string
           subtopic_id?: string | null
+          tags?: string[]
           title?: string | null
           topic_id?: string
           updated_at?: string
@@ -788,24 +797,30 @@ export type Database = {
       }
       subtopics: {
         Row: {
+          description: string | null
           id: string
           name: string
           slug: string
           sort_order: number
+          status: Database["public"]["Enums"]["content_status"]
           topic_id: string
         }
         Insert: {
+          description?: string | null
           id?: string
           name: string
           slug: string
           sort_order?: number
+          status?: Database["public"]["Enums"]["content_status"]
           topic_id: string
         }
         Update: {
+          description?: string | null
           id?: string
           name?: string
           slug?: string
           sort_order?: number
+          status?: Database["public"]["Enums"]["content_status"]
           topic_id?: string
         }
         Relationships: [
@@ -818,33 +833,89 @@ export type Database = {
           },
         ]
       }
-      topics: {
+      themes: {
         Row: {
           created_at: string
           description: string | null
           id: string
+          level_code: string | null
           name: string
           slug: string
           sort_order: number
+          status: Database["public"]["Enums"]["content_status"]
           subject_id: string
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: string
+          level_code?: string | null
           name: string
           slug: string
           sort_order?: number
+          status?: Database["public"]["Enums"]["content_status"]
           subject_id: string
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: string
+          level_code?: string | null
           name?: string
           slug?: string
           sort_order?: number
+          status?: Database["public"]["Enums"]["content_status"]
           subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "themes_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      topics: {
+        Row: {
+          created_at: string
+          description: string | null
+          estimated_minutes: number | null
+          id: string
+          level_code: string | null
+          name: string
+          slug: string
+          sort_order: number
+          status: Database["public"]["Enums"]["content_status"]
+          subject_id: string
+          theme_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          level_code?: string | null
+          name: string
+          slug: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["content_status"]
+          subject_id: string
+          theme_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          level_code?: string | null
+          name?: string
+          slug?: string
+          sort_order?: number
+          status?: Database["public"]["Enums"]["content_status"]
+          subject_id?: string
+          theme_id?: string | null
         }
         Relationships: [
           {
@@ -852,6 +923,13 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "topics_theme_id_fkey"
+            columns: ["theme_id"]
+            isOneToOne: false
+            referencedRelation: "themes"
             referencedColumns: ["id"]
           },
         ]
