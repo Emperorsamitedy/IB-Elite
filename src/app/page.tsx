@@ -6,6 +6,7 @@ import { Gauge } from "@/components/ui/gauge";
 import { MarketingNav } from "@/components/marketing/marketing-nav";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/server";
+import { env } from "@/lib/env";
 import { APP_NAME, PRICING } from "@/lib/constants";
 
 const FEATURES = [
@@ -54,16 +55,31 @@ const CHIP_COLORS = [
 ];
 
 export default async function LandingPage() {
-  const supabase = await createClient();
-  const { data: subjects } = await supabase
-    .from("subjects")
-    .select("id, name, group_name, color")
-    .order("sort_order")
-    .limit(6);
+  const subjects = env.configured
+    ? (
+        await (await createClient())
+          .from("subjects")
+          .select("id, name, group_name, color")
+          .order("sort_order")
+          .limit(6)
+      ).data
+    : null;
 
   return (
     <div className="flex min-h-dvh flex-col">
       <MarketingNav />
+
+      {!env.configured && (
+        <div className="border-b border-accent/40 bg-accent/10">
+          <div className="container py-3 font-mono text-xs uppercase tracking-[0.08em]">
+            Supabase is not configured. Copy{" "}
+            <code className="font-bold">.env.example</code> to{" "}
+            <code className="font-bold">.env.local</code> and set{" "}
+            <code className="font-bold">NEXT_PUBLIC_SUPABASE_URL</code> and{" "}
+            <code className="font-bold">NEXT_PUBLIC_SUPABASE_ANON_KEY</code>.
+          </div>
+        </div>
+      )}
 
       <main className="flex-1">
         {/* Hero */}

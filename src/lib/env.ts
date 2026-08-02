@@ -7,16 +7,32 @@ function required(name: string, value: string | undefined): string {
   return value;
 }
 
+/**
+ * Read lazily so a missing variable surfaces on the request that needs it
+ * rather than at import time, which would break `next build`.
+ */
 export const env = {
-  supabaseUrl: required(
-    "NEXT_PUBLIC_SUPABASE_URL",
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-  ),
-  supabaseAnonKey: required(
-    "NEXT_PUBLIC_SUPABASE_ANON_KEY",
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-  ),
-  siteUrl: process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000",
+  get supabaseUrl(): string {
+    return required(
+      "NEXT_PUBLIC_SUPABASE_URL",
+      process.env.NEXT_PUBLIC_SUPABASE_URL,
+    );
+  },
+  get supabaseAnonKey(): string {
+    return required(
+      "NEXT_PUBLIC_SUPABASE_ANON_KEY",
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    );
+  },
+  get siteUrl(): string {
+    return process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+  },
+  get configured(): boolean {
+    return Boolean(
+      process.env.NEXT_PUBLIC_SUPABASE_URL &&
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+    );
+  },
 };
 
 /** Server-only secrets — never import from client components. */
