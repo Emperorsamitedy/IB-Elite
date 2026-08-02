@@ -1,0 +1,167 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Paper & ink surface scale (light) */
+    --background: 45 27% 94%; /* warm study paper */
+    --surface: 0 0% 100%;
+    --surface-2: 49 22% 90%;
+    --foreground: 208 44% 13%; /* deep petrol-ink */
+    --muted: 49 22% 90%;
+    --muted-foreground: 213 11% 40%; /* slate */
+    --border: 47 15% 82%; /* rule */
+    --input: 47 15% 82%;
+    --ring: 4 78% 53%;
+
+    /* Brand accent — examiner's marker red */
+    --accent: 4 78% 53%;
+    --accent-foreground: 0 0% 100%;
+    --accent-deep: 4 71% 42%;
+    --accent-soft: 4 78% 96%;
+
+    /* Ink (primary dark surface used for hero/ink buttons) */
+    --ink: 208 44% 13%;
+    --ink-2: 205 42% 18%;
+    --ink-foreground: 45 27% 94%;
+
+    /* Study palette */
+    --highlight: 43 91% 62%; /* highlighter yellow */
+    --highlight-foreground: 208 44% 13%;
+
+    /* Semantic */
+    --success: 158 51% 37%;
+    --warning: 43 91% 55%;
+    --danger: 4 78% 53%;
+    --danger-foreground: 0 0% 100%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 208 44% 13%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 208 44% 13%;
+
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 210 45% 9%;
+    --surface: 208 44% 13%;
+    --surface-2: 209 35% 16%;
+    --foreground: 45 27% 94%;
+    --muted: 207 34% 14%;
+    --muted-foreground: 210 14% 63%;
+    --border: 209 25% 20%;
+    --input: 209 25% 20%;
+    --ring: 4 78% 58%;
+
+    --accent: 4 78% 58%;
+    --accent-foreground: 0 0% 100%;
+    --accent-deep: 4 71% 46%;
+    --accent-soft: 4 40% 20%;
+
+    --ink: 208 44% 13%;
+    --ink-2: 209 35% 16%;
+    --ink-foreground: 45 27% 94%;
+
+    --highlight: 43 91% 62%;
+    --highlight-foreground: 208 44% 13%;
+
+    --success: 158 48% 46%;
+    --warning: 43 91% 60%;
+    --danger: 4 78% 60%;
+    --danger-foreground: 0 0% 100%;
+
+    --card: 208 44% 13%;
+    --card-foreground: 45 27% 94%;
+    --popover: 208 44% 13%;
+    --popover-foreground: 45 27% 94%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  html {
+    -webkit-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    text-rendering: optimizeLegibility;
+  }
+  ::selection {
+    background-color: hsl(var(--highlight) / 0.55);
+    color: hsl(var(--ink));
+  }
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-thumb {
+    background-color: hsl(var(--border));
+    border-radius: 9999px;
+    border: 2px solid transparent;
+    background-clip: content-box;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  .font-serif {
+    font-family: var(--font-serif), Georgia, serif;
+  }
+  .font-mono {
+    font-family: var(--font-mono), ui-monospace, monospace;
+  }
+  /* Answer-booklet ruled lines (for ink hero panels) */
+  .bg-ruled {
+    background-image: repeating-linear-gradient(
+      to bottom,
+      transparent 0 37px,
+      hsl(var(--ink-foreground) / 0.05) 37px 38px
+    );
+  }
+  /* Highlighter swipe behind a word */
+  .marker-hl {
+    position: relative;
+    display: inline-block;
+    padding: 0 0.18em;
+    color: hsl(var(--highlight-foreground));
+  }
+  .marker-hl::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 14%;
+    bottom: 10%;
+    background: hsl(var(--highlight));
+    transform: rotate(-1.6deg);
+    border-radius: 2px;
+    z-index: 0;
+  }
+  .marker-hl > * {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

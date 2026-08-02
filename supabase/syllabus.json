@@ -1,0 +1,518 @@
+{
+  "subjects": [
+    {
+      "slug": "math-aa",
+      "name": "Mathematics: Analysis & Approaches",
+      "group": "Mathematics",
+      "color": "#B92A5A",
+      "description": "Algebra, functions, calculus and proof with an emphasis on analytical methods.",
+      "themes": [
+        {
+          "slug": "number-algebra",
+          "name": "Number & Algebra",
+          "topics": [
+            { "slug": "sequences-series", "name": "Sequences & Series", "subtopics": ["Arithmetic sequences", "Geometric sequences", "Sigma notation", "Compound interest"] },
+            { "slug": "exponents-logarithms", "name": "Exponents & Logarithms", "subtopics": ["Laws of exponents", "Laws of logarithms", "Exponential equations"] },
+            { "slug": "binomial-theorem", "name": "Binomial Theorem", "subtopics": ["Binomial expansion", "General term"] },
+            { "slug": "proof", "name": "Proof", "subtopics": ["Proof by deduction", "Proof by induction", "Proof by contradiction"], "level": "HL" },
+            { "slug": "complex-numbers", "name": "Complex Numbers", "subtopics": ["Cartesian form", "Polar form", "De Moivre's theorem"], "level": "HL" }
+          ]
+        },
+        {
+          "slug": "functions",
+          "name": "Functions",
+          "topics": [
+            { "slug": "linear-quadratic", "name": "Linear & Quadratic Functions", "subtopics": ["Straight lines", "Quadratic graphs", "Discriminant"] },
+            { "slug": "function-properties", "name": "Function Properties", "subtopics": ["Domain and range", "Composite functions", "Inverse functions"] },
+            { "slug": "rational-exponential-log", "name": "Rational, Exponential & Log Functions", "subtopics": ["Rational functions", "Exponential models", "Logarithmic graphs"] },
+            { "slug": "transformations", "name": "Transformations of Graphs", "subtopics": ["Translations", "Stretches", "Reflections"] }
+          ]
+        },
+        {
+          "slug": "geometry-trigonometry",
+          "name": "Geometry & Trigonometry",
+          "topics": [
+            { "slug": "triangle-trigonometry", "name": "Triangle Trigonometry", "subtopics": ["Sine rule", "Cosine rule", "Area of a triangle"] },
+            { "slug": "circular-functions", "name": "Circular Functions", "subtopics": ["Radians", "Unit circle", "Trigonometric graphs"] },
+            { "slug": "trigonometric-identities", "name": "Trigonometric Identities & Equations", "subtopics": ["Pythagorean identities", "Double angle formulae", "Solving equations"] },
+            { "slug": "vectors", "name": "Vectors", "subtopics": ["Vector algebra", "Scalar product", "Vector product", "Lines and planes"], "level": "HL" }
+          ]
+        },
+        {
+          "slug": "statistics-probability",
+          "name": "Statistics & Probability",
+          "topics": [
+            { "slug": "descriptive-statistics", "name": "Descriptive Statistics", "subtopics": ["Measures of central tendency", "Measures of dispersion", "Box plots"] },
+            { "slug": "probability", "name": "Probability", "subtopics": ["Combined events", "Conditional probability", "Independence"] },
+            { "slug": "distributions", "name": "Probability Distributions", "subtopics": ["Discrete random variables", "Binomial distribution", "Normal distribution"] },
+            { "slug": "bivariate-statistics", "name": "Bivariate Statistics", "subtopics": ["Correlation", "Regression"] }
+          ]
+        },
+        {
+          "slug": "calculus",
+          "name": "Calculus",
+          "topics": [
+            { "slug": "limits", "name": "Limits", "subtopics": ["Limits from graphs", "Limits and continuity", "L'Hôpital's rule"] },
+            { "slug": "differentiation", "name": "Differentiation", "subtopics": ["First principles", "Chain rule", "Product and quotient rules", "Implicit differentiation"] },
+            { "slug": "applications-of-derivatives", "name": "Applications of Derivatives", "subtopics": ["Tangents and normals", "Stationary points", "Optimisation", "Kinematics"] },
+            { "slug": "integration", "name": "Integration", "subtopics": ["Indefinite integrals", "Definite integrals", "Integration by substitution", "Integration by parts"] },
+            { "slug": "differential-equations", "name": "Differential Equations", "subtopics": ["Separation of variables", "Euler's method"], "level": "HL" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "math-ai",
+      "name": "Mathematics: Applications & Interpretation",
+      "group": "Mathematics",
+      "color": "#7A4FB0",
+      "description": "Modelling, statistics and applied mathematics supported by technology.",
+      "themes": [
+        {
+          "slug": "number-algebra",
+          "name": "Number & Algebra",
+          "topics": [
+            { "slug": "approximation", "name": "Approximation & Error", "subtopics": ["Rounding and significant figures", "Percentage error", "Standard form"] },
+            { "slug": "sequences-finance", "name": "Sequences & Financial Mathematics", "subtopics": ["Arithmetic and geometric sequences", "Compound interest", "Amortisation and annuities"] },
+            { "slug": "matrices", "name": "Matrices", "subtopics": ["Matrix operations", "Determinants and inverses", "Eigenvalues and eigenvectors"], "level": "HL" }
+          ]
+        },
+        {
+          "slug": "functions",
+          "name": "Functions",
+          "topics": [
+            { "slug": "linear-models", "name": "Linear Models", "subtopics": ["Gradient and intercept", "Piecewise models"] },
+            { "slug": "nonlinear-models", "name": "Non-linear Models", "subtopics": ["Quadratic models", "Exponential models", "Logistic models"] },
+            { "slug": "modelling-skills", "name": "Modelling Skills", "subtopics": ["Choosing a model", "Fitting and interpreting", "Evaluating a model"] }
+          ]
+        },
+        {
+          "slug": "geometry-trigonometry",
+          "name": "Geometry & Trigonometry",
+          "topics": [
+            { "slug": "geometry-3d", "name": "3D Geometry & Measurement", "subtopics": ["Volume and surface area", "Angles in 3D solids"] },
+            { "slug": "trigonometry-applications", "name": "Applied Trigonometry", "subtopics": ["Sine and cosine rules", "Bearings", "Radians and arcs"] },
+            { "slug": "voronoi-graph-theory", "name": "Voronoi Diagrams & Graph Theory", "subtopics": ["Voronoi diagrams", "Adjacency matrices", "Shortest path algorithms"] }
+          ]
+        },
+        {
+          "slug": "statistics-probability",
+          "name": "Statistics & Probability",
+          "topics": [
+            { "slug": "data-collection", "name": "Data Collection & Presentation", "subtopics": ["Sampling techniques", "Frequency tables", "Outliers"] },
+            { "slug": "correlation-regression", "name": "Correlation & Regression", "subtopics": ["Pearson's r", "Spearman's rank", "Least squares regression"] },
+            { "slug": "probability-distributions", "name": "Probability & Distributions", "subtopics": ["Binomial distribution", "Normal distribution", "Expected value"] },
+            { "slug": "hypothesis-testing", "name": "Statistical Tests", "subtopics": ["Chi-squared test", "t-test", "Validity of tests"] }
+          ]
+        },
+        {
+          "slug": "calculus",
+          "name": "Calculus",
+          "topics": [
+            { "slug": "differentiation", "name": "Differentiation", "subtopics": ["Rates of change", "Tangents", "Optimisation"] },
+            { "slug": "integration", "name": "Integration", "subtopics": ["Areas under curves", "Trapezoidal rule", "Kinematics"] },
+            { "slug": "differential-equations", "name": "Differential Equations & Slope Fields", "subtopics": ["Slope fields", "Euler's method", "Coupled systems"], "level": "HL" }
+          ]
+        },
+        {
+          "slug": "discrete-mathematics",
+          "name": "Discrete Mathematics",
+          "topics": [
+            { "slug": "graphs-networks", "name": "Graphs & Networks", "subtopics": ["Minimum spanning trees", "Chinese postman problem", "Travelling salesman problem"], "level": "HL" },
+            { "slug": "markov-chains", "name": "Markov Chains", "subtopics": ["Transition matrices", "Steady states"], "level": "HL" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "physics",
+      "name": "Physics",
+      "group": "Sciences",
+      "color": "#2B6E8F",
+      "description": "Motion, matter, waves, fields and the quantum world.",
+      "themes": [
+        {
+          "slug": "space-time-motion",
+          "name": "Space, Time and Motion",
+          "topics": [
+            { "slug": "kinematics", "name": "Kinematics", "subtopics": ["Displacement and velocity", "Uniform acceleration", "Projectile motion", "Graphs of motion"] },
+            { "slug": "forces-motion", "name": "Forces and Motion", "subtopics": ["Newton's laws", "Friction", "Circular motion", "Equilibrium"] },
+            { "slug": "work-energy-power", "name": "Work, Energy and Power", "subtopics": ["Work done", "Conservation of energy", "Efficiency and power"] },
+            { "slug": "momentum-impulse", "name": "Momentum and Impulse", "subtopics": ["Conservation of momentum", "Impulse", "Collisions"] }
+          ]
+        },
+        {
+          "slug": "particulate-nature-of-matter",
+          "name": "The Particulate Nature of Matter",
+          "topics": [
+            { "slug": "thermal-physics", "name": "Thermal Physics", "subtopics": ["Temperature and internal energy", "Specific heat capacity", "Latent heat"] },
+            { "slug": "ideal-gases", "name": "Ideal Gases", "subtopics": ["Gas laws", "Kinetic model", "Ideal gas equation"] },
+            { "slug": "nuclear-structure", "name": "Nuclear Structure", "subtopics": ["Isotopes", "Mass defect and binding energy"] },
+            { "slug": "radioactivity", "name": "Radioactivity", "subtopics": ["Types of decay", "Half-life", "Nuclear equations"] }
+          ]
+        },
+        {
+          "slug": "wave-behaviour",
+          "name": "Wave Behaviour",
+          "topics": [
+            { "slug": "oscillations", "name": "Oscillations", "subtopics": ["Simple harmonic motion", "Energy in SHM", "Damping"] },
+            { "slug": "wave-model", "name": "Wave Model", "subtopics": ["Wave characteristics", "Transverse and longitudinal waves", "Wave speed"] },
+            { "slug": "wave-phenomena", "name": "Wave Phenomena", "subtopics": ["Reflection and refraction", "Diffraction", "Interference", "Doppler effect"] },
+            { "slug": "standing-waves", "name": "Standing Waves", "subtopics": ["Nodes and antinodes", "Harmonics in strings and pipes", "Resonance"] }
+          ]
+        },
+        {
+          "slug": "fields",
+          "name": "Fields",
+          "topics": [
+            { "slug": "gravitational-fields", "name": "Gravitational Fields", "subtopics": ["Newton's law of gravitation", "Field strength", "Orbital motion", "Gravitational potential"] },
+            { "slug": "electric-fields", "name": "Electric Fields", "subtopics": ["Coulomb's law", "Field strength and potential", "Electric circuits", "Capacitance"] },
+            { "slug": "magnetic-fields", "name": "Magnetic Fields", "subtopics": ["Magnetic force on a current", "Moving charges", "Field patterns"] },
+            { "slug": "electromagnetic-induction", "name": "Electromagnetic Induction", "subtopics": ["Faraday's law", "Lenz's law", "Transformers and AC"] }
+          ]
+        },
+        {
+          "slug": "nuclear-quantum-physics",
+          "name": "Nuclear and Quantum Physics",
+          "topics": [
+            { "slug": "quantum-physics", "name": "Quantum Physics", "subtopics": ["Photoelectric effect", "Wave-particle duality", "Atomic spectra"] },
+            { "slug": "nuclear-physics", "name": "Nuclear Physics", "subtopics": ["Fission and fusion", "Nuclear energy", "Radioactive decay law"] },
+            { "slug": "particle-physics", "name": "Particle Physics", "subtopics": ["Standard model", "Quarks and leptons", "Fundamental interactions"] }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "chemistry",
+      "name": "Chemistry",
+      "group": "Sciences",
+      "color": "#2F8F6B",
+      "description": "Structure and reactivity: how matter is built and how it changes.",
+      "themes": [
+        {
+          "slug": "structure-1-particulate-nature",
+          "name": "Structure 1 — Models of the Particulate Nature of Matter",
+          "topics": [
+            { "slug": "introduction-to-particulate-nature", "name": "Introduction to the Particulate Nature of Matter", "subtopics": ["States of matter", "Kinetic molecular theory"] },
+            { "slug": "the-nuclear-atom", "name": "The Nuclear Atom", "subtopics": ["Subatomic particles", "Isotopes", "Mass spectrometry"] },
+            { "slug": "electron-configurations", "name": "Electron Configurations", "subtopics": ["Emission spectra", "Orbitals and sublevels", "Ionisation energy"] },
+            { "slug": "counting-particles-by-mass", "name": "Counting Particles by Mass: the Mole", "subtopics": ["The mole", "Empirical and molecular formulae", "Molar concentration"] }
+          ]
+        },
+        {
+          "slug": "structure-2-bonding",
+          "name": "Structure 2 — Models of Bonding and Structure",
+          "topics": [
+            { "slug": "ionic-model", "name": "The Ionic Model", "subtopics": ["Ion formation", "Lattice structure", "Properties of ionic compounds"] },
+            { "slug": "covalent-model", "name": "The Covalent Model", "subtopics": ["Lewis formulas", "VSEPR and shapes", "Intermolecular forces", "Giant covalent structures"] },
+            { "slug": "metallic-model", "name": "The Metallic Model", "subtopics": ["Metallic bonding", "Alloys"] },
+            { "slug": "from-models-to-materials", "name": "From Models to Materials", "subtopics": ["Bonding triangle", "Polymers and composites"] }
+          ]
+        },
+        {
+          "slug": "structure-3-classification",
+          "name": "Structure 3 — Classification of Matter",
+          "topics": [
+            { "slug": "periodic-table", "name": "The Periodic Table: Classification of Elements", "subtopics": ["Periodicity", "Trends in properties", "Transition metals"] },
+            { "slug": "functional-groups", "name": "Functional Groups: Classification of Organic Compounds", "subtopics": ["Homologous series", "Nomenclature", "Isomerism", "Spectroscopy"] }
+          ]
+        },
+        {
+          "slug": "reactivity-1-what-drives-reactions",
+          "name": "Reactivity 1 — What Drives Reactions?",
+          "topics": [
+            { "slug": "measuring-enthalpy-changes", "name": "Measuring Enthalpy Changes", "subtopics": ["Exothermic and endothermic", "Calorimetry"] },
+            { "slug": "energy-cycles", "name": "Energy Cycles in Reactions", "subtopics": ["Hess's law", "Bond enthalpies", "Born-Haber cycles"] },
+            { "slug": "energy-from-fuels", "name": "Energy from Fuels", "subtopics": ["Combustion", "Fuel cells and biofuels"] },
+            { "slug": "entropy-spontaneity", "name": "Entropy and Spontaneity", "subtopics": ["Entropy change", "Gibbs energy"] }
+          ]
+        },
+        {
+          "slug": "reactivity-2-how-much-how-fast-how-far",
+          "name": "Reactivity 2 — How Much, How Fast and How Far?",
+          "topics": [
+            { "slug": "amount-of-chemical-change", "name": "How Much? The Amount of Chemical Change", "subtopics": ["Reacting masses", "Limiting reactants", "Percentage yield"] },
+            { "slug": "rate-of-reaction", "name": "How Fast? The Rate of Chemical Change", "subtopics": ["Collision theory", "Rate equations", "Reaction mechanisms"] },
+            { "slug": "extent-of-reaction", "name": "How Far? The Extent of Chemical Change", "subtopics": ["Dynamic equilibrium", "Le Chatelier's principle", "Equilibrium constants"] }
+          ]
+        },
+        {
+          "slug": "reactivity-3-mechanisms",
+          "name": "Reactivity 3 — What are the Mechanisms of Chemical Change?",
+          "topics": [
+            { "slug": "proton-transfer", "name": "Proton Transfer Reactions", "subtopics": ["Acids and bases", "pH and Kw", "Buffers and titrations"] },
+            { "slug": "electron-transfer", "name": "Electron Transfer Reactions", "subtopics": ["Redox equations", "Electrochemical cells", "Electrolysis"] },
+            { "slug": "electron-sharing", "name": "Electron Sharing Reactions", "subtopics": ["Radical substitution"] },
+            { "slug": "electron-pair-sharing", "name": "Electron-pair Sharing Reactions", "subtopics": ["Nucleophilic substitution", "Electrophilic addition", "Elimination"] }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "biology",
+      "name": "Biology",
+      "group": "Sciences",
+      "color": "#3F8F2F",
+      "description": "Unity and diversity, form and function, interaction and continuity.",
+      "themes": [
+        {
+          "slug": "unity-and-diversity",
+          "name": "Theme A — Unity and Diversity",
+          "topics": [
+            { "slug": "molecules", "name": "Molecules", "subtopics": ["Water", "Nucleic acids"] },
+            { "slug": "cells", "name": "Cells", "subtopics": ["Origins of cells", "Cell structure", "Viruses"] },
+            { "slug": "organisms", "name": "Organisms", "subtopics": ["Diversity of organisms", "Classification and cladistics"] },
+            { "slug": "ecosystems", "name": "Ecosystems", "subtopics": ["Evolution and speciation", "Conservation of biodiversity"] }
+          ]
+        },
+        {
+          "slug": "form-and-function",
+          "name": "Theme B — Form and Function",
+          "topics": [
+            { "slug": "molecules-form-function", "name": "Molecules", "subtopics": ["Carbohydrates and lipids", "Proteins"] },
+            { "slug": "cells-form-function", "name": "Cells", "subtopics": ["Membranes and transport", "Organelles and compartmentalisation", "Cell specialisation"] },
+            { "slug": "organisms-form-function", "name": "Organisms", "subtopics": ["Gas exchange", "Transport", "Muscle and motility"] },
+            { "slug": "ecosystems-form-function", "name": "Ecosystems", "subtopics": ["Adaptation to environment", "Ecological niches"] }
+          ]
+        },
+        {
+          "slug": "interaction-and-interdependence",
+          "name": "Theme C — Interaction and Interdependence",
+          "topics": [
+            { "slug": "molecules-interaction", "name": "Molecules", "subtopics": ["Enzymes and metabolism", "Cell respiration", "Photosynthesis"] },
+            { "slug": "cells-interaction", "name": "Cells", "subtopics": ["Chemical signalling", "Neural signalling"] },
+            { "slug": "organisms-interaction", "name": "Organisms", "subtopics": ["Integration of body systems", "Defence against disease"] },
+            { "slug": "ecosystems-interaction", "name": "Ecosystems", "subtopics": ["Populations and communities", "Transfers of energy and matter"] }
+          ]
+        },
+        {
+          "slug": "continuity-and-change",
+          "name": "Theme D — Continuity and Change",
+          "topics": [
+            { "slug": "molecules-continuity", "name": "Molecules", "subtopics": ["DNA replication", "Protein synthesis", "Mutations and gene editing"] },
+            { "slug": "cells-continuity", "name": "Cells", "subtopics": ["Cell and nuclear division", "Gene expression", "Water potential"] },
+            { "slug": "organisms-continuity", "name": "Organisms", "subtopics": ["Reproduction", "Inheritance", "Homeostasis"] },
+            { "slug": "ecosystems-continuity", "name": "Ecosystems", "subtopics": ["Natural selection", "Stability and change", "Climate change"] }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "economics",
+      "name": "Economics",
+      "group": "Individuals & Societies",
+      "color": "#C6892B",
+      "description": "Scarcity and choice, markets, national policy and the global economy.",
+      "themes": [
+        {
+          "slug": "introduction-to-economics",
+          "name": "Introduction to Economics",
+          "topics": [
+            { "slug": "what-is-economics", "name": "What is Economics?", "subtopics": ["Scarcity and choice", "Opportunity cost", "Economic systems"] },
+            { "slug": "how-economists-work", "name": "How Do Economists Approach the World?", "subtopics": ["Models and assumptions", "Positive and normative economics"] }
+          ]
+        },
+        {
+          "slug": "microeconomics",
+          "name": "Microeconomics",
+          "topics": [
+            { "slug": "demand-supply", "name": "Demand and Supply", "subtopics": ["Law of demand", "Law of supply", "Market equilibrium"] },
+            { "slug": "elasticity", "name": "Elasticities", "subtopics": ["Price elasticity of demand", "Income elasticity", "Price elasticity of supply"] },
+            { "slug": "government-intervention", "name": "Government Intervention", "subtopics": ["Indirect taxes", "Subsidies", "Price controls"] },
+            { "slug": "market-failure", "name": "Market Failure", "subtopics": ["Externalities", "Public goods", "Asymmetric information"] },
+            { "slug": "theory-of-the-firm", "name": "Theory of the Firm", "subtopics": ["Costs and revenues", "Perfect competition", "Monopoly and oligopoly"], "level": "HL" }
+          ]
+        },
+        {
+          "slug": "macroeconomics",
+          "name": "Macroeconomics",
+          "topics": [
+            { "slug": "measuring-economic-activity", "name": "Measuring Economic Activity", "subtopics": ["GDP and GNI", "The business cycle", "Alternative measures"] },
+            { "slug": "ad-as", "name": "Aggregate Demand and Supply", "subtopics": ["Components of AD", "SRAS and LRAS", "Equilibrium output"] },
+            { "slug": "macro-objectives", "name": "Macroeconomic Objectives", "subtopics": ["Economic growth", "Unemployment", "Inflation", "Income distribution"] },
+            { "slug": "demand-supply-side-policies", "name": "Demand and Supply-side Policies", "subtopics": ["Monetary policy", "Fiscal policy", "Supply-side policy"] }
+          ]
+        },
+        {
+          "slug": "the-global-economy",
+          "name": "The Global Economy",
+          "topics": [
+            { "slug": "international-trade", "name": "International Trade", "subtopics": ["Benefits of trade", "Protectionism", "Trade agreements"] },
+            { "slug": "exchange-rates", "name": "Exchange Rates & the Balance of Payments", "subtopics": ["Exchange rate systems", "Current account", "Marshall-Lerner and the J-curve"] },
+            { "slug": "economic-integration", "name": "Economic Integration", "subtopics": ["Trading blocs", "Monetary union", "WTO"] },
+            { "slug": "economic-development", "name": "Economic Development", "subtopics": ["Measuring development", "Barriers to development", "Strategies for development"] }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "global-politics",
+      "name": "Global Politics",
+      "group": "Individuals & Societies",
+      "color": "#B0483C",
+      "description": "Power, rights, development, peace and conflict in a global context.",
+      "themes": [
+        {
+          "slug": "power-sovereignty-international-relations",
+          "name": "Power, Sovereignty and International Relations",
+          "topics": [
+            { "slug": "nature-of-power", "name": "The Nature of Power", "subtopics": ["Types of power", "Legitimacy and authority"] },
+            { "slug": "sovereignty-and-the-state", "name": "Sovereignty and the State", "subtopics": ["The state and statehood", "Challenges to sovereignty"] },
+            { "slug": "global-governance", "name": "Global Governance", "subtopics": ["Intergovernmental organisations", "NGOs and civil society", "Treaties and international law"] }
+          ]
+        },
+        {
+          "slug": "human-rights",
+          "name": "Human Rights",
+          "topics": [
+            { "slug": "nature-of-human-rights", "name": "The Nature of Human Rights", "subtopics": ["Universality and relativism", "Generations of rights"] },
+            { "slug": "protecting-human-rights", "name": "Codification and Protection", "subtopics": ["UDHR and treaties", "International courts", "Monitoring and enforcement"] },
+            { "slug": "human-rights-debates", "name": "Contemporary Debates", "subtopics": ["Rights violations", "Humanitarian intervention", "Culture and rights"] }
+          ]
+        },
+        {
+          "slug": "development",
+          "name": "Development",
+          "topics": [
+            { "slug": "contested-meanings-of-development", "name": "Contested Meanings of Development", "subtopics": ["Definitions of development", "Measuring development"] },
+            { "slug": "factors-affecting-development", "name": "Factors Affecting Development", "subtopics": ["Political factors", "Economic factors", "Social and environmental factors"] },
+            { "slug": "pathways-to-development", "name": "Pathways to Development", "subtopics": ["Aid and trade", "Sustainable development", "Debt relief"] }
+          ]
+        },
+        {
+          "slug": "peace-and-conflict",
+          "name": "Peace and Conflict",
+          "topics": [
+            { "slug": "conceptualising-peace-conflict", "name": "Conceptualising Peace and Conflict", "subtopics": ["Positive and negative peace", "Types of violence"] },
+            { "slug": "causes-and-parties", "name": "Causes and Parties to Conflict", "subtopics": ["Causes of conflict", "State and non-state actors"] },
+            { "slug": "conflict-resolution", "name": "Conflict Resolution & Peacebuilding", "subtopics": ["Negotiation and mediation", "Peacekeeping", "Post-conflict transformation"] }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "psychology",
+      "name": "Psychology",
+      "group": "Individuals & Societies",
+      "color": "#2E7D8F",
+      "description": "Biological, cognitive and sociocultural approaches to behaviour.",
+      "themes": [
+        {
+          "slug": "biological-approach",
+          "name": "Biological Approach to Behaviour",
+          "topics": [
+            { "slug": "brain-and-behaviour", "name": "The Brain and Behaviour", "subtopics": ["Localisation", "Neuroplasticity", "Neurotransmitters"] },
+            { "slug": "hormones-and-pheromones", "name": "Hormones and Pheromones", "subtopics": ["Hormones and behaviour", "Pheromones"] },
+            { "slug": "genetics-and-behaviour", "name": "Genetics and Behaviour", "subtopics": ["Genes and behaviour", "Evolutionary explanations"] }
+          ]
+        },
+        {
+          "slug": "cognitive-approach",
+          "name": "Cognitive Approach to Behaviour",
+          "topics": [
+            { "slug": "models-of-memory", "name": "Cognitive Processing", "subtopics": ["Models of memory", "Schema theory", "Thinking and decision-making"] },
+            { "slug": "reliability-of-cognition", "name": "Reliability of Cognitive Processes", "subtopics": ["Reconstructive memory", "Biases in thinking"] },
+            { "slug": "emotion-and-cognition", "name": "Emotion and Cognition", "subtopics": ["Flashbulb memory", "Emotion and decision-making"] }
+          ]
+        },
+        {
+          "slug": "sociocultural-approach",
+          "name": "Sociocultural Approach to Behaviour",
+          "topics": [
+            { "slug": "individual-and-group", "name": "The Individual and the Group", "subtopics": ["Social identity theory", "Social cognitive theory", "Stereotypes"] },
+            { "slug": "cultural-origins", "name": "Cultural Origins of Behaviour", "subtopics": ["Culture and cultural dimensions", "Enculturation and acculturation"] },
+            { "slug": "cultural-influences", "name": "Cultural Influences on Behaviour", "subtopics": ["Globalisation and behaviour"] }
+          ]
+        },
+        {
+          "slug": "options-and-research",
+          "name": "Options and Research Methodology",
+          "topics": [
+            { "slug": "abnormal-psychology", "name": "Abnormal Psychology", "subtopics": ["Diagnosis", "Aetiology", "Treatment"] },
+            { "slug": "developmental-psychology", "name": "Developmental Psychology", "subtopics": ["Influences on development", "Developing an identity"] },
+            { "slug": "health-psychology", "name": "Health Psychology", "subtopics": ["Determinants of health", "Health problems", "Promoting health"] },
+            { "slug": "human-relationships", "name": "Human Relationships", "subtopics": ["Personal relationships", "Group dynamics", "Social responsibility"] },
+            { "slug": "research-methodology", "name": "Research Methodology", "subtopics": ["Quantitative methods", "Qualitative methods", "Ethics in research"] }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "philosophy",
+      "name": "Philosophy",
+      "group": "Individuals & Societies",
+      "color": "#6A5AA8",
+      "description": "Being human, optional themes, prescribed texts and the HL extension.",
+      "themes": [
+        {
+          "slug": "core-theme-being-human",
+          "name": "Core Theme — Being Human",
+          "topics": [
+            { "slug": "human-nature", "name": "What is a Human Being?", "subtopics": ["Human nature", "Personhood", "Mind and body"] },
+            { "slug": "self-and-others", "name": "The Self and Others", "subtopics": ["Personal identity", "Freedom and determinism", "Human relationships"] }
+          ]
+        },
+        {
+          "slug": "optional-themes",
+          "name": "Optional Themes",
+          "topics": [
+            { "slug": "ethics", "name": "Ethics", "subtopics": ["Normative ethics", "Metaethics", "Applied ethics"] },
+            { "slug": "epistemology", "name": "Epistemology", "subtopics": ["Knowledge and belief", "Justification", "Scepticism"] },
+            { "slug": "aesthetics", "name": "Aesthetics", "subtopics": ["Art and beauty", "Judgement and taste"] },
+            { "slug": "philosophy-of-religion", "name": "Philosophy of Religion", "subtopics": ["Arguments for God", "Problem of evil", "Religious language"] },
+            { "slug": "political-philosophy", "name": "Political Philosophy", "subtopics": ["Political obligation", "Justice", "Liberty and equality"] },
+            { "slug": "philosophy-of-science", "name": "Philosophy of Science", "subtopics": ["Scientific method", "Realism and anti-realism"] }
+          ]
+        },
+        {
+          "slug": "prescribed-text",
+          "name": "Prescribed Text",
+          "topics": [
+            { "slug": "reading-the-text", "name": "Reading the Prescribed Text", "subtopics": ["Analysis of arguments", "Contextual understanding"] }
+          ]
+        },
+        {
+          "slug": "hl-extension",
+          "name": "HL Extension — Philosophy of Philosophy",
+          "level": "HL",
+          "topics": [
+            { "slug": "doing-philosophy", "name": "Doing Philosophy", "subtopics": ["Nature of philosophical activity", "Methods and value of philosophy"], "level": "HL" }
+          ]
+        }
+      ]
+    },
+    {
+      "slug": "world-religions",
+      "name": "World Religions",
+      "group": "Individuals & Societies",
+      "color": "#A0662B",
+      "description": "Beliefs, practices and lived experience across the world's religions.",
+      "themes": [
+        {
+          "slug": "introduction-to-world-religions",
+          "name": "Introduction to World Religions",
+          "topics": [
+            { "slug": "hinduism", "name": "Hinduism", "subtopics": ["Beliefs and texts", "Practices and rituals"] },
+            { "slug": "buddhism", "name": "Buddhism", "subtopics": ["Four Noble Truths", "Practices and meditation"] },
+            { "slug": "sikhism", "name": "Sikhism", "subtopics": ["Beliefs and the Gurus", "Practices and the Gurdwara"] },
+            { "slug": "judaism", "name": "Judaism", "subtopics": ["Beliefs and Torah", "Festivals and practice"] },
+            { "slug": "christianity", "name": "Christianity", "subtopics": ["Beliefs and scripture", "Worship and sacraments"] },
+            { "slug": "islam", "name": "Islam", "subtopics": ["Beliefs and Qur'an", "Five Pillars"] },
+            { "slug": "jainism", "name": "Jainism", "subtopics": ["Beliefs and ahimsa", "Practices"] },
+            { "slug": "taoism", "name": "Taoism", "subtopics": ["Beliefs and the Tao", "Practices"] }
+          ]
+        },
+        {
+          "slug": "in-depth-studies",
+          "name": "In-depth Studies",
+          "topics": [
+            { "slug": "rituals-and-practices", "name": "Rituals and Practices", "subtopics": ["Rites of passage", "Pilgrimage", "Worship"] },
+            { "slug": "religious-experience", "name": "Religious Experience", "subtopics": ["Mysticism", "Prayer and meditation"] },
+            { "slug": "ethics-and-religion", "name": "Religion and Ethics", "subtopics": ["Moral teaching", "Contemporary issues"] },
+            { "slug": "religion-and-society", "name": "Religion and Society", "subtopics": ["Religion and identity", "Interfaith dialogue"] }
+          ]
+        }
+      ]
+    }
+  ]
+}
