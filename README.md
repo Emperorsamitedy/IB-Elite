@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Atlas — IB revision platform
 
-## Getting Started
+Stop searching. Start practising. Atlas is an IB revision companion: past-paper
+style questions organised by the real syllabus, practice sessions, a mistake
+notebook, an AI tutor and progress on the IB 1–7 scale.
 
-First, run the development server:
+## Stack
+
+- Next.js 15 (App Router) · React 19 · TypeScript · Tailwind CSS
+- Supabase (Postgres, Auth, Storage, RLS) — local via the Supabase CLI
+- Stripe (billing scaffolding) · OpenAI-compatible tutor with an offline fallback
+
+## Getting started
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+cp .env.example .env.local        # fill in the Supabase keys printed below
+npx supabase start                # local Postgres, Auth, Studio (Docker)
+npx supabase db reset             # migrations + syllabus/demo seed
+npm run dev                       # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Stripe and AI keys are optional: billing shows as "not configured" and the tutor
+falls back to deterministic offline hints when no key is present.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Content model
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Navigation is rendered entirely from the database, so the syllabus can change
+without touching application code:
 
-## Learn More
+```
+Subject → Theme → Topic → Subtopic (optional) → Questions
+```
 
-To learn more about Next.js, take a look at the following resources:
+Admins manage the tree at `/admin/syllabus` (add, rename, reorder, merge,
+archive) and questions at `/admin/questions`. Publishing a question makes it
+appear under its subject, theme, topic and subtopic automatically.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The seeded tree lives in `supabase/syllabus.json`; regenerate its SQL with:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npm run syllabus:sql
+```
 
-## Deploy on Vercel
+## Checks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+npx tsc --noEmit
+npm run lint
+npm run build
+```
