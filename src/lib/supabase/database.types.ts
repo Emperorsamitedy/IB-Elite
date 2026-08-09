@@ -151,6 +151,44 @@ export type Database = {
           },
         ]
       }
+      deadlines: {
+        Row: {
+          created_at: string
+          due_date: string
+          id: string
+          student_id: string
+          subject_id: string | null
+          title: string
+          type: Database["public"]["Enums"]["deadline_type"]
+        }
+        Insert: {
+          created_at?: string
+          due_date: string
+          id?: string
+          student_id: string
+          subject_id?: string | null
+          title: string
+          type: Database["public"]["Enums"]["deadline_type"]
+        }
+        Update: {
+          created_at?: string
+          due_date?: string
+          id?: string
+          student_id?: string
+          subject_id?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["deadline_type"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "deadlines_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exam_dates: {
         Row: {
           created_at: string
@@ -632,6 +670,64 @@ export type Database = {
           },
         ]
       }
+      study_blocks: {
+        Row: {
+          allocated_minutes: number
+          created_at: string
+          date: string
+          deadline_id: string | null
+          id: string
+          is_locked: boolean
+          student_id: string
+          subject_id: string | null
+          topic_id: string | null
+        }
+        Insert: {
+          allocated_minutes: number
+          created_at?: string
+          date: string
+          deadline_id?: string | null
+          id?: string
+          is_locked?: boolean
+          student_id: string
+          subject_id?: string | null
+          topic_id?: string | null
+        }
+        Update: {
+          allocated_minutes?: number
+          created_at?: string
+          date?: string
+          deadline_id?: string | null
+          id?: string
+          is_locked?: boolean
+          student_id?: string
+          subject_id?: string | null
+          topic_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "study_blocks_deadline_id_fkey"
+            columns: ["deadline_id"]
+            isOneToOne: false
+            referencedRelation: "deadlines"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_blocks_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "study_blocks_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_plan_items: {
         Row: {
           completed: boolean
@@ -1010,6 +1106,7 @@ export type Database = {
     Enums: {
       confidence_rating: "easy" | "okay" | "difficult" | "wrong"
       content_status: "draft" | "published" | "archived"
+      deadline_type: "IA" | "EE" | "TOK" | "MOCK" | "EXAM"
       difficulty: "easy" | "medium" | "hard"
       plan_intensity: "light" | "balanced" | "intense"
       session_mode: "practice" | "exam" | "mistakes" | "daily"
@@ -1146,6 +1243,7 @@ export const Constants = {
     Enums: {
       confidence_rating: ["easy", "okay", "difficult", "wrong"],
       content_status: ["draft", "published", "archived"],
+      deadline_type: ["IA", "EE", "TOK", "MOCK", "EXAM"],
       difficulty: ["easy", "medium", "hard"],
       plan_intensity: ["light", "balanced", "intense"],
       session_mode: ["practice", "exam", "mistakes", "daily"],

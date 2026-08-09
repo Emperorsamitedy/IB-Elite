@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "syllabus:sql": "node scripts/generate-syllabus-sql.mjs"
+    "syllabus:sql": "node scripts/generate-syllabus-sql.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.2.4",
@@ -51,6 +52,7 @@
     "postcss": "^8",
     "supabase": "^2.109.1",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }
