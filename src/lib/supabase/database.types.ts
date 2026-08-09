@@ -791,6 +791,56 @@ export type Database = {
           },
         ]
       }
+      scans: {
+        Row: {
+          annotation_result: Json | null
+          created_at: string
+          error_message: string | null
+          id: string
+          image_url: string
+          ocr_bounding_boxes: Json | null
+          ocr_text: string | null
+          question_id: string
+          status: Database["public"]["Enums"]["scan_status"]
+          student_id: string
+          updated_at: string
+        }
+        Insert: {
+          annotation_result?: Json | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          image_url: string
+          ocr_bounding_boxes?: Json | null
+          ocr_text?: string | null
+          question_id: string
+          status?: Database["public"]["Enums"]["scan_status"]
+          student_id: string
+          updated_at?: string
+        }
+        Update: {
+          annotation_result?: Json | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          image_url?: string
+          ocr_bounding_boxes?: Json | null
+          ocr_text?: string | null
+          question_id?: string
+          status?: Database["public"]["Enums"]["scan_status"]
+          student_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "scans_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       study_blocks: {
         Row: {
           allocated_minutes: number
@@ -1231,6 +1281,7 @@ export type Database = {
       difficulty: "easy" | "medium" | "hard"
       ladder_status: "WAITING" | "ACTIVE" | "COMPLETE"
       plan_intensity: "light" | "balanced" | "intense"
+      scan_status: "UPLOADED" | "PROCESSING" | "ANNOTATED" | "FAILED"
       session_mode: "practice" | "exam" | "mistakes" | "daily"
       session_status: "active" | "completed" | "abandoned"
     }
@@ -1369,6 +1420,7 @@ export const Constants = {
       difficulty: ["easy", "medium", "hard"],
       ladder_status: ["WAITING", "ACTIVE", "COMPLETE"],
       plan_intensity: ["light", "balanced", "intense"],
+      scan_status: ["UPLOADED", "PROCESSING", "ANNOTATED", "FAILED"],
       session_mode: ["practice", "exam", "mistakes", "daily"],
       session_status: ["active", "completed", "abandoned"],
     },
