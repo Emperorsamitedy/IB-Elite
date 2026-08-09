@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "syllabus:sql": "node scripts/generate-syllabus-sql.mjs"
+    "syllabus:sql": "node scripts/generate-syllabus-sql.mjs",
+    "test": "vitest run"
   },
   "dependencies": {
     "@radix-ui/react-avatar": "^1.2.4",
@@ -34,6 +35,8 @@
     "next": "^15.5.21",
     "next-themes": "^0.4.6",
     "openai": "^6.48.0",
+    "pusher": "^5.3.4",
+    "pusher-js": "^8.6.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "sonner": "^2.0.7",
@@ -51,6 +54,7 @@
     "postcss": "^8",
     "supabase": "^2.109.1",
     "tailwindcss": "^3.4.1",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^3.2.4"
   }
 }

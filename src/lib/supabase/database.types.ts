@@ -196,6 +196,127 @@ export type Database = {
           },
         ]
       }
+      ladder_leaderboard: {
+        Row: {
+          country: string | null
+          id: string
+          losses: number
+          school: string | null
+          student_id: string
+          updated_at: string
+          wins: number
+        }
+        Insert: {
+          country?: string | null
+          id?: string
+          losses?: number
+          school?: string | null
+          student_id: string
+          updated_at?: string
+          wins?: number
+        }
+        Update: {
+          country?: string | null
+          id?: string
+          losses?: number
+          school?: string | null
+          student_id?: string
+          updated_at?: string
+          wins?: number
+        }
+        Relationships: []
+      }
+      ladder_matches: {
+        Row: {
+          created_at: string
+          ended_at: string | null
+          id: string
+          level_code: string
+          paper_ref: string | null
+          paper_year: number | null
+          started_at: string | null
+          status: Database["public"]["Enums"]["ladder_status"]
+          student_a_id: string
+          student_b_id: string | null
+          subject_id: string
+        }
+        Insert: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          level_code?: string
+          paper_ref?: string | null
+          paper_year?: number | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["ladder_status"]
+          student_a_id: string
+          student_b_id?: string | null
+          subject_id: string
+        }
+        Update: {
+          created_at?: string
+          ended_at?: string | null
+          id?: string
+          level_code?: string
+          paper_ref?: string | null
+          paper_year?: number | null
+          started_at?: string | null
+          status?: Database["public"]["Enums"]["ladder_status"]
+          student_a_id?: string
+          student_b_id?: string | null
+          subject_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ladder_matches_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ladder_progress: {
+        Row: {
+          correct_count: number
+          current_question_index: number
+          final_score: number | null
+          id: string
+          is_complete: boolean
+          last_updated_at: string
+          match_id: string
+          student_id: string
+        }
+        Insert: {
+          correct_count?: number
+          current_question_index?: number
+          final_score?: number | null
+          id?: string
+          is_complete?: boolean
+          last_updated_at?: string
+          match_id: string
+          student_id: string
+        }
+        Update: {
+          correct_count?: number
+          current_question_index?: number
+          final_score?: number | null
+          id?: string
+          is_complete?: boolean
+          last_updated_at?: string
+          match_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ladder_progress_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "ladder_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       levels: {
         Row: {
           code: string
@@ -1011,6 +1132,7 @@ export type Database = {
       confidence_rating: "easy" | "okay" | "difficult" | "wrong"
       content_status: "draft" | "published" | "archived"
       difficulty: "easy" | "medium" | "hard"
+      ladder_status: "WAITING" | "ACTIVE" | "COMPLETE"
       plan_intensity: "light" | "balanced" | "intense"
       session_mode: "practice" | "exam" | "mistakes" | "daily"
       session_status: "active" | "completed" | "abandoned"
@@ -1147,6 +1269,7 @@ export const Constants = {
       confidence_rating: ["easy", "okay", "difficult", "wrong"],
       content_status: ["draft", "published", "archived"],
       difficulty: ["easy", "medium", "hard"],
+      ladder_status: ["WAITING", "ACTIVE", "COMPLETE"],
       plan_intensity: ["light", "balanced", "intense"],
       session_mode: ["practice", "exam", "mistakes", "daily"],
       session_status: ["active", "completed", "abandoned"],
