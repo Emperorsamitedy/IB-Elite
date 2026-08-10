@@ -48,14 +48,16 @@ describe("createOcrSpaceOcr", () => {
   });
 
   it("posts to /parse/image with the handwriting engine and parses word boxes", async () => {
-    const fetchMock = vi.fn(async () => jsonResponse(OK_PAYLOAD));
+    const fetchMock = vi.fn(async (_url: string, _init: RequestInit) =>
+      jsonResponse(OK_PAYLOAD),
+    );
     vi.stubGlobal("fetch", fetchMock);
 
     const result = await createOcrSpaceOcr(storageReturning(new ArrayBuffer(64))).read(
       "scans/student-1/answer.jpg",
     );
 
-    const [url, init] = fetchMock.mock.calls[0] as [string, RequestInit];
+    const [url, init] = fetchMock.mock.calls[0];
     expect(url).toBe("https://api.ocr.space/parse/image");
     expect((init.headers as Record<string, string>).apikey).toBe("test-key");
 
