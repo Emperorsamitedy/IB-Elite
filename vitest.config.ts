@@ -10,6 +10,10 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
   },
   resolve: {
-    alias: { "@": path.resolve(__dirname, "src") },
+    alias: {
+      "@": path.resolve(__dirname, "src"),
+      // Next resolves this marker itself; outside next it has nothing to load.
+      "server-only": path.resolve(__dirname, "test/server-only-stub.ts"),
+    },
   },
 });
