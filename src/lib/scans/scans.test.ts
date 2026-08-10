@@ -110,14 +110,14 @@ describe("processScan", () => {
 
     const ocr: ScanOcr = {
       read: vi.fn(async () => {
-        throw new Error("Vision request failed with status 429");
+        throw new Error("OCR.space request failed with status 429");
       }),
     };
 
     const processed = await processScan(store, ocr, scan.id);
 
     expect(processed?.status).toBe("FAILED");
-    expect(processed?.error_message).toBe("Vision request failed with status 429");
+    expect(processed?.error_message).toBe("OCR.space request failed with status 429");
     expect(processed?.annotation_result).toBeNull();
   });
 

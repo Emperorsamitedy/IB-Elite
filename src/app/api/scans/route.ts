@@ -4,8 +4,8 @@ import {
   createSupabaseScanStorage,
   createSupabaseScanStore,
 } from "@/lib/scans/supabase-store";
+import { createOcrSpaceOcr } from "@/lib/scans/ocr-space";
 import { ScanUploadError, uploadScan } from "@/lib/scans/upload";
-import { createVisionOcr } from "@/lib/scans/vision";
 import { createClient } from "@/lib/supabase/server";
 
 export async function POST(request: NextRequest) {
@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Fire and forget: processScan never throws, it records FAILED instead.
-    void processScan(store, createVisionOcr(storage), scan.id);
+    void processScan(store, createOcrSpaceOcr(storage), scan.id);
 
     return NextResponse.json(
       { scanId: scan.id, status: scan.status },
