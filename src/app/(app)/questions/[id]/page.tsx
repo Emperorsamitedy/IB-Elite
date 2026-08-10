@@ -19,6 +19,7 @@ export default async function QuestionPage({
     .select(
       `id, title, prompt, answer, solution, difficulty, marks, question_type,
        calculator, year, paper, source, license,
+       reviewer_name, reviewer_credential, reviewed_at,
        topics(name, slug, subjects(name, slug))`,
     )
     .eq("id", id)

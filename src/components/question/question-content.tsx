@@ -22,6 +22,9 @@ export type QuestionForViewer = {
   paper: string | null;
   source: string | null;
   license: string | null;
+  reviewer_name?: string | null;
+  reviewer_credential?: string | null;
+  reviewed_at?: string | null;
   topics?: { name: string } | null;
 };
 
@@ -128,6 +131,15 @@ export function QuestionContent({
                 </div>
               )}
             </div>
+          )}
+
+          {question.reviewer_name && (
+            <p className="mt-6 font-mono text-2xs text-muted-foreground">
+              Reviewed by {question.reviewer_name}
+              {question.reviewer_credential
+                ? `, ${question.reviewer_credential}`
+                : ""}
+            </p>
           )}
 
           {(question.source || question.license) && (
