@@ -1,7 +1,9 @@
 import type { ScanStore } from "./store";
 import type { Scan, ScanStorage } from "./types";
 
-export const MAX_UPLOAD_BYTES = 10 * 1024 * 1024;
+/** Matches the OCR.space free tier, so an oversized file fails at upload
+ * rather than silently later, in the background OCR pass. */
+export const MAX_UPLOAD_BYTES = 1024 * 1024;
 export const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
 export type UploadInput = {
@@ -30,7 +32,7 @@ export async function uploadScan(
     throw new ScanUploadError("Image is empty");
   }
   if (input.body.byteLength > MAX_UPLOAD_BYTES) {
-    throw new ScanUploadError("Image is larger than 10MB");
+    throw new ScanUploadError("Image is larger than 1MB");
   }
 
   const imageUrl = await storage.upload({

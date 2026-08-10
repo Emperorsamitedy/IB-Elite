@@ -37,8 +37,13 @@ export function generateRubricFeedback(
     const words = keywords(text);
     const hits = words.filter((word) => haystack.includes(word));
     const present = words.length > 0 && hits.length === words.length;
+    // Substring, not equality: OCR.space engine 3 returns one "word" per line
+    // for handwriting, so the anchor box is the line containing the keyword.
     const anchor = present
-      ? (ocr.words.find((w) => hits.includes(w.text.toLowerCase())) ?? null)
+      ? (ocr.words.find((w) => {
+          const haystackWord = w.text.toLowerCase();
+          return hits.some((hit) => haystackWord.includes(hit));
+        }) ?? null)
       : null;
     return { text, present, box: anchor?.box ?? null };
   });

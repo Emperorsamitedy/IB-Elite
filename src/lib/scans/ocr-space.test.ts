@@ -48,8 +48,8 @@ describe("createOcrSpaceOcr", () => {
   });
 
   it("posts to /parse/image with the handwriting engine and parses word boxes", async () => {
-    const fetchMock = vi.fn(async (_url: string, _init: RequestInit) =>
-      jsonResponse(OK_PAYLOAD),
+    const fetchMock = vi.fn<(url: string, init: RequestInit) => Promise<Response>>(
+      async () => jsonResponse(OK_PAYLOAD),
     );
     vi.stubGlobal("fetch", fetchMock);
 
