@@ -36,6 +36,7 @@ export default async function SessionPage({
        questions(
          id, title, prompt, answer, solution, difficulty, marks,
          question_type, calculator, year, paper, source, license,
+         reviewer_name, reviewer_credential, reviewed_at,
          topics(name)
        )`,
     )

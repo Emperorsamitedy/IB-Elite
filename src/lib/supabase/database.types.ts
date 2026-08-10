@@ -697,6 +697,9 @@ export type Database = {
           prompt: string
           question_number: string | null
           question_type: string
+          reviewed_at: string | null
+          reviewer_credential: string | null
+          reviewer_name: string | null
           solution: string | null
           source: string | null
           status: Database["public"]["Enums"]["content_status"]
@@ -723,6 +726,9 @@ export type Database = {
           prompt: string
           question_number?: string | null
           question_type?: string
+          reviewed_at?: string | null
+          reviewer_credential?: string | null
+          reviewer_name?: string | null
           solution?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["content_status"]
@@ -749,6 +755,9 @@ export type Database = {
           prompt?: string
           question_number?: string | null
           question_type?: string
+          reviewed_at?: string | null
+          reviewer_credential?: string | null
+          reviewer_name?: string | null
           solution?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["content_status"]
