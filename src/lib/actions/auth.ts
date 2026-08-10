@@ -8,6 +8,9 @@ import { env } from "@/lib/env";
 
 export type AuthState = { error?: string; message?: string } | null;
 
+const NOT_CONFIGURED =
+  "This deployment has no Supabase connection yet, so accounts cannot be created or signed in to. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY and redeploy.";
+
 async function siteOrigin() {
   const h = await headers();
   return h.get("origin") ?? env.siteUrl;
@@ -21,6 +24,7 @@ export async function signIn(
   const password = String(formData.get("password") ?? "");
   const next = String(formData.get("next") ?? "/app");
 
+  if (!env.configured) return { error: NOT_CONFIGURED };
   if (!email || !password) {
     return { error: "Enter your email and password." };
   }
@@ -42,6 +46,7 @@ export async function signUp(
   const password = String(formData.get("password") ?? "");
   const fullName = String(formData.get("full_name") ?? "").trim();
 
+  if (!env.configured) return { error: NOT_CONFIGURED };
   if (!email || !password) {
     return { error: "Enter your email and password." };
   }
@@ -79,6 +84,7 @@ export async function requestPasswordReset(
   formData: FormData,
 ): Promise<AuthState> {
   const email = String(formData.get("email") ?? "").trim();
+  if (!env.configured) return { error: NOT_CONFIGURED };
   if (!email) return { error: "Enter your email address." };
 
   const supabase = await createClient();
@@ -94,6 +100,7 @@ export async function requestPasswordReset(
 }
 
 export async function signInWithGoogle() {
+  if (!env.configured) return;
   const supabase = await createClient();
   const origin = await siteOrigin();
   const { data, error } = await supabase.auth.signInWithOAuth({
@@ -105,6 +112,7 @@ export async function signInWithGoogle() {
 }
 
 export async function signOut() {
+  if (!env.configured) redirect("/login");
   const supabase = await createClient();
   await supabase.auth.signOut();
   revalidatePath("/", "layout");
