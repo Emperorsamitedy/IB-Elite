@@ -2,9 +2,18 @@
 
 import * as React from "react";
 import { toast } from "sonner";
-import { ArrowRight, Timer, Bookmark, AlertCircle } from "lucide-react";
+import {
+  ArrowRight,
+  Timer,
+  Bookmark,
+  AlertCircle,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  X,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Spinner } from "@/components/ui/misc";
 import { DIFFICULTIES, QUESTION_COUNT_PRESETS } from "@/lib/constants";
@@ -12,12 +21,20 @@ import { cn } from "@/lib/utils";
 import { createSession } from "@/lib/actions/session";
 import type { Difficulty } from "@/lib/types";
 
-type Topic = { id: string; name: string; slug: string };
+type Topic = {
+  id: string;
+  name: string;
+  slug: string;
+  theme_id?: string | null;
+  sort_order?: number | null;
+};
+type Theme = { id: string; name: string; sort_order?: number | null };
 type SubjectOption = {
   id: string;
   slug: string;
   name: string;
   topics: Topic[];
+  themes?: Theme[];
 };
 
 export function PracticeCreator({ subjects }: { subjects: SubjectOption[] }) {
@@ -30,12 +47,43 @@ export function PracticeCreator({ subjects }: { subjects: SubjectOption[] }) {
   const [timed, setTimed] = React.useState(false);
   const [onlyBookmarked, setOnlyBookmarked] = React.useState(false);
   const [includeMistakes, setIncludeMistakes] = React.useState(false);
+  const [query, setQuery] = React.useState("");
+  const [showDetails, setShowDetails] = React.useState(false);
+  const [collapsed, setCollapsed] = React.useState<string[]>([]);
   const [pending, start] = React.useTransition();
 
   const subject = subjects.find((s) => s.id === subjectId);
 
+  const groups = React.useMemo(() => {
+    if (!subject) return [];
+    const needle = query.trim().toLowerCase();
+    const match = (t: Topic) =>
+      !needle || t.name.toLowerCase().includes(needle);
+    const topics = [...subject.topics].sort(
+      (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+    );
+    const themes = [...(subject.themes ?? [])].sort(
+      (a, b) => (a.sort_order ?? 0) - (b.sort_order ?? 0),
+    );
+    const out = themes.map((theme, i) => ({
+      id: theme.id,
+      name: `${i + 1}. ${theme.name}`,
+      topics: topics.filter((t) => t.theme_id === theme.id && match(t)),
+    }));
+    const loose = topics.filter((t) => !t.theme_id && match(t));
+    if (loose.length) {
+      out.push({ id: "__other", name: "Other topics", topics: loose });
+    }
+    return out.filter((g) => g.topics.length > 0);
+  }, [subject, query]);
+
   const toggleTopic = (id: string) =>
     setTopicIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
+    );
+
+  const toggleGroup = (id: string) =>
+    setCollapsed((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
     );
 
@@ -54,9 +102,8 @@ export function PracticeCreator({ subjects }: { subjects: SubjectOption[] }) {
     });
 
   return (
-    <div className="flex flex-col gap-5">
-      {/* Subject */}
-      <Field label="Subject">
+    <div className="flex flex-col gap-4">
+      <Panel label="Subject">
         <div className="flex flex-wrap gap-2">
           {subjects.map((s) => (
             <Chip
@@ -65,75 +112,164 @@ export function PracticeCreator({ subjects }: { subjects: SubjectOption[] }) {
               onClick={() => {
                 setSubjectId(s.id);
                 setTopicIds([]);
+                setQuery("");
               }}
             >
               {s.name}
             </Chip>
           ))}
         </div>
-      </Field>
+      </Panel>
 
-      {/* Topics */}
       {subject && subject.topics.length > 0 && (
-        <Field
+        <Panel
           label="Topics"
           hint={
             topicIds.length === 0 ? "All topics" : `${topicIds.length} selected`
           }
         >
-          <div className="flex flex-wrap gap-2">
-            {subject.topics.map((t) => (
-              <Chip
-                key={t.id}
-                active={topicIds.includes(t.id)}
-                onClick={() => toggleTopic(t.id)}
+          <div className="relative">
+            <Input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search topics…"
+              className="h-9 pr-9"
+            />
+            {query && (
+              <button
+                type="button"
+                aria-label="Clear search"
+                onClick={() => setQuery("")}
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1 text-muted-foreground hover:text-foreground"
               >
-                {t.name}
-              </Chip>
-            ))}
+                <X className="h-4 w-4" />
+              </button>
+            )}
           </div>
-        </Field>
+
+          <div className="mt-3 max-h-80 overflow-y-auto rounded-md border border-border bg-background/40 p-2">
+            <p className="px-1 pb-1 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+              {subject.name}
+            </p>
+            {groups.length === 0 && (
+              <p className="px-1 py-3 text-sm text-muted-foreground">
+                No topics match “{query}”.
+              </p>
+            )}
+            {groups.map((g) => {
+              const open = !collapsed.includes(g.id);
+              return (
+                <div key={g.id} className="py-0.5">
+                  <button
+                    type="button"
+                    onClick={() => toggleGroup(g.id)}
+                    aria-expanded={open}
+                    className="flex w-full items-center gap-1.5 rounded px-1 py-1 text-left text-sm font-medium hover:bg-muted/50"
+                  >
+                    {open ? (
+                      <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                    ) : (
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                    )}
+                    {g.name}
+                  </button>
+                  {open && (
+                    <div className="ml-5 flex flex-col">
+                      {g.topics.map((t) => {
+                        const active = topicIds.includes(t.id);
+                        return (
+                          <button
+                            key={t.id}
+                            type="button"
+                            onClick={() => toggleTopic(t.id)}
+                            aria-pressed={active}
+                            className={cn(
+                              "flex items-center justify-between rounded px-2 py-1 text-left text-sm transition-colors",
+                              active
+                                ? "bg-accent/10 font-medium text-accent"
+                                : "text-muted-foreground hover:bg-muted/50 hover:text-foreground",
+                            )}
+                          >
+                            {t.name}
+                            {active && <Check className="h-3.5 w-3.5" />}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </Panel>
       )}
 
-      {/* Difficulty */}
-      <Field label="Difficulty">
-        <div className="flex flex-wrap gap-2">
-          <Chip active={difficulty === null} onClick={() => setDifficulty(null)}>
-            Mixed
-          </Chip>
-          {DIFFICULTIES.map((d) => (
-            <Chip
-              key={d.value}
-              active={difficulty === d.value}
-              onClick={() => setDifficulty(d.value)}
-            >
-              {d.label}
-            </Chip>
-          ))}
-        </div>
-      </Field>
+      <Panel label="Session details">
+        <label className="flex cursor-pointer items-center gap-3">
+          <div className="flex-1">
+            <p className="text-sm font-medium">
+              Difficulty and number of questions
+            </p>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              {`${
+                difficulty
+                  ? DIFFICULTIES.find((d) => d.value === difficulty)?.label
+                  : "Mixed"
+              } · ${count} questions · ${timed ? "Timed" : "Untimed"}`}
+            </p>
+          </div>
+          <Switch checked={showDetails} onCheckedChange={setShowDetails} />
+        </label>
 
-      {/* Count */}
-      <Field label="Number of questions">
-        <div className="flex flex-wrap gap-2">
-          {QUESTION_COUNT_PRESETS.map((n) => (
-            <Chip key={n} active={count === n} onClick={() => setCount(n)}>
-              {n}
-            </Chip>
-          ))}
-        </div>
-      </Field>
+        {showDetails && (
+          <div className="mt-4 flex flex-col gap-4 border-t border-border pt-4">
+            <div>
+              <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                Difficulty
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <Chip
+                  active={difficulty === null}
+                  onClick={() => setDifficulty(null)}
+                >
+                  Mixed
+                </Chip>
+                {DIFFICULTIES.map((d) => (
+                  <Chip
+                    key={d.value}
+                    active={difficulty === d.value}
+                    onClick={() => setDifficulty(d.value)}
+                  >
+                    {d.label}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+            <div>
+              <p className="mb-2 font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
+                Number of questions
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {QUESTION_COUNT_PRESETS.map((n) => (
+                  <Chip key={n} active={count === n} onClick={() => setCount(n)}>
+                    {n}
+                  </Chip>
+                ))}
+              </div>
+            </div>
+            <ToggleRow
+              icon={Timer}
+              label="Timed exam mode"
+              description="~2 minutes per question with a countdown"
+              checked={timed}
+              onChange={setTimed}
+            />
+          </div>
+        )}
+      </Panel>
 
-      {/* Options */}
-      <Card>
-        <CardContent className="divide-y divide-border p-0">
-          <ToggleRow
-            icon={Timer}
-            label="Timed exam mode"
-            description="~2 minutes per question with a countdown"
-            checked={timed}
-            onChange={setTimed}
-          />
+      <Panel label="Advanced options">
+        <div className="grid gap-3 sm:grid-cols-2">
           <ToggleRow
             icon={Bookmark}
             label="Only bookmarked"
@@ -143,6 +279,7 @@ export function PracticeCreator({ subjects }: { subjects: SubjectOption[] }) {
               setOnlyBookmarked(v);
               if (v) setIncludeMistakes(false);
             }}
+            boxed
           />
           <ToggleRow
             icon={AlertCircle}
@@ -153,19 +290,31 @@ export function PracticeCreator({ subjects }: { subjects: SubjectOption[] }) {
               setIncludeMistakes(v);
               if (v) setOnlyBookmarked(false);
             }}
+            boxed
           />
-        </CardContent>
-      </Card>
+        </div>
+      </Panel>
 
-      <Button size="lg" onClick={submit} disabled={pending}>
-        {pending ? <Spinner /> : "Start practising"}
-        {!pending && <ArrowRight className="h-4 w-4" />}
+      <Button
+        size="lg"
+        onClick={submit}
+        disabled={pending}
+        className="w-full py-6 text-base"
+      >
+        {pending ? (
+          <Spinner />
+        ) : (
+          <>
+            {`Start practice (${count} questions, ${timed ? "Timed" : "Untimed"})`}
+            <ArrowRight className="h-4 w-4" />
+          </>
+        )}
       </Button>
     </div>
   );
 }
 
-function Field({
+function Panel({
   label,
   hint,
   children,
@@ -175,8 +324,8 @@ function Field({
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <div className="mb-3 flex items-baseline gap-3 border-b border-border pb-2">
+    <section className="rounded-xl border border-border bg-surface p-4">
+      <div className="mb-3 flex items-baseline gap-3">
         <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
           {label}
         </span>
@@ -188,7 +337,7 @@ function Field({
         )}
       </div>
       {children}
-    </div>
+    </section>
   );
 }
 
@@ -207,13 +356,14 @@ function Chip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "rounded-md border px-3.5 py-2 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
+        "inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background",
         active
-          ? "border-ink bg-ink text-ink-foreground dark:border-foreground dark:bg-foreground dark:text-background"
+          ? "border-accent bg-accent/10 text-accent"
           : "border-border text-muted-foreground hover:border-foreground hover:text-foreground",
       )}
     >
       {children}
+      {active && <Check className="h-3.5 w-3.5" />}
     </button>
   );
 }
@@ -224,18 +374,25 @@ function ToggleRow({
   description,
   checked,
   onChange,
+  boxed,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   label: string;
   description: string;
   checked: boolean;
   onChange: (v: boolean) => void;
+  boxed?: boolean;
 }) {
   return (
-    <label className="flex cursor-pointer items-center gap-3 p-4">
-      <Icon className="h-4 w-4 text-muted-foreground" />
+    <label
+      className={cn(
+        "flex cursor-pointer items-center gap-3",
+        boxed && "rounded-lg border border-border p-3",
+      )}
+    >
+      <Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
       <div className="flex-1">
-        <p className="font-mono text-xs uppercase tracking-[0.1em]">{label}</p>
+        <p className="text-sm font-medium">{label}</p>
         <p className="mt-0.5 text-xs text-muted-foreground">{description}</p>
       </div>
       <Switch checked={checked} onCheckedChange={onChange} />

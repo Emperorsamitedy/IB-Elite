@@ -11,7 +11,9 @@ export default async function PracticePage() {
   const [{ data: subjects }, { data: userSubjects }] = await Promise.all([
     supabase
       .from("subjects")
-      .select("id, slug, name, topics(id, name, slug)")
+      .select(
+        "id, slug, name, themes(id, name, sort_order), topics(id, name, slug, theme_id, sort_order)",
+      )
       .order("sort_order"),
     supabase
       .from("user_subjects")
