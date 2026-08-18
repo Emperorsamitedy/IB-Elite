@@ -118,7 +118,7 @@ export type TopicFormValues = z.infer<typeof topicSchema>;
 export type SubtopicFormValues = z.infer<typeof subtopicSchema>;
 
 function revalidateSyllabus() {
-  revalidatePath("/admin/syllabus");
+  revalidatePath("/admin/curriculum");
   revalidatePath("/subjects", "layout");
 }
 
