@@ -16,7 +16,7 @@ import { Logo } from "@/components/logo";
 const SECTIONS = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/questions", label: "Questions", icon: FileQuestion },
-  { href: "/admin/syllabus", label: "Curriculum", icon: FolderTree },
+  { href: "/admin/curriculum", label: "Curriculum", icon: FolderTree },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
