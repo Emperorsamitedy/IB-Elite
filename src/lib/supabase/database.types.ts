@@ -685,6 +685,7 @@ export type Database = {
         Row: {
           answer: string | null
           calculator: boolean | null
+          command_term: string | null
           created_at: string
           difficulty: Database["public"]["Enums"]["difficulty"]
           estimated_minutes: number | null
@@ -714,6 +715,7 @@ export type Database = {
         Insert: {
           answer?: string | null
           calculator?: boolean | null
+          command_term?: string | null
           created_at?: string
           difficulty?: Database["public"]["Enums"]["difficulty"]
           estimated_minutes?: number | null
@@ -743,6 +745,7 @@ export type Database = {
         Update: {
           answer?: string | null
           calculator?: boolean | null
+          command_term?: string | null
           created_at?: string
           difficulty?: Database["public"]["Enums"]["difficulty"]
           estimated_minutes?: number | null
