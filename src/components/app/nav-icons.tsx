@@ -6,6 +6,8 @@ import {
   Bookmark,
   MessageSquareText,
   CalendarRange,
+  ScanLine,
+  Swords,
   Settings,
   Shield,
   type LucideIcon,
@@ -19,6 +21,8 @@ export const ICONS: Record<string, LucideIcon> = {
   Bookmark,
   MessageSquareText,
   CalendarRange,
+  ScanLine,
+  Swords,
   Settings,
   Shield,
 };
