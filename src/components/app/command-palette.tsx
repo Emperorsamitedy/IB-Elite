@@ -14,6 +14,8 @@ import {
   AlertCircle,
   MessageSquareText,
   CalendarRange,
+  ScanLine,
+  Swords,
 } from "lucide-react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 
@@ -40,6 +42,8 @@ const QUICK_LINKS = [
   { href: "/mistakes", label: "Mistake notebook", icon: AlertCircle },
   { href: "/bookmarks", label: "Bookmarks", icon: Bookmark },
   { href: "/tutor", label: "AI tutor", icon: MessageSquareText },
+  { href: "/scans/upload", label: "Scan handwritten work", icon: ScanLine },
+  { href: "/ladder", label: "World Ladder", icon: Swords },
   { href: "/plan", label: "Study plan", icon: CalendarRange },
 ];
 
