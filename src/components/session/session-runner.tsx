@@ -9,6 +9,7 @@ import {
   BookmarkCheck,
   MessageSquareText,
   ScanLine,
+  PencilRuler,
   ArrowRight,
   RotateCcw,
 } from "lucide-react";
@@ -22,6 +23,7 @@ import {
 } from "@/components/question/question-content";
 import { TutorPanel } from "@/components/question/tutor-panel";
 import { ScanMarker } from "@/components/scans/scan-marker";
+import { ShowYourWork } from "@/components/whiteboard/show-your-work";
 import { ExamNavPanel } from "@/components/session/exam-nav-panel";
 import { CONFIDENCE_OPTIONS } from "@/lib/constants";
 import { cn, gradeFromAccuracy } from "@/lib/utils";
@@ -64,6 +66,7 @@ export function SessionRunner({
   );
   const [tutorOpen, setTutorOpen] = React.useState(false);
   const [scanOpen, setScanOpen] = React.useState(false);
+  const [workOpen, setWorkOpen] = React.useState(false);
   const [finished, setFinished] = React.useState(completed);
   const [saving, setSaving] = React.useState(false);
   const [remaining, setRemaining] = React.useState(timeLimitSeconds ?? 0);
@@ -255,6 +258,12 @@ export function SessionRunner({
                   >
                     <ScanLine className="h-4 w-4" /> Scan work
                   </button>
+                  <button
+                    onClick={() => setWorkOpen(true)}
+                    className="flex items-center gap-1.5 rounded-md px-2 py-1.5 font-mono text-[11px] uppercase tracking-[0.08em] transition-colors hover:bg-ink-foreground/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <PencilRuler className="h-4 w-4" /> Show your work
+                  </button>
                 </div>
               </div>
               <div className="px-4 pt-4 sm:px-6">
@@ -321,6 +330,12 @@ export function SessionRunner({
               { id: current.id, label: current.title ?? current.prompt },
             ]}
           />
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={workOpen} onOpenChange={setWorkOpen}>
+        <SheetContent className="w-full max-w-3xl p-0">
+          {workOpen && <ShowYourWork questionId={current.id} />}
         </SheetContent>
       </Sheet>
     </div>
