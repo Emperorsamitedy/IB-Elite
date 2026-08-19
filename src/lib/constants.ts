@@ -10,6 +10,7 @@ export const NAV_ITEMS = [
   { href: "/bookmarks", label: "Bookmarks", icon: "Bookmark" },
   { href: "/tutor", label: "AI Tutor", icon: "MessageSquareText" },
   { href: "/solve", label: "Solve & Grade", icon: "Camera" },
+  { href: "/whiteboard", label: "Whiteboard", icon: "PencilRuler" },
   { href: "/scans/upload", label: "Scan work", icon: "ScanLine" },
   { href: "/ladder", label: "World Ladder", icon: "Swords" },
   { href: "/plan", label: "Study Plan", icon: "CalendarRange" },

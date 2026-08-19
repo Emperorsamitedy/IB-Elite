@@ -9,6 +9,7 @@ import {
   NotebookPen,
   AlertCircle,
   Check,
+  PencilRuler,
 } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -17,6 +18,7 @@ import {
   type QuestionForViewer,
 } from "@/components/question/question-content";
 import { TutorPanel } from "@/components/question/tutor-panel";
+import { ShowYourWork } from "@/components/whiteboard/show-your-work";
 import { CONFIDENCE_OPTIONS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 import {
@@ -43,6 +45,7 @@ export function QuestionViewer({
   const [showNotes, setShowNotes] = React.useState(Boolean(initialNote));
   const [note, setNote] = React.useState(initialNote);
   const [tutorOpen, setTutorOpen] = React.useState(false);
+  const [workOpen, setWorkOpen] = React.useState(false);
   const [rated, setRated] = React.useState<ConfidenceRating | null>(null);
   const start = React.useRef(Date.now());
 
@@ -113,6 +116,15 @@ export function QuestionViewer({
                 Tutor
               </span>
             </button>
+            <button
+              onClick={() => setWorkOpen(true)}
+              className={cn(toolClass, "gap-1.5")}
+            >
+              <PencilRuler className="h-4 w-4" />
+              <span className="font-mono text-[11px] uppercase tracking-[0.08em]">
+                Show your work
+              </span>
+            </button>
           </div>
         </div>
 
@@ -167,6 +179,12 @@ export function QuestionViewer({
       <Sheet open={tutorOpen} onOpenChange={setTutorOpen}>
         <SheetContent className="w-full max-w-md p-0">
           <TutorPanel questionId={question.id} />
+        </SheetContent>
+      </Sheet>
+
+      <Sheet open={workOpen} onOpenChange={setWorkOpen}>
+        <SheetContent className="w-full max-w-3xl p-0">
+          {workOpen && <ShowYourWork questionId={question.id} />}
         </SheetContent>
       </Sheet>
     </div>
