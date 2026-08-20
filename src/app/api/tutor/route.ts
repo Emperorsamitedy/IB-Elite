@@ -160,6 +160,7 @@ export async function POST(request: NextRequest) {
       conversationId,
       reply,
       hintLevel,
+      source: "model",
       remaining: entitlement.isPro
         ? null
         : Math.max(0, FREE_LIMITS.aiMessagesPerDay - usedToday - 1),
@@ -217,7 +218,7 @@ export async function POST(request: NextRequest) {
     hint_level: hintLevel,
   });
 
-  const reply = await generateTutorReply({
+  const { reply, source } = await generateTutorReply({
     question: {
       prompt: q.prompt,
       answer: q.answer,
@@ -242,6 +243,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({
     conversationId,
     reply,
+    source,
     hintLevel: nextHint,
     remaining: entitlement.isPro
       ? null
