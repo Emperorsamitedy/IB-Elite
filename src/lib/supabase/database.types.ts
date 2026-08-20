@@ -151,6 +151,120 @@ export type Database = {
           },
         ]
       }
+      curriculum_solve_sessions: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          id: string
+          image_url: string
+          ocr_text: string | null
+          retrieved_context: Json
+          source_citations: Json
+          steps: Json
+          student_id: string
+          subject_id: string | null
+          subtopic_id: string | null
+          topic_id: string | null
+          verdict: Database["public"]["Enums"]["solve_verdict"]
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          ocr_text?: string | null
+          retrieved_context?: Json
+          source_citations?: Json
+          steps?: Json
+          student_id: string
+          subject_id?: string | null
+          subtopic_id?: string | null
+          topic_id?: string | null
+          verdict?: Database["public"]["Enums"]["solve_verdict"]
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          ocr_text?: string | null
+          retrieved_context?: Json
+          source_citations?: Json
+          steps?: Json
+          student_id?: string
+          subject_id?: string | null
+          subtopic_id?: string | null
+          topic_id?: string | null
+          verdict?: Database["public"]["Enums"]["solve_verdict"]
+        }
+        Relationships: []
+      }
+      curriculum_solve_usage: {
+        Row: {
+          count: number
+          student_id: string
+          usage_date: string
+        }
+        Insert: {
+          count?: number
+          student_id: string
+          usage_date?: string
+        }
+        Update: {
+          count?: number
+          student_id?: string
+          usage_date?: string
+        }
+        Relationships: []
+      }
+      syllabus_content: {
+        Row: {
+          command_terms: Json
+          content_text: string
+          created_at: string
+          hl_only: boolean
+          id: string
+          source_note: string | null
+          subtopic_id: string | null
+          topic_id: string
+        }
+        Insert: {
+          command_terms?: Json
+          content_text: string
+          created_at?: string
+          hl_only?: boolean
+          id?: string
+          source_note?: string | null
+          subtopic_id?: string | null
+          topic_id: string
+        }
+        Update: {
+          command_terms?: Json
+          content_text?: string
+          created_at?: string
+          hl_only?: boolean
+          id?: string
+          source_note?: string | null
+          subtopic_id?: string | null
+          topic_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "syllabus_content_topic_id_fkey"
+            columns: ["topic_id"]
+            isOneToOne: false
+            referencedRelation: "topics"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "syllabus_content_subtopic_id_fkey"
+            columns: ["subtopic_id"]
+            isOneToOne: false
+            referencedRelation: "subtopics"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deadlines: {
         Row: {
           created_at: string
@@ -1078,6 +1192,7 @@ export type Database = {
         Row: {
           description: string | null
           id: string
+          level_code: string | null
           name: string
           slug: string
           sort_order: number
@@ -1087,6 +1202,7 @@ export type Database = {
         Insert: {
           description?: string | null
           id?: string
+          level_code?: string | null
           name: string
           slug: string
           sort_order?: number
@@ -1096,6 +1212,7 @@ export type Database = {
         Update: {
           description?: string | null
           id?: string
+          level_code?: string | null
           name?: string
           slug?: string
           sort_order?: number
@@ -1337,6 +1454,12 @@ export type Database = {
       scan_status: "UPLOADED" | "PROCESSING" | "ANNOTATED" | "FAILED"
       session_mode: "practice" | "exam" | "mistakes" | "daily"
       session_status: "active" | "completed" | "abandoned"
+      solve_verdict:
+        | "CORRECT"
+        | "PARTIAL"
+        | "INCORRECT"
+        | "OUT_OF_SYLLABUS_SCOPE"
+        | "INSUFFICIENT_DATA"
     }
     CompositeTypes: {
       [_ in never]: never
