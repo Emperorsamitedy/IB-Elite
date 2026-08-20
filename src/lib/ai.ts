@@ -32,12 +32,21 @@ ${q.solution ? `Worked solution (use to guide, do not paste wholesale): ${q.solu
 Current hint level: ${hintLevel} (0 = gentle nudge, 3 = detailed walkthrough).`;
 }
 
+/**
+ * Where a tutor reply came from. `heuristic` replies are assembled from the
+ * question's own mark scheme rather than generated, and the UI says so — a
+ * student should never mistake scripted guidance for a live answer.
+ */
+export type ReplySource = "model" | "heuristic";
+
+export type TutorReply = { reply: string; source: ReplySource };
+
 export async function generateTutorReply(params: {
   question: TutorQuestion;
   history: { role: "user" | "assistant"; content: string }[];
   message: string;
   hintLevel: number;
-}): Promise<string> {
+}): Promise<TutorReply> {
   if (featureFlags.ai && serverEnv.openaiApiKey) {
     try {
       const client = new OpenAI({ apiKey: serverEnv.openaiApiKey });
@@ -59,13 +68,16 @@ export async function generateTutorReply(params: {
         ],
       });
       const text = completion.choices[0]?.message?.content?.trim();
-      if (text) return text;
+      if (text) return { reply: text, source: "model" };
     } catch {
       // fall through to heuristic tutor
     }
   }
 
-  return heuristicHint(params.question, params.hintLevel);
+  return {
+    reply: heuristicHint(params.question, params.hintLevel),
+    source: "heuristic",
+  };
 }
 
 const ASSISTANT_SYSTEM = `You are Atlas, an IB revision assistant embedded in the student's revision app. You can be opened from any screen, so always ground your reply in the screen context you are given.

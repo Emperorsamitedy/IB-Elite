@@ -3,9 +3,10 @@ import { describe, expect, it, vi, beforeEach } from "vitest";
 const QUESTION = "33333333-3333-4333-8333-333333333333";
 const CONVERSATION = "44444444-4444-4444-8444-444444444444";
 
+let tutorSource: "model" | "heuristic" = "model";
 const tutorReply = vi.fn(async (params: unknown) => {
   void params;
-  return "hint";
+  return { reply: "hint", source: tutorSource };
 });
 const assistantReply = vi.fn(
   async (params: { context: string; message: string }) => {
@@ -109,6 +110,7 @@ describe("POST /api/tutor", () => {
     inserted.length = 0;
     aiEnabled = true;
     isPro = true;
+    tutorSource = "model";
     messagesUsedToday = 0;
     questionRow = {
       id: QUESTION,
@@ -147,6 +149,23 @@ describe("POST /api/tutor", () => {
     );
     expect(body.hintLevel).toBe(1);
     expect(body.reply).toBe("hint");
+    expect(body.source).toBe("model");
+  });
+
+  // A mark-scheme walkthrough is still useful, but the student must be able to
+  // tell it apart from a generated reply.
+  it("tells the client when a reply came from the mark scheme, not the model", async () => {
+    tutorSource = "heuristic";
+    const { POST } = await import("@/app/api/tutor/route");
+    const res = await POST(
+      req({ questionId: QUESTION, message: "help", hintLevel: 0 }),
+    );
+    const body = await res.json();
+
+    expect(res.status).toBe(200);
+    expect(body.reply).toBe("hint");
+    expect(body.source).toBe("heuristic");
+    expect(body.hintLevel).toBe(1);
   });
 
   it("reuses an existing conversation rather than opening another", async () => {
