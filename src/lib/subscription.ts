@@ -1,10 +1,14 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
+import { serverEnv } from "@/lib/env";
+import { planForPriceId, type Plan } from "@/lib/plans";
 
 export type Entitlement = {
-  plan: "free" | "pro";
+  plan: Plan;
+  /** True for Max as well — Max includes everything Pro has. */
   isPro: boolean;
+  isMax: boolean;
   status: string;
   currentPeriodEnd: string | null;
   cancelAtPeriodEnd: boolean;
@@ -22,7 +26,7 @@ export const getEntitlement = cache(
     const { data } = await supabase
       .from("subscriptions")
       .select(
-        "status, current_period_end, cancel_at_period_end",
+        "status, price_id, current_period_end, cancel_at_period_end",
       )
       .eq("user_id", userId)
       .maybeSingle();
@@ -34,9 +38,18 @@ export const getEntitlement = cache(
         new Date(data.current_period_end).getTime() > Date.now() ||
         status !== "free");
 
+    const plan: Plan = active
+      ? planForPriceId(data?.price_id, {
+          proMonthly: serverEnv.stripePriceProMonthly,
+          proAnnual: serverEnv.stripePriceProAnnual,
+          maxMonthly: serverEnv.stripePriceMaxMonthly,
+        })
+      : "free";
+
     return {
-      plan: active ? "pro" : "free",
+      plan,
       isPro: active,
+      isMax: plan === "max",
       status,
       currentPeriodEnd: data?.current_period_end ?? null,
       cancelAtPeriodEnd: data?.cancel_at_period_end ?? false,

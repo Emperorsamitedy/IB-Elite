@@ -31,7 +31,9 @@ export default async function BillingPage() {
       </div>
 
       <BillingView
+        plan={entitlement.plan}
         isPro={entitlement.isPro}
+        isMax={entitlement.isMax}
         status={entitlement.status}
         currentPeriodEnd={entitlement.currentPeriodEnd}
         cancelAtPeriodEnd={entitlement.cancelAtPeriodEnd}

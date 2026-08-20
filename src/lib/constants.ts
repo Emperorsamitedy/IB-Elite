@@ -48,7 +48,34 @@ export const CONFIDENCE_OPTIONS = [
   { value: "wrong", label: "I got it wrong", tone: "danger" },
 ] as const;
 
+export const CURRENCY_SYMBOL = "$";
+
+/**
+ * Display prices. Amounts are strings because they are only ever rendered —
+ * Stripe is the source of truth for what is actually charged.
+ */
 export const PRICING = {
-  monthly: { amount: 9, label: "month", interval: "monthly" as const },
-  annual: { amount: 72, label: "year", interval: "annual" as const },
+  pro: {
+    monthly: { amount: "16.99", label: "month", interval: "monthly" as const },
+    annual: { amount: "169", label: "year", interval: "annual" as const },
+  },
+  max: {
+    monthly: { amount: "25", label: "month", interval: "monthly" as const },
+  },
 };
+
+export const PRO_FEATURES = [
+  "Unlimited practice sessions",
+  "AI tutor with progressive hints",
+  "Personalised study plans",
+  "Full mistake analytics",
+  "Unlimited exam countdowns",
+];
+
+/** What Max adds on top of Pro. None of this library exists yet. */
+export const MAX_FEATURES = [
+  "Every year's topical past papers",
+  "Full past papers by subject and session",
+  "Video solutions",
+  "Downloadable PDFs per topic",
+];
