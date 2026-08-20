@@ -5,6 +5,7 @@ import { Upload } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
+import { FileDropzone } from "@/components/ui/file-dropzone";
 import type { AnnotationResult, ScanStatus } from "@/lib/scans/types";
 
 const POLL_INTERVAL_MS = 2000;
@@ -115,23 +116,14 @@ export function ScanMarker({
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="scan-file">Photo of your work</Label>
-        <input
-          id="scan-file"
-          type="file"
-          accept="image/*"
-          onChange={(event) => setFile(event.target.files?.[0] ?? null)}
-          className="text-sm"
-        />
-        <p className="font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground">
-          JPG or PNG up to 1 MB
-        </p>
+        <FileDropzone id="scan-file" file={file} onFile={setFile} />
       </div>
 
       <Button onClick={submit} disabled={!file || !questionId || uploading}>
         <Upload className="mr-2 size-4" />
         {uploading ? "Uploading…" : "Upload and mark"}
       </Button>
-      {error && <p className="text-sm text-destructive">{error}</p>}
+      {error && <p className="text-sm text-danger">{error}</p>}
     </div>
   );
 

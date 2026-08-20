@@ -1,3 +1,4 @@
+import { DeclareAssistantContext } from "@/components/assistant/assistant-provider";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { PracticeCreator } from "@/components/practice/practice-creator";
@@ -30,6 +31,7 @@ export default async function PracticePage() {
 
   return (
     <div className="mx-auto max-w-2xl">
+      <DeclareAssistantContext page="Practice builder" />
       <div className="mb-6">
         <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
           Cover sheet

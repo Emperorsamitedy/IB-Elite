@@ -68,6 +68,66 @@ export async function generateTutorReply(params: {
   return heuristicHint(params.question, params.hintLevel);
 }
 
+const ASSISTANT_SYSTEM = `You are Atlas, an IB revision assistant embedded in the student's revision app. You can be opened from any screen, so always ground your reply in the screen context you are given.
+
+Rules:
+- Use the context block: refer to the subject, topic or question the student is actually looking at rather than asking them where they are.
+- Answer the question they asked. General study, planning and concept questions are all in scope, not just hints.
+- When a specific exam question is in view, coach rather than hand over the answer.
+- Be concise (2-5 sentences unless they ask for a walkthrough) and concrete.
+- If you genuinely don't have the information, say so plainly instead of inventing IB specifics.`;
+
+/**
+ * Thrown when the assistant cannot produce a genuine model reply. The dock
+ * never substitutes canned text for a real answer: a student must not be shown
+ * scripted copy under an "AI" label.
+ */
+export class AiUnavailableError extends Error {
+  constructor(message = "AI provider unavailable") {
+    super(message);
+    this.name = "AiUnavailableError";
+  }
+}
+
+/**
+ * Free-form assistant reply for the floating dock. Unlike `generateTutorReply`
+ * this needs no question — the grounding is the screen the student is on.
+ *
+ * Throws `AiUnavailableError` rather than falling back to a heuristic.
+ */
+export async function generateAssistantReply(params: {
+  context: string;
+  history: { role: "user" | "assistant"; content: string }[];
+  message: string;
+}): Promise<string> {
+  if (!featureFlags.ai || !serverEnv.openaiApiKey) {
+    throw new AiUnavailableError("No AI provider is configured.");
+  }
+
+  const client = new OpenAI({ apiKey: serverEnv.openaiApiKey });
+  const completion = await client.chat.completions
+    .create({
+      model: serverEnv.openaiModel,
+      temperature: 0.4,
+      max_tokens: 500,
+      messages: [
+        { role: "system", content: ASSISTANT_SYSTEM },
+        { role: "system", content: params.context },
+        ...params.history.map((m) => ({ role: m.role, content: m.content })),
+        { role: "user", content: params.message },
+      ],
+    })
+    .catch((error: unknown) => {
+      throw new AiUnavailableError(
+        error instanceof Error ? error.message : "AI request failed.",
+      );
+    });
+
+  const text = completion.choices[0]?.message?.content?.trim();
+  if (!text) throw new AiUnavailableError("Empty reply from the AI provider.");
+  return text;
+}
+
 /**
  * Deterministic fallback tutor used when no AI provider is configured. Produces
  * genuinely useful, progressively-more-detailed guidance derived from the

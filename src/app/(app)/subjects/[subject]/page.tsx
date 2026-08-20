@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { DeclareAssistantContext } from "@/components/assistant/assistant-provider";
 import { notFound } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { requireUser } from "@/lib/auth";
@@ -31,6 +32,7 @@ export default async function SubjectPage({
 
   return (
     <div className="flex flex-col gap-6">
+      <DeclareAssistantContext page="Subject" subject={subject.name} />
       <nav className="flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
         <Link href="/subjects" className="hover:text-foreground">
           Subjects

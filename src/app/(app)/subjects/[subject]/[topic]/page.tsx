@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ChevronRight, Bookmark, AlertCircle, MessageSquareText } from "lucide-react";
+import { DeclareAssistantContext } from "@/components/assistant/assistant-provider";
 import { requireUser } from "@/lib/auth";
 import { getSubject, getTopicDetail, getTopicName } from "@/lib/syllabus";
 import { StartSessionButton } from "@/components/app/start-session-button";
@@ -39,6 +40,11 @@ export default async function TopicPage({
 
   return (
     <div className="flex flex-col gap-6">
+      <DeclareAssistantContext
+        page="Topic"
+        subject={subject.name}
+        topic={topic.name}
+      />
       <nav className="flex flex-wrap items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.1em] text-muted-foreground">
         <Link href="/subjects" className="hover:text-foreground">
           Subjects
