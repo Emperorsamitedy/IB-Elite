@@ -22,6 +22,7 @@ import {
   type QuestionForViewer,
 } from "@/components/question/question-content";
 import { TutorPanel } from "@/components/question/tutor-panel";
+import { useDeclareAssistantContext } from "@/components/assistant/assistant-provider";
 import { ScanMarker } from "@/components/scans/scan-marker";
 import { ShowYourWork } from "@/components/whiteboard/show-your-work";
 import { ExamNavPanel } from "@/components/session/exam-nav-panel";
@@ -74,6 +75,13 @@ export function SessionRunner({
 
   const current = questions[index];
   const answered = outcomes.some((o) => o.questionId === current?.id);
+
+  useDeclareAssistantContext({
+    page: "Practice session",
+    topic: current?.topics?.name ?? null,
+    questionId: current?.id ?? null,
+    detail: `Question ${index + 1} of ${questions.length}`,
+  });
 
   const outcomeByIndex = React.useMemo(() => {
     const map: Record<number, ConfidenceRating> = {};

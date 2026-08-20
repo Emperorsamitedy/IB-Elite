@@ -18,6 +18,7 @@ import {
   type QuestionForViewer,
 } from "@/components/question/question-content";
 import { TutorPanel } from "@/components/question/tutor-panel";
+import { useDeclareAssistantContext } from "@/components/assistant/assistant-provider";
 import { ShowYourWork } from "@/components/whiteboard/show-your-work";
 import { CONFIDENCE_OPTIONS } from "@/lib/constants";
 import { cn } from "@/lib/utils";
@@ -48,6 +49,13 @@ export function QuestionViewer({
   const [workOpen, setWorkOpen] = React.useState(false);
   const [rated, setRated] = React.useState<ConfidenceRating | null>(null);
   const start = React.useRef(Date.now());
+
+  useDeclareAssistantContext({
+    page: "Question",
+    topic: question.topics?.name ?? null,
+    questionId: question.id,
+    detail: question.title ?? null,
+  });
 
   const onBookmark = async () => {
     setBookmarked((b) => !b);
