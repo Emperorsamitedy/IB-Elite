@@ -4,7 +4,10 @@ import { createClient } from "@/lib/supabase/server";
 import { getStripe } from "@/lib/stripe";
 import { serverEnv, env } from "@/lib/env";
 
-const schema = z.object({ interval: z.enum(["monthly", "annual"]) });
+const schema = z.object({
+  interval: z.enum(["monthly", "annual"]),
+  plan: z.enum(["pro", "max"]).default("pro"),
+});
 
 export async function POST(request: NextRequest) {
   const stripe = getStripe();
@@ -28,10 +31,15 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request." }, { status: 400 });
   }
 
+  // Max is monthly only; an annual Max request has no price to charge.
   const priceId =
-    parsed.data.interval === "annual"
-      ? serverEnv.stripePriceAnnual
-      : serverEnv.stripePriceMonthly;
+    parsed.data.plan === "max"
+      ? parsed.data.interval === "monthly"
+        ? serverEnv.stripePriceMaxMonthly
+        : ""
+      : parsed.data.interval === "annual"
+        ? serverEnv.stripePriceProAnnual
+        : serverEnv.stripePriceProMonthly;
   if (!priceId) {
     return NextResponse.json(
       { error: "No price configured for this plan." },

@@ -7,7 +7,12 @@ import { MarketingNav } from "@/components/marketing/marketing-nav";
 import { Logo } from "@/components/logo";
 import { createClient } from "@/lib/supabase/server";
 import { env } from "@/lib/env";
-import { APP_NAME, PRICING } from "@/lib/constants";
+import {
+  APP_NAME,
+  CURRENCY_SYMBOL,
+  MAX_FEATURES,
+  PRICING,
+} from "@/lib/constants";
 
 const FEATURES = [
   {
@@ -237,10 +242,10 @@ export default async function LandingPage() {
               eyebrow="Pricing"
               title="Start free. Go Pro when you're serious."
             />
-            <div className="mx-auto mt-12 grid max-w-3xl gap-4 md:grid-cols-2">
+            <div className="mx-auto mt-12 grid max-w-5xl gap-4 md:grid-cols-3">
               <PricingCard
                 name="Free"
-                price="£0"
+                price={`${CURRENCY_SYMBOL}0`}
                 cadence="forever"
                 features={[
                   "Browse all subjects & topics",
@@ -254,7 +259,7 @@ export default async function LandingPage() {
               <PricingCard
                 highlighted
                 name="Pro"
-                price={`£${PRICING.monthly.amount}`}
+                price={`${CURRENCY_SYMBOL}${PRICING.pro.monthly.amount}`}
                 cadence="per month"
                 features={[
                   "Unlimited practice sessions",
@@ -265,6 +270,13 @@ export default async function LandingPage() {
                 ]}
                 cta="Start Pro"
                 href="/register?plan=pro"
+              />
+              <PricingCard
+                name="Max"
+                price={`${CURRENCY_SYMBOL}${PRICING.max.monthly.amount}`}
+                cadence="per month"
+                features={["Everything in Pro", ...MAX_FEATURES]}
+                cta="Coming soon"
               />
             </div>
           </div>
@@ -427,7 +439,8 @@ function PricingCard({
   cadence: string;
   features: string[];
   cta: string;
-  href: string;
+  /** Omitted for a tier that isn't on sale yet. */
+  href?: string;
   highlighted?: boolean;
 }) {
   return (
@@ -459,13 +472,19 @@ function PricingCard({
           </li>
         ))}
       </ul>
-      <Button
-        className="mt-7"
-        variant={highlighted ? "primary" : "outline"}
-        asChild
-      >
-        <Link href={href}>{cta}</Link>
-      </Button>
+      {href ? (
+        <Button
+          className="mt-7"
+          variant={highlighted ? "primary" : "outline"}
+          asChild
+        >
+          <Link href={href}>{cta}</Link>
+        </Button>
+      ) : (
+        <Button className="mt-7" variant="outline" disabled>
+          {cta}
+        </Button>
+      )}
     </div>
   );
 }

@@ -42,8 +42,12 @@ export const serverEnv = {
   openaiModel: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
   stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
-  stripePriceMonthly: process.env.STRIPE_PRICE_MONTHLY ?? "",
-  stripePriceAnnual: process.env.STRIPE_PRICE_ANNUAL ?? "",
+  // `STRIPE_PRICE_MONTHLY`/`_ANNUAL` are the pre-Max names, still honoured.
+  stripePriceProMonthly:
+    process.env.STRIPE_PRICE_PRO_MONTHLY ?? process.env.STRIPE_PRICE_MONTHLY ?? "",
+  stripePriceProAnnual:
+    process.env.STRIPE_PRICE_PRO_ANNUAL ?? process.env.STRIPE_PRICE_ANNUAL ?? "",
+  stripePriceMaxMonthly: process.env.STRIPE_PRICE_MAX_MONTHLY ?? "",
 };
 
 export const featureFlags = {
