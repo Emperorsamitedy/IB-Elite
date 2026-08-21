@@ -1,6 +1,6 @@
 import type { CanvasData } from "./types";
 
-/** Fabric has no undo of its own, so we keep snapshots of the whole canvas. */
+/** Undo is snapshot-based: every action records the whole board. */
 export const HISTORY_LIMIT = 20;
 
 export type History = {

@@ -13,6 +13,19 @@ const HANDWRITING_ENGINE = "3";
 /** Free-tier ceiling; larger files are rejected by OCR.space with an error. */
 export const OCR_SPACE_FREE_TIER_BYTES = 1024 * 1024;
 
+/**
+ * The key OCR.space publishes for testing. Scanning works with no setup at
+ * all by falling back to it — it is rate limited and shared, so a personal
+ * free key (25k scans/month, https://ocr.space/ocrapi/freekey) is worth the
+ * two minutes it takes to get.
+ */
+export const OCR_SPACE_DEMO_KEY = "helloworld";
+
+/** The configured key, or the shared demo key when none is set. */
+export function ocrSpaceKey(): string {
+  return process.env.OCR_SPACE_API_KEY || OCR_SPACE_DEMO_KEY;
+}
+
 type OcrSpaceWord = {
   WordText?: string;
   Left?: number;
@@ -57,18 +70,24 @@ function extensionFor(imagePath: string): string {
   return (match?.[1] ?? "jpg").toUpperCase().replace("JPEG", "JPG");
 }
 
+/**
+ * Always true: without a key of their own, scans fall back to OCR.space's
+ * public demo key rather than failing.
+ */
 export function isOcrConfigured(): boolean {
-  return Boolean(process.env.OCR_SPACE_API_KEY);
+  return true;
+}
+
+/** Whether scans are running on the shared demo key rather than a real one. */
+export function isUsingDemoKey(): boolean {
+  return !process.env.OCR_SPACE_API_KEY;
 }
 
 /** OCR.space `/parse/image`, engine 3 (handwriting) with word overlays. */
 export function createOcrSpaceOcr(storage: ScanStorage): ScanOcr {
   return {
     async read(imagePath: string): Promise<OcrResult> {
-      const key = process.env.OCR_SPACE_API_KEY;
-      if (!key) {
-        throw new Error("OCR_SPACE_API_KEY is not configured.");
-      }
+      const key = ocrSpaceKey();
 
       const bytes = await storage.download(imagePath);
       if (bytes.byteLength > OCR_SPACE_FREE_TIER_BYTES) {
@@ -97,6 +116,13 @@ export function createOcrSpaceOcr(storage: ScanStorage): ScanOcr {
         body,
       });
 
+      if (response.status === 403 || response.status === 429) {
+        throw new Error(
+          isUsingDemoKey()
+            ? "The shared free OCR key is rate limited. Add your own free key (OCR_SPACE_API_KEY) or try again shortly."
+            : "OCR.space rate limited this key. Try again shortly.",
+        );
+      }
       if (!response.ok) {
         throw new Error(`OCR.space request failed with status ${response.status}`);
       }

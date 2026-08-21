@@ -1,5 +1,6 @@
 import "server-only";
 import { serverEnv } from "@/lib/env";
+import { OCR_SPACE_FREE_TIER_BYTES, ocrSpaceKey } from "@/lib/scans/ocr-space";
 
 export type ScanResult = { text: string; provider: string };
 
@@ -12,17 +13,6 @@ export class ScanError extends Error {
     this.name = "ScanError";
   }
 }
-
-/**
- * The demo key OCR.space publishes for testing. It is heavily rate limited but
- * means scanning works out of the box with no configuration at all. Get a
- * personal free key (25k scans/month) at https://ocr.space/ocrapi/freekey and
- * put it in OCR_SPACE_API_KEY.
- */
-const OCR_SPACE_DEMO_KEY = "helloworld";
-
-/** OCR.space's free tier rejects anything over 1024 KB. */
-const OCR_SPACE_MAX_BYTES = 1024 * 1024;
 
 const TRANSCRIBE_PROMPT = `Transcribe every piece of text in this image exactly as written. It is usually a photo of an exam paper or a student's handwritten working.
 
@@ -100,7 +90,7 @@ async function scanWithGemini(image: Decoded): Promise<ScanResult | null> {
 
 /** Free OCR API — no key needed thanks to the public demo key. */
 async function scanWithOcrSpace(image: Decoded): Promise<ScanResult> {
-  if (image.bytes > OCR_SPACE_MAX_BYTES) {
+  if (image.bytes > OCR_SPACE_FREE_TIER_BYTES) {
     throw new ScanError(
       "That image is too large to scan (the free OCR tier caps at 1 MB). Try a smaller photo.",
       413,
@@ -108,7 +98,7 @@ async function scanWithOcrSpace(image: Decoded): Promise<ScanResult> {
   }
 
   const body = new URLSearchParams({
-    apikey: serverEnv.ocrSpaceApiKey || OCR_SPACE_DEMO_KEY,
+    apikey: ocrSpaceKey(),
     base64Image: `data:${image.mimeType};base64,${image.base64}`,
     language: "eng",
     isOverlayRequired: "false",
@@ -171,9 +161,4 @@ export async function recogniseText(dataUrl: string): Promise<ScanResult> {
   }
 
   return scanWithOcrSpace(image);
-}
-
-/** Which free provider a scan will try first — surfaced in the UI. */
-export function scanProviderLabel(): string {
-  return serverEnv.geminiApiKey ? "Google AI (free tier)" : "OCR.space (free)";
 }

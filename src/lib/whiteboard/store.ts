@@ -42,7 +42,7 @@ export function createWhiteboardDb(
         .from("whiteboards")
         .update({
           ...patch,
-          // jsonb column; the shape is Fabric's, opaque to the database types.
+          // jsonb column; the board's shape is opaque to the database types.
           canvas_data: patch.canvas_data as unknown as Json,
           updated_at: new Date().toISOString(),
         })

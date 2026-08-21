@@ -4,7 +4,7 @@ import * as React from "react";
 import dynamic from "next/dynamic";
 import type { CanvasData } from "@/lib/whiteboard/types";
 
-// Fabric touches `window` on import, so the canvas never renders on the server.
+// The board is canvas-only, so there is nothing to render on the server.
 const WhiteboardCanvas = dynamic(() => import("./whiteboard-canvas"), {
   ssr: false,
   loading: () => (
