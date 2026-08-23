@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Sparkles, Send, X, Minimize2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/misc";
+import { MathText } from "@/components/ui/math-text";
 import { useAssistant } from "@/components/assistant/assistant-provider";
 import { contextChips, quickActions } from "@/lib/assistant";
 import { cn } from "@/lib/utils";
@@ -177,7 +178,7 @@ export function AssistantDock() {
                 : "rounded-bl-sm border border-border bg-surface",
             )}
           >
-            <p className="whitespace-pre-wrap">{m.content}</p>
+            <MathText as="p">{m.content}</MathText>
           </div>
         ))}
         {loading && (

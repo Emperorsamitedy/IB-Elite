@@ -5,6 +5,7 @@ import Link from "next/link";
 import { MessageSquareText, Send, Lightbulb } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/misc";
+import { MathText } from "@/components/ui/math-text";
 import { cn } from "@/lib/utils";
 
 type Msg = { role: "user" | "assistant"; content: string };
@@ -110,7 +111,7 @@ export function TutorPanel({
                 : "rounded-bl-sm border border-border bg-surface",
             )}
           >
-            <p className="whitespace-pre-wrap">{m.content}</p>
+            <MathText as="p">{m.content}</MathText>
           </div>
         ))}
         {loading && (

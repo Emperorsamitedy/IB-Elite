@@ -1,5 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { hasMath, looksLikeUnmarkedMath, splitMath } from "@/lib/math";
+import {
+  hasMath,
+  looksLikeUnmarkedMath,
+  splitMath,
+  splitMathAuto,
+} from "@/lib/math";
+
+const rendered = (text: string) =>
+  splitMathAuto(text)
+    .map((segment) => (segment.type === "text" ? segment.value : `[${segment.value}]`))
+    .join("");
 
 describe("splitMath", () => {
   it("keeps text with no maths as a single plain segment", () => {
@@ -50,6 +60,43 @@ describe("splitMath", () => {
   it("reports whether any maths is present", () => {
     expect(hasMath("plain")).toBe(false);
     expect(hasMath("$x$")).toBe(true);
+  });
+});
+
+describe("splitMathAuto", () => {
+  it("renders maths that was typed as plain text", () => {
+    expect(
+      rendered("Find the term independent of x in the expansion of (2x - 1/x^2)^9."),
+    ).toBe(
+      "Find the term independent of x in the expansion of [\\left(2x - \\frac{1}{x^{2}}\\right)^{9}].",
+    );
+  });
+
+  it("leaves prose alone", () => {
+    const prose = "Explain the role of the ribosome in translation.";
+    expect(rendered(prose)).toBe(prose);
+  });
+
+  it("does not italicise chemical formulae or roman numerals as algebra", () => {
+    expect(rendered("Water (H2O) boils at 100 degrees.")).toBe(
+      "Water (H2O) boils at 100 degrees.",
+    );
+    expect(rendered("(i) State the trend.")).toBe("(i) State the trend.");
+  });
+
+  it("leaves date and mark ranges as written", () => {
+    const text = "The 1919 - 1939 period is worth 8 - 10 marks.";
+    expect(rendered(text)).toBe(text);
+  });
+
+  it("never re-parses maths the author already delimited", () => {
+    expect(rendered("Solve $x^2 = 9$ for x.")).toBe("Solve [x^2 = 9] for x.");
+  });
+
+  it("finds the expression when prose is glued to its front", () => {
+    expect(rendered("when [H+] = 1.0 x 10^-3")).toBe(
+      "when [H+] = [1.0 \\times 10^{-3}]",
+    );
   });
 });
 

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import katex from "katex";
-import { splitMath, type MathSegment } from "@/lib/math";
+import { splitMathAuto, type MathSegment } from "@/lib/math";
 import { cn } from "@/lib/utils";
 
 function render(segment: MathSegment): string | null {
@@ -31,7 +31,7 @@ export function MathText({
   className?: string;
   as?: "div" | "span" | "p";
 }) {
-  const segments = React.useMemo(() => splitMath(children ?? ""), [children]);
+  const segments = React.useMemo(() => splitMathAuto(children ?? ""), [children]);
 
   return (
     <Tag className={cn("whitespace-pre-wrap", className)}>
