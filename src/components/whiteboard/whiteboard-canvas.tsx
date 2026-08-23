@@ -11,6 +11,7 @@ import {
   MousePointer2,
   Pen,
   Redo2,
+  Save,
   ScanLine,
   Trash2,
   Undo2,
@@ -83,10 +84,16 @@ export default function WhiteboardCanvas({
   whiteboardId,
   initialCanvas,
   height = 620,
+  autosave = true,
+  onSave,
 }: {
-  whiteboardId: string;
+  whiteboardId?: string;
   initialCanvas?: CanvasData | null;
   height?: number;
+  /** Off for one-shot uses, e.g. drawing a question diagram in the admin. */
+  autosave?: boolean;
+  /** Takes over persistence; the canvas PATCH is used when it is absent. */
+  onSave?: (canvasData: CanvasData, pngDataUrl: string) => Promise<void>;
 }) {
   const { resolvedTheme } = useTheme();
 
@@ -172,6 +179,19 @@ export default function WhiteboardCanvas({
     setSaving(true);
     try {
       const payload = JSON.stringify(next);
+      if (onSave) {
+        await onSave(
+          JSON.parse(payload) as CanvasData,
+          WB.flatten(next, { print: true }).toDataURL("image/png"),
+        );
+        setSavedAt(
+          new Date().toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
+        );
+        return;
+      }
       if (payload.length > MAX_SAVE_BYTES) {
         toast.error("This board has too many scans to save.", {
           description: "Delete one, or export the sheet as a PNG instead.",
@@ -202,14 +222,14 @@ export default function WhiteboardCanvas({
     } finally {
       setSaving(false);
     }
-  }, [whiteboardId]);
+  }, [onSave, whiteboardId]);
 
   // Autosave a short beat after the pen stops moving.
   React.useEffect(() => {
-    if (!ready || board === initial) return;
+    if (!autosave || !ready || board === initial) return;
     const timer = setTimeout(() => void save(board), AUTOSAVE_MS);
     return () => clearTimeout(timer);
-  }, [board, initial, ready, save]);
+  }, [autosave, board, initial, ready, save]);
 
   /* -------------------------------------------------------------- rendering */
 
@@ -727,6 +747,12 @@ export default function WhiteboardCanvas({
           >
             <Download className="h-4 w-4" />
           </Button>
+          {onSave && (
+            <Button size="sm" onClick={() => void save(board)} disabled={saving}>
+              {saving ? <Spinner /> : <Save className="h-4 w-4" />}
+              Save diagram
+            </Button>
+          )}
         </div>
       </div>
 

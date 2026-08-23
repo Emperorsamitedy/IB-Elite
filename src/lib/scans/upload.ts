@@ -1,9 +1,10 @@
 import type { ScanStore } from "./store";
 import type { Scan, ScanStorage } from "./types";
 
-/** Matches the OCR.space free tier, so an oversized file fails at upload
- * rather than silently later, in the background OCR pass. */
-export const MAX_UPLOAD_BYTES = 1024 * 1024;
+/** The browser downscales photos before sending, so this is a backstop
+ * rather than the real limit. Gemini reads well above it; the OCR.space
+ * fallback is the 1MB-capped path and rejects oversized images itself. */
+export const MAX_UPLOAD_BYTES = 4 * 1024 * 1024;
 export const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
 export type UploadInput = {
@@ -32,7 +33,11 @@ export async function uploadScan(
     throw new ScanUploadError("Image is empty");
   }
   if (input.body.byteLength > MAX_UPLOAD_BYTES) {
-    throw new ScanUploadError("Image is larger than 1MB");
+    throw new ScanUploadError(
+      `Image is ${Math.round(input.body.byteLength / 1024)}KB; the limit is ${
+        MAX_UPLOAD_BYTES / 1024
+      }KB.`,
+    );
   }
 
   const imageUrl = await storage.upload({

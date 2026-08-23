@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { MathText } from "@/components/ui/math-text";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Check, Trash2, RotateCcw } from "lucide-react";
@@ -55,9 +56,12 @@ export function MistakeList({ items }: { items: MistakeRow[] }) {
             href={`/questions/${m.questionId}`}
             className="min-w-0 flex-1 rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
           >
-            <p className="line-clamp-1 font-serif text-[15px] hover:text-accent">
+            <MathText
+              as="p"
+              className="line-clamp-1 font-serif text-[15px] hover:text-accent"
+            >
               {m.prompt}
-            </p>
+            </MathText>
             {m.topicName && (
               <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
                 {m.topicName}

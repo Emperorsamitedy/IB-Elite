@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { MathText } from "@/components/ui/math-text";
 import Link from "next/link";
 import { Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -220,9 +221,12 @@ function QuestionRow({ question: q }: { question: TopicQuestion }) {
               .join(" · ")}
           </span>
         </span>
-        <span className="mt-1.5 block line-clamp-2 font-serif text-[15px] leading-snug">
+        <MathText
+          as="span"
+          className="mt-1.5 block line-clamp-2 font-serif text-[15px] leading-snug"
+        >
           {q.title || q.prompt}
-        </span>
+        </MathText>
       </span>
       <span className="hidden w-24 shrink-0 text-right font-mono text-[10px] uppercase tracking-[0.08em] text-muted-foreground sm:block">
         {q.attempted ? (q.correct ? "Correct" : "Missed") : `~${q.estimatedMinutes} min`}

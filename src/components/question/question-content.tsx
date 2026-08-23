@@ -5,6 +5,8 @@ import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CommandStamp, commandTermFor } from "@/components/ui/stamp";
 import { Gauge } from "@/components/ui/gauge";
+import { MathText } from "@/components/ui/math-text";
+import { QuestionFigures } from "@/components/question/question-figures";
 import { cn } from "@/lib/utils";
 import type { Difficulty } from "@/lib/types";
 
@@ -84,9 +86,11 @@ export function QuestionContent({
               {question.title}
             </h2>
           )}
-          <div className="mt-3 whitespace-pre-wrap font-serif text-lg leading-relaxed">
+          <MathText className="mt-3 font-serif text-lg leading-relaxed">
             {question.prompt}
-          </div>
+          </MathText>
+
+          <QuestionFigures questionId={question.id} />
 
           {hasSolution && (
             <div className="mt-6 border-t border-dashed border-border pt-4">
@@ -113,9 +117,12 @@ export function QuestionContent({
                       <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-success">
                         Answer
                       </p>
-                      <p className="mt-1.5 whitespace-pre-wrap font-serif text-[15px] leading-relaxed">
+                      <MathText
+                        as="p"
+                        className="mt-1.5 font-serif text-[15px] leading-relaxed"
+                      >
                         {question.answer}
-                      </p>
+                      </MathText>
                     </div>
                   )}
                   {question.solution && (
@@ -123,9 +130,12 @@ export function QuestionContent({
                       <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-muted-foreground">
                         Worked solution
                       </p>
-                      <p className="mt-1.5 whitespace-pre-wrap font-serif text-[15px] leading-relaxed">
+                      <MathText
+                        as="p"
+                        className="mt-1.5 font-serif text-[15px] leading-relaxed"
+                      >
                         {question.solution}
-                      </p>
+                      </MathText>
                     </div>
                   )}
                 </div>

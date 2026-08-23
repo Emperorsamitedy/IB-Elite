@@ -600,28 +600,43 @@ export type Database = {
       }
       question_assets: {
         Row: {
-          alt: string | null
+          alt_text: string | null
+          canvas_data: Json | null
+          caption: string | null
+          created_at: string
+          graph_spec: Json | null
           id: string
           kind: string
           question_id: string
           sort_order: number
-          storage_path: string
+          storage_path: string | null
+          updated_at: string
         }
         Insert: {
-          alt?: string | null
+          alt_text?: string | null
+          canvas_data?: Json | null
+          caption?: string | null
+          created_at?: string
+          graph_spec?: Json | null
           id?: string
           kind?: string
           question_id: string
           sort_order?: number
-          storage_path: string
+          storage_path?: string | null
+          updated_at?: string
         }
         Update: {
-          alt?: string | null
+          alt_text?: string | null
+          canvas_data?: Json | null
+          caption?: string | null
+          created_at?: string
+          graph_spec?: Json | null
           id?: string
           kind?: string
           question_id?: string
           sort_order?: number
-          storage_path?: string
+          storage_path?: string | null
+          updated_at?: string
         }
         Relationships: [
           {

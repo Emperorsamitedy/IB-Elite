@@ -43,7 +43,7 @@ export const serverEnv = {
   // Free-tier OCR for the whiteboard scanner. Both are optional: with no keys
   // at all, scanning falls back to OCR.space's public demo key.
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
-  geminiModel: process.env.GEMINI_MODEL ?? "gemini-2.0-flash",
+  geminiModel: process.env.GEMINI_MODEL ?? "gemini-2.5-flash",
   ocrSpaceApiKey: process.env.OCR_SPACE_API_KEY ?? "",
   stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
