@@ -2,11 +2,16 @@ export type LadderStatus = "WAITING" | "ACTIVE" | "COMPLETE";
 
 export type LevelCode = "SL" | "HL";
 
+/** How many questions a match runs through (fewer if the bank is smaller). */
+export const MATCH_QUESTION_COUNT = 10;
+
 export type LadderMatch = {
   id: string;
   subject_id: string;
   paper_ref: string | null;
   paper_year: number | null;
+  /** Both players race through exactly these questions, in this order. */
+  question_ids: string[];
   level_code: LevelCode;
   student_a_id: string;
   student_b_id: string | null;

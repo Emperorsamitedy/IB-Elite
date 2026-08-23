@@ -32,3 +32,16 @@ export function createPusherPublisher(): LadderPublisher {
     },
   };
 }
+
+/** Silently drops events; opponents fall back to polling. */
+const NOOP_PUBLISHER: LadderPublisher = {
+  async publish() {},
+};
+
+/**
+ * The publisher for API routes: real Pusher when configured, otherwise a
+ * no-op so the ladder still works (via polling) on installs without keys.
+ */
+export function createPublisher(): LadderPublisher {
+  return isPusherConfigured() ? createPusherPublisher() : NOOP_PUBLISHER;
+}

@@ -21,7 +21,9 @@ npm run dev                       # http://localhost:3000
 ```
 
 Stripe and AI keys are optional: billing shows as "not configured" and the tutor
-falls back to deterministic offline hints when no key is present.
+falls back to deterministic offline hints when no key is present. Supabase
+Realtime and Analytics are disabled in `supabase/config.toml` — the World
+Ladder uses Pusher for realtime, and Analytics only powers the Studio Logs tab.
 
 ### Environment variables
 
@@ -58,8 +60,8 @@ cannot serve pages until the two Supabase values are set.
 ## Whiteboard & scanning
 
 `/whiteboard` is a pressure-sensitive scratch sheet (pen, highlighter, eraser,
-ruled/grid/plain paper, undo/redo, PNG export) that saves to the browser as you
-work. Two buttons run OCR through the `/api/scan` route:
+ruled/grid/plain paper, undo/redo, PNG export) that autosaves to your account
+as you work. Two buttons run OCR through the `/api/scan` route:
 
 - **Scan a question** — photograph a past paper; the photo is placed on the
   sheet and its text is transcribed.
@@ -86,7 +88,7 @@ without touching application code:
 Subject → Theme → Topic → Subtopic (optional) → Questions
 ```
 
-Admins manage the tree at `/admin/syllabus` (add, rename, reorder, merge,
+Admins manage the tree at `/admin/curriculum` (add, rename, reorder, merge,
 archive) and questions at `/admin/questions`. Publishing a question makes it
 appear under its subject, theme, topic and subtopic automatically.
 

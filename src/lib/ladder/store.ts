@@ -32,7 +32,10 @@ export type LadderStore = {
     studentId: string;
     paperRef: string | null;
     paperYear: number | null;
+    questionIds: string[];
   }): Promise<LadderMatch>;
+  /** Random published question ids for the subject, newest bank first. */
+  pickQuestionIds(subjectId: string, count: number): Promise<string[]>;
   joinMatch(matchId: string, studentId: string): Promise<LadderMatch>;
   getMatch(matchId: string): Promise<LadderMatch | null>;
   getStudentLevel(studentId: string, subjectId: string): Promise<LevelCode>;

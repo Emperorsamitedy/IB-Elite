@@ -272,6 +272,7 @@ export type Database = {
           level_code: string
           paper_ref: string | null
           paper_year: number | null
+          question_ids: string[]
           started_at: string | null
           status: Database["public"]["Enums"]["ladder_status"]
           student_a_id: string
@@ -285,6 +286,7 @@ export type Database = {
           level_code?: string
           paper_ref?: string | null
           paper_year?: number | null
+          question_ids?: string[]
           started_at?: string | null
           status?: Database["public"]["Enums"]["ladder_status"]
           student_a_id: string
@@ -298,6 +300,7 @@ export type Database = {
           level_code?: string
           paper_ref?: string | null
           paper_year?: number | null
+          question_ids?: string[]
           started_at?: string | null
           status?: Database["public"]["Enums"]["ladder_status"]
           student_a_id?: string
@@ -1060,6 +1063,7 @@ export type Database = {
         Row: {
           cancel_at_period_end: boolean
           current_period_end: string | null
+          plan: string
           price_id: string | null
           status: string
           stripe_customer_id: string | null
@@ -1070,6 +1074,7 @@ export type Database = {
         Insert: {
           cancel_at_period_end?: boolean
           current_period_end?: string | null
+          plan?: string
           price_id?: string | null
           status?: string
           stripe_customer_id?: string | null
@@ -1080,6 +1085,7 @@ export type Database = {
         Update: {
           cancel_at_period_end?: boolean
           current_period_end?: string | null
+          plan?: string
           price_id?: string | null
           status?: string
           stripe_customer_id?: string | null

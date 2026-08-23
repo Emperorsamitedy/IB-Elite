@@ -25,6 +25,9 @@ export function createFakeLadderStore(
     async getStudentLevel(studentId) {
       return levels[studentId] ?? "SL";
     },
+    async pickQuestionIds(subjectId, count) {
+      return Array.from({ length: count }, (_, i) => `${subjectId}-q${i + 1}`);
+    },
     async findWaitingMatch(subjectId, level, studentId) {
       return (
         matches.find(
@@ -43,6 +46,7 @@ export function createFakeLadderStore(
         subject_id: input.subjectId,
         paper_ref: input.paperRef,
         paper_year: input.paperYear,
+        question_ids: input.questionIds,
         level_code: input.level,
         student_a_id: input.studentId,
         student_b_id: null,

@@ -1,7 +1,7 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { completeSide } from "@/lib/ladder/complete";
-import { createPusherPublisher } from "@/lib/ladder/pusher";
+import { createPublisher } from "@/lib/ladder/pusher";
 import { createSupabaseLadderStore } from "@/lib/ladder/supabase-store";
 import { authorizeSelf } from "../auth";
 
@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
   try {
     const result = await completeSide(
       createSupabaseLadderStore(),
-      createPusherPublisher(),
+      createPublisher(),
       {
         matchId,
         studentId,

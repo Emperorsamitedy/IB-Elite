@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/misc";
@@ -15,6 +16,7 @@ export function StartSessionButton({
   children: React.ReactNode;
 } & ButtonProps) {
   const [pending, start] = React.useTransition();
+  const router = useRouter();
 
   return (
     <Button
@@ -23,7 +25,13 @@ export function StartSessionButton({
       onClick={() =>
         start(async () => {
           const res = await createSession(input);
-          if (res?.error) toast.error(res.error);
+          if (res?.error) {
+            toast.error(res.error, {
+              action: res.limitReached
+                ? { label: "Upgrade", onClick: () => router.push("/settings/billing") }
+                : undefined,
+            });
+          }
         })
       }
     >

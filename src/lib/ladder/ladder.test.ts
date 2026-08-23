@@ -38,6 +38,26 @@ describe("ladder queue", () => {
     expect(second.status).toBe("WAITING");
   });
 
+  it("fixes the same question list on the match for both players", async () => {
+    const store = createFakeLadderStore({ [ALICE]: "HL", [BOB]: "HL" });
+
+    const first = await queueForMatch(store, { studentId: ALICE, subjectId: SUBJECT });
+    const second = await queueForMatch(store, { studentId: BOB, subjectId: SUBJECT });
+
+    expect(first.match.question_ids.length).toBeGreaterThan(0);
+    // Joining must not reshuffle: a race is only fair on identical papers.
+    expect(second.match.question_ids).toEqual(first.match.question_ids);
+  });
+
+  it("refuses to open a match when the subject has no questions", async () => {
+    const store = createFakeLadderStore({ [ALICE]: "SL" });
+    store.pickQuestionIds = async () => [];
+
+    await expect(
+      queueForMatch(store, { studentId: ALICE, subjectId: SUBJECT }),
+    ).rejects.toThrow(/no published questions/i);
+  });
+
   it("creates a WAITING row for a lone student without erroring", async () => {
     const store = createFakeLadderStore({ [ALICE]: "SL" });
 

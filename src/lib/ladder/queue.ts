@@ -1,5 +1,5 @@
 import type { LadderStore } from "./store";
-import type { LadderMatch } from "./types";
+import { MATCH_QUESTION_COUNT, type LadderMatch } from "./types";
 
 export type QueueResult = {
   matchId: string;
@@ -27,15 +27,28 @@ export async function queueForMatch(
     input.studentId,
   );
 
-  const match = waiting
-    ? await store.joinMatch(waiting.id, input.studentId)
-    : await store.createWaitingMatch({
-        subjectId: input.subjectId,
-        level,
-        studentId: input.studentId,
-        paperRef: input.paperRef ?? null,
-        paperYear: input.paperYear ?? null,
-      });
+  let match: LadderMatch;
+  if (waiting) {
+    match = await store.joinMatch(waiting.id, input.studentId);
+  } else {
+    // The question list is fixed at creation so both players race through
+    // the same paper in the same order.
+    const questionIds = await store.pickQuestionIds(
+      input.subjectId,
+      MATCH_QUESTION_COUNT,
+    );
+    if (questionIds.length === 0) {
+      throw new Error("No published questions for this subject yet.");
+    }
+    match = await store.createWaitingMatch({
+      subjectId: input.subjectId,
+      level,
+      studentId: input.studentId,
+      paperRef: input.paperRef ?? null,
+      paperYear: input.paperYear ?? null,
+      questionIds,
+    });
+  }
 
   return { matchId: match.id, status: match.status, match };
 }

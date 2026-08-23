@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { logEvent } from "@/lib/actions/analytics";
+import { getEntitlement, FREE_LIMITS } from "@/lib/subscription";
 import type { ConfidenceRating, Difficulty, SessionMode } from "@/lib/types";
 
 export type CreateSessionInput = {
@@ -32,6 +33,23 @@ function shuffle<T>(arr: T[]): T[] {
 export async function createSession(input: CreateSessionInput) {
   const user = await requireUser();
   const supabase = await createClient();
+
+  // Free tier: a rolling 24h cap on questions started. The session is trimmed
+  // to what's left rather than refused outright so a student with 3 questions
+  // remaining can still use them.
+  let maxQuestions = Math.max(1, input.count);
+  const entitlement = await getEntitlement(user.id);
+  if (!entitlement.isPro) {
+    const usedToday = await practiceQuestionsUsedToday(user.id);
+    const remaining = FREE_LIMITS.practiceQuestionsPerDay - usedToday;
+    if (remaining <= 0) {
+      return {
+        error: `You've used your ${FREE_LIMITS.practiceQuestionsPerDay} free practice questions today. Upgrade to Pro for unlimited practice.`,
+        limitReached: true,
+      };
+    }
+    maxQuestions = Math.min(maxQuestions, remaining);
+  }
 
   let query = supabase
     .from("questions")
@@ -70,7 +88,7 @@ export async function createSession(input: CreateSessionInput) {
     return { error: "No questions match those filters yet." };
 
   const chosen = shuffle(candidates)
-    .slice(0, Math.max(1, input.count))
+    .slice(0, maxQuestions)
     .map((c) => c.id);
 
   const timeLimit = input.timed
@@ -183,4 +201,16 @@ export async function completeSession(sessionId: string) {
   await logEvent("practice_session_completed", { session_id: sessionId });
   revalidatePath("/app");
   return { ok: true };
+}
+
+/** Questions this user has started in the last 24 hours, across sessions. */
+export async function practiceQuestionsUsedToday(userId: string) {
+  const supabase = await createClient();
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  const { data } = await supabase
+    .from("practice_sessions")
+    .select("total_questions")
+    .eq("user_id", userId)
+    .gte("created_at", since);
+  return (data ?? []).reduce((sum, s) => sum + (s.total_questions ?? 0), 0);
 }

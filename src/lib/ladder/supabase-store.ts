@@ -13,7 +13,7 @@ import type {
 } from "./types";
 
 const MATCH_COLUMNS =
-  "id, subject_id, paper_ref, paper_year, level_code, student_a_id, student_b_id, status, started_at, ended_at";
+  "id, subject_id, paper_ref, paper_year, question_ids, level_code, student_a_id, student_b_id, status, started_at, ended_at";
 const PROGRESS_COLUMNS =
   "id, match_id, student_id, current_question_index, correct_count, final_score, is_complete, last_updated_at";
 const LEADERBOARD_COLUMNS =
@@ -53,6 +53,23 @@ export function createSupabaseLadderStore(
       return level?.code === "HL" ? "HL" : "SL";
     },
 
+    async pickQuestionIds(subjectId, count) {
+      // The bank is small enough to sample in memory; cap the fetch anyway.
+      const { data, error } = await client
+        .from("questions")
+        .select("id")
+        .eq("subject_id", subjectId)
+        .eq("status", "published")
+        .limit(500);
+      if (error) throw new Error(error.message);
+      const ids = (data ?? []).map((q) => q.id);
+      for (let i = ids.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [ids[i], ids[j]] = [ids[j], ids[i]];
+      }
+      return ids.slice(0, count);
+    },
+
     async findWaitingMatch(subjectId, level, studentId) {
       const { data } = await client
         .from("ladder_matches")
@@ -77,6 +94,7 @@ export function createSupabaseLadderStore(
           student_a_id: input.studentId,
           paper_ref: input.paperRef,
           paper_year: input.paperYear,
+          question_ids: input.questionIds,
           status: "WAITING",
         })
         .select(MATCH_COLUMNS)

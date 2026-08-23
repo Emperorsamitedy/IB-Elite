@@ -7,6 +7,7 @@ import {
   QuestionForm,
   type AdminSubject,
 } from "@/components/admin/question-form";
+import { ReviewerCard } from "@/components/admin/reviewer-card";
 import type { QuestionFormValues } from "@/lib/actions/admin";
 
 export const metadata = { title: "Edit question" };
@@ -67,6 +68,14 @@ export default async function EditQuestionPage({
       </nav>
       <h1 className="text-2xl font-extrabold tracking-tight">Edit question</h1>
       <QuestionForm subjects={subjects} questionId={id} initial={initial} />
+      <ReviewerCard
+        questionId={id}
+        review={{
+          reviewer_name: q.reviewer_name,
+          reviewer_credential: q.reviewer_credential,
+          reviewed_at: q.reviewed_at,
+        }}
+      />
     </div>
   );
 }

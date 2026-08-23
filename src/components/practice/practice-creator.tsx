@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
   ArrowRight,
@@ -51,6 +52,7 @@ export function PracticeCreator({ subjects }: { subjects: SubjectOption[] }) {
   const [showDetails, setShowDetails] = React.useState(false);
   const [collapsed, setCollapsed] = React.useState<string[]>([]);
   const [pending, start] = React.useTransition();
+  const router = useRouter();
 
   const subject = subjects.find((s) => s.id === subjectId);
 
@@ -98,7 +100,13 @@ export function PracticeCreator({ subjects }: { subjects: SubjectOption[] }) {
         onlyBookmarked,
         includeMistakes,
       });
-      if (res?.error) toast.error(res.error);
+      if (res?.error) {
+        toast.error(res.error, {
+          action: res.limitReached
+            ? { label: "Upgrade", onClick: () => router.push("/settings/billing") }
+            : undefined,
+        });
+      }
     });
 
   return (

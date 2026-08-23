@@ -9,8 +9,6 @@ const PUBLIC_PATHS = [
   "/register",
   "/forgot-password",
   "/auth",
-  "/pricing",
-  "/features",
 ];
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password"];
