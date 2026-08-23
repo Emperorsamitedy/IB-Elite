@@ -1,4 +1,10 @@
-import type { AnnotationResult, OcrWord, Scan, ScanStatus } from "./types";
+import type {
+  AnnotationResult,
+  OcrWord,
+  QuestionContext,
+  Scan,
+  ScanStatus,
+} from "./types";
 
 /**
  * Storage seam for scan rows. `supabase-store.ts` talks to Postgres;
@@ -18,6 +24,6 @@ export type ScanStore = {
   ): Promise<Scan>;
   saveAnnotation(scanId: string, result: AnnotationResult): Promise<Scan>;
   fail(scanId: string, message: string): Promise<Scan>;
-  /** Mark-scheme text used by the matcher. */
-  getMarkScheme(questionId: string): Promise<{ answer: string | null; marks: number }>;
+  /** Mark scheme plus the question's curriculum slot, used by the marker. */
+  getQuestionContext(questionId: string): Promise<QuestionContext>;
 };

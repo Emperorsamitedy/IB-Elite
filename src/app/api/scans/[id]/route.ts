@@ -30,6 +30,7 @@ export async function GET(
       status: scan.status,
       imageUrl,
       errorMessage: scan.error_message,
+      transcript: scan.status === "ANNOTATED" ? scan.ocr_text : null,
       annotationResult: scan.status === "ANNOTATED" ? scan.annotation_result : null,
       boundingBoxes: scan.status === "ANNOTATED" ? scan.ocr_bounding_boxes : null,
     });

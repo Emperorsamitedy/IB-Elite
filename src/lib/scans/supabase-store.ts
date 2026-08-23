@@ -32,6 +32,12 @@ function asScan(row: ScanRow): Scan {
   };
 }
 
+/** PostgREST types an embedded one-to-one join as an object or an array. */
+function first<T>(value: T | T[] | null | undefined): T | null {
+  if (!value) return null;
+  return Array.isArray(value) ? (value[0] ?? null) : value;
+}
+
 export function createSupabaseScanStore(
   client: AdminClient = createAdminClient(),
 ): ScanStore {
@@ -93,15 +99,24 @@ export function createSupabaseScanStore(
       return update(scanId, { status: "FAILED", error_message: message });
     },
 
-    async getMarkScheme(questionId) {
+    async getQuestionContext(questionId) {
       const { data } = await client
         .from("questions")
-        .select("answer, solution, marks")
+        .select(
+          "prompt, answer, solution, marks, command_term, subjects(name), topics(name), subtopics(name)",
+        )
         .eq("id", questionId)
         .maybeSingle();
+
       return {
-        answer: data?.answer ?? data?.solution ?? null,
+        prompt: data?.prompt ?? "",
+        answer: data?.answer ?? null,
+        solution: data?.solution ?? null,
         marks: data?.marks ?? 0,
+        commandTerm: data?.command_term ?? null,
+        subject: first(data?.subjects)?.name ?? null,
+        topic: first(data?.topics)?.name ?? null,
+        subtopic: first(data?.subtopics)?.name ?? null,
       };
     },
   };

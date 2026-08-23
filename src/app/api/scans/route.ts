@@ -4,9 +4,14 @@ import {
   createSupabaseScanStorage,
   createSupabaseScanStore,
 } from "@/lib/scans/supabase-store";
-import { createOcrSpaceOcr } from "@/lib/scans/ocr-space";
+import { createScanOcr, isScanOcrConfigured } from "@/lib/scans/ocr";
 import { ScanUploadError, uploadScan } from "@/lib/scans/upload";
 import { createClient } from "@/lib/supabase/server";
+
+/** OCR plus marking runs inside the request: a serverless function can be
+ * frozen the moment it responds, so fire-and-forget work never finished and
+ * scans sat in UPLOADED for ever. */
+export const maxDuration = 60;
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -25,6 +30,16 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  if (!isScanOcrConfigured()) {
+    return NextResponse.json(
+      {
+        error:
+          "Handwriting recognition is not configured on the server yet, so we cannot mark a photo.",
+      },
+      { status: 503 },
+    );
+  }
+
   const store = createSupabaseScanStore();
   const storage = createSupabaseScanStorage();
 
@@ -37,11 +52,11 @@ export async function POST(request: NextRequest) {
       body: await file.arrayBuffer(),
     });
 
-    // Fire and forget: processScan never throws, it records FAILED instead.
-    void processScan(store, createOcrSpaceOcr(storage), scan.id);
+    // processScan never throws; it records FAILED with a message instead.
+    const processed = await processScan(store, createScanOcr(storage), scan.id);
 
     return NextResponse.json(
-      { scanId: scan.id, status: scan.status },
+      { scanId: scan.id, status: processed?.status ?? scan.status },
       { status: 202 },
     );
   } catch (error) {

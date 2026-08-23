@@ -1,4 +1,4 @@
-import { generateRubricFeedback } from "./rubric";
+import { gradeScan } from "./grade";
 import type { ScanStore } from "./store";
 import type { Scan, ScanOcr } from "./types";
 
@@ -21,12 +21,8 @@ export async function processScan(
     const result = await ocr.read(scan.image_url);
     await store.saveOcr(scanId, { text: result.text, words: result.words });
 
-    const markScheme = await store.getMarkScheme(scan.question_id);
-    const annotation = generateRubricFeedback(
-      result,
-      markScheme.answer,
-      markScheme.marks,
-    );
+    const context = await store.getQuestionContext(scan.question_id);
+    const annotation = await gradeScan(result, context);
 
     await store.saveAnnotation(scanId, annotation);
     return store.setStatus(scanId, "ANNOTATED");

@@ -1,5 +1,5 @@
 import type { ScanStore } from "./store";
-import type { Scan, ScanStorage } from "./types";
+import type { QuestionContext, Scan, ScanStorage } from "./types";
 
 export type FakeScanStore = ScanStore & { scans: Scan[] };
 
@@ -7,6 +7,20 @@ export type FakeScanStore = ScanStore & { scans: Scan[] };
 export function createFakeScanStore(
   markSchemes: Record<string, { answer: string | null; marks: number }> = {},
 ): FakeScanStore {
+  function context(questionId: string): QuestionContext {
+    const markScheme = markSchemes[questionId] ?? { answer: null, marks: 0 };
+    return {
+      prompt: `Question ${questionId}`,
+      answer: markScheme.answer,
+      solution: null,
+      marks: markScheme.marks,
+      commandTerm: null,
+      subject: null,
+      topic: null,
+      subtopic: null,
+    };
+  }
+
   const scans: Scan[] = [];
   let counter = 0;
 
@@ -57,8 +71,8 @@ export function createFakeScanStore(
       scan.error_message = message;
       return scan;
     },
-    async getMarkScheme(questionId) {
-      return markSchemes[questionId] ?? { answer: null, marks: 0 };
+    async getQuestionContext(questionId) {
+      return context(questionId);
     },
   };
 
