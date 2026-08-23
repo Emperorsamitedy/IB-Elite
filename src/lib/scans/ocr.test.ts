@@ -11,7 +11,7 @@ describe("createScanOcr", () => {
   it("still has a provider with no keys at all — OCR.space's demo key", async () => {
     vi.stubEnv("GEMINI_API_KEY", "");
     vi.stubEnv("OCR_SPACE_API_KEY", "");
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock: ReturnType<typeof vi.fn> = vi.fn(async () => ({
       ok: true,
       json: async () => ({ ParsedResults: [{ ParsedText: "x = 2" }] }),
     }));
@@ -29,7 +29,7 @@ describe("createScanOcr", () => {
   it("prefers Gemini when both providers are configured", async () => {
     vi.stubEnv("GEMINI_API_KEY", "gemini-key");
     vi.stubEnv("OCR_SPACE_API_KEY", "ocr-space-key");
-    const fetchMock = vi.fn(async () => ({
+    const fetchMock: ReturnType<typeof vi.fn> = vi.fn(async () => ({
       ok: true,
       json: async () => ({
         candidates: [{ content: { parts: [{ text: '{"lines":[]}' }] } }],

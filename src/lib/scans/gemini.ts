@@ -13,7 +13,7 @@ const API_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 
 /** Free-tier vision model; overridable for accounts on a paid tier. */
 function model(): string {
-  return process.env.GEMINI_MODEL ?? "gemini-2.0-flash";
+  return process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
 }
 
 /** Gemini accepts up to 20MB inline, far above our 4MB upload ceiling. */
@@ -34,13 +34,19 @@ function mimeFor(path: string): string {
 type GeminiPart = { text: string } | { inline_data: { mime_type: string; data: string } };
 
 type GeminiResponse = {
-  candidates?: Array<{ content?: { parts?: Array<{ text?: string }> } }>;
+  candidates?: Array<{
+    content?: { parts?: Array<{ text?: string }> };
+    finishReason?: string;
+  }>;
   error?: { message?: string };
   promptFeedback?: { blockReason?: string };
 };
 
+/** Free-tier capacity is shared, so 429/503 are routine and worth one retry. */
+const RETRY_STATUSES = new Set([429, 503]);
+
 /** One JSON-mode call. Throws with the API's own message so scans fail loudly. */
-async function callGemini(parts: GeminiPart[]): Promise<string> {
+async function callGemini(parts: GeminiPart[], attempt = 0): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY is not configured.");
 
@@ -54,7 +60,11 @@ async function callGemini(parts: GeminiPart[]): Promise<string> {
         generationConfig: {
           temperature: 0,
           responseMimeType: "application/json",
-          maxOutputTokens: 2048,
+          maxOutputTokens: 8192,
+          // 2.5+ models reason before answering and charge it to the output
+          // budget, which silently truncates the JSON. Marking needs the
+          // answer, not the deliberation.
+          thinkingConfig: { thinkingBudget: 0 },
         },
       }),
     },
@@ -62,6 +72,10 @@ async function callGemini(parts: GeminiPart[]): Promise<string> {
 
   const payload: GeminiResponse = await response.json().catch(() => ({}));
   if (!response.ok) {
+    if (RETRY_STATUSES.has(response.status) && attempt === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 1500));
+      return callGemini(parts, attempt + 1);
+    }
     throw new Error(
       payload.error?.message ?? `Gemini request failed with status ${response.status}`,
     );
@@ -70,11 +84,15 @@ async function callGemini(parts: GeminiPart[]): Promise<string> {
     throw new Error(`Gemini blocked the image (${payload.promptFeedback.blockReason})`);
   }
 
-  const text = payload.candidates?.[0]?.content?.parts
+  const candidate = payload.candidates?.[0];
+  const text = candidate?.content?.parts
     ?.map((part) => part.text ?? "")
     .join("")
     .trim();
   if (!text) throw new Error("Gemini returned an empty response");
+  if (candidate?.finishReason === "MAX_TOKENS") {
+    throw new Error("Gemini ran out of output tokens before finishing the JSON");
+  }
   return text;
 }
 
@@ -84,7 +102,7 @@ function parseJson<T>(raw: string): T {
   try {
     return JSON.parse(cleaned) as T;
   } catch {
-    throw new Error("Gemini returned malformed JSON");
+    throw new Error(`Gemini returned malformed JSON: ${cleaned.slice(0, 200)}`);
   }
 }
 

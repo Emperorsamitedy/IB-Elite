@@ -86,6 +86,37 @@ describe("createGeminiOcr", () => {
     expect(result.words[1].box).toEqual({ x: 100, y: 100, width: 200, height: 100 });
   });
 
+  it("retries once when the free tier is momentarily overloaded", async () => {
+    vi.stubEnv("GEMINI_API_KEY", KEY);
+    const fetchMock = vi
+      .fn()
+      .mockResolvedValueOnce({
+        ok: false,
+        status: 503,
+        json: async () => ({ error: { message: "high demand" } }),
+      })
+      .mockResolvedValueOnce({
+        ok: true,
+        json: async () => ({
+          candidates: [
+            {
+              content: {
+                parts: [{ text: '{"lines":[{"text":"x = 2","box":[0,0,10,10]}]}' }],
+              },
+            },
+          ],
+        }),
+      });
+    vi.stubGlobal("fetch", fetchMock as unknown as typeof fetch);
+
+    const result = await createGeminiOcr(storageReturning(pngBytes())).read(
+      "student/answer.png",
+    );
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(result.text).toBe("x = 2");
+  });
+
   it("surfaces the API's error message rather than a generic failure", async () => {
     vi.stubEnv("GEMINI_API_KEY", KEY);
     vi.stubGlobal(
