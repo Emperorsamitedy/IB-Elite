@@ -24,12 +24,31 @@ export type MarkPoint = {
   present: boolean;
   /** Where it was found on the scan, when it was found. */
   box: BoundingBox | null;
+  /** Examiner note on this point, when the marker is an AI one. */
+  comment?: string | null;
 };
 
 export type AnnotationResult = {
   markPoints: MarkPoint[];
   awarded: number;
   total: number;
+  /** Overall advice; only the AI marker produces it. */
+  feedback?: string | null;
+  /** Which marker produced this, so the UI can be honest about it. */
+  source?: "ai" | "keywords";
+};
+
+/** Everything the marker is allowed to mark against: the question's own
+ * curriculum slot plus its published mark scheme. */
+export type QuestionContext = {
+  prompt: string;
+  answer: string | null;
+  solution: string | null;
+  marks: number;
+  commandTerm: string | null;
+  subject: string | null;
+  topic: string | null;
+  subtopic: string | null;
 };
 
 export type Scan = {

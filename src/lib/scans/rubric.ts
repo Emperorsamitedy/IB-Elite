@@ -1,4 +1,4 @@
-import type { AnnotationResult, MarkPoint, OcrResult } from "./types";
+import type { AnnotationResult, BoundingBox, MarkPoint, OcrResult } from "./types";
 
 const STOP_WORDS = new Set([
   "the", "a", "an", "and", "or", "of", "to", "in", "is", "are", "for", "with",
@@ -21,7 +21,27 @@ export function splitMarkScheme(answer: string): string[] {
 }
 
 /**
- * Placeholder matcher until the real rubric engine exists: a mark point counts
+ * Box of the first OCR line containing any of `needles`, so an overlay has
+ * somewhere to point. Substring, not equality: handwriting OCR returns one
+ * "word" per line, so the anchor is the line holding the phrase.
+ */
+export function findAnchor(
+  ocr: OcrResult,
+  needles: string[],
+): BoundingBox | null {
+  const wanted = needles
+    .map((needle) => needle.toLowerCase().trim())
+    .filter((needle) => needle.length > 2);
+  if (wanted.length === 0) return null;
+  const hit = ocr.words.find((word) => {
+    const text = word.text.toLowerCase();
+    return wanted.some((needle) => text.includes(needle) || needle.includes(text));
+  });
+  return hit?.box ?? null;
+}
+
+/**
+ * Keyword fallback used when no AI marker is configured: a mark point counts
  * as present when every one of its keywords appears in the OCR text, and the
  * box is the first matching word's box so the overlay has somewhere to point.
  */
@@ -39,13 +59,7 @@ export function generateRubricFeedback(
     const present = words.length > 0 && hits.length === words.length;
     // Substring, not equality: OCR.space engine 3 returns one "word" per line
     // for handwriting, so the anchor box is the line containing the keyword.
-    const anchor = present
-      ? (ocr.words.find((w) => {
-          const haystackWord = w.text.toLowerCase();
-          return hits.some((hit) => haystackWord.includes(hit));
-        }) ?? null)
-      : null;
-    return { text, present, box: anchor?.box ?? null };
+    return { text, present, box: present ? findAnchor(ocr, hits) : null };
   });
 
   const awarded = markPoints.filter((point) => point.present).length;
@@ -53,5 +67,6 @@ export function generateRubricFeedback(
     markPoints,
     awarded: Math.min(awarded, totalMarks),
     total: totalMarks || markPoints.length,
+    source: "keywords",
   };
 }
