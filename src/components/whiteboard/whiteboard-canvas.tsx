@@ -47,10 +47,16 @@ export default function WhiteboardCanvas({
   whiteboardId,
   initialCanvas,
   height = 460,
+  autosave = true,
+  onSave,
 }: {
-  whiteboardId: string;
+  whiteboardId?: string;
   initialCanvas?: CanvasData | null;
   height?: number;
+  /** Off for one-shot uses, e.g. drawing a question diagram in the admin. */
+  autosave?: boolean;
+  /** Takes over persistence; the canvas PATCH is used when it is absent. */
+  onSave?: (canvasData: CanvasData, pngDataUrl: string) => Promise<void>;
 }) {
   const elementRef = React.useRef<HTMLCanvasElement | null>(null);
   const canvasRef = React.useRef<Canvas | null>(null);
@@ -77,6 +83,14 @@ export default function WhiteboardCanvas({
     if (!canvas) return;
     setSaving(true);
     try {
+      if (onSave) {
+        await onSave(
+          snapshot(),
+          canvas.toDataURL({ format: "png", multiplier: 1 }),
+        );
+        setSavedAt(new Date().toLocaleTimeString());
+        return;
+      }
       await fetch(`/api/whiteboard/${whiteboardId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -92,12 +106,13 @@ export default function WhiteboardCanvas({
     } finally {
       setSaving(false);
     }
-  }, [snapshot, whiteboardId]);
+  }, [onSave, snapshot, whiteboardId]);
 
   const scheduleSave = React.useCallback(() => {
+    if (!autosave) return;
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(() => void save(), AUTOSAVE_MS);
-  }, [save]);
+  }, [autosave, save]);
 
   const record = React.useCallback(() => {
     if (restoringRef.current) return;

@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { MathText } from "@/components/ui/math-text";
 import Link from "next/link";
 import { AnimatePresence, motion } from "framer-motion";
 import {
@@ -425,9 +426,12 @@ function SessionSummary({
                 >
                   {i + 1}
                 </span>
-                <span className="line-clamp-1 flex-1 font-serif text-[15px]">
+                <MathText
+                  as="span"
+                  className="line-clamp-1 flex-1 font-serif text-[15px]"
+                >
                   {q.prompt}
-                </span>
+                </MathText>
                 {o && (
                   <Badge
                     variant={correctAns ? "success" : "danger"}

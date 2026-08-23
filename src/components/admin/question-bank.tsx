@@ -9,7 +9,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import {
   Dialog,
@@ -19,7 +18,10 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { MathText } from "@/components/ui/math-text";
+import { MathField } from "@/components/admin/math-field";
 import { COMMAND_TERMS } from "@/lib/admin/questions";
+import { looksLikeUnmarkedMath } from "@/lib/math";
 import { cn } from "@/lib/utils";
 import type { ContentStatus, Difficulty } from "@/lib/types";
 import { BulkImportDialog } from "./bulk-import-dialog";
@@ -245,8 +247,21 @@ export function QuestionBank({
                   onClick={() => setDraft({ ...q })}
                   className="cursor-pointer border-b border-border/60 last:border-0 hover:bg-surface-2"
                 >
-                  <td className="max-w-xs truncate px-4 py-2.5">
-                    {q.title || q.prompt}
+                  <td className="max-w-xs px-4 py-2.5">
+                    <span className="flex items-center gap-2">
+                      <MathText as="span" className="line-clamp-1">
+                        {q.title || q.prompt}
+                      </MathText>
+                      {looksLikeUnmarkedMath(q.prompt) && (
+                        <Badge
+                          variant="warning"
+                          className="shrink-0"
+                          title="Maths here is plain text, not LaTeX"
+                        >
+                          Plain maths
+                        </Badge>
+                      )}
+                    </span>
                   </td>
                   <td className="hidden px-4 py-2.5 text-muted-foreground md:table-cell">
                     {subjectName(q.subject_id)}
@@ -371,31 +386,26 @@ export function QuestionBank({
                 />
               </Field>
 
-              <Field label="Prompt">
-                <Textarea
-                  rows={4}
-                  value={draft.prompt}
-                  onChange={(e) => setDraft({ ...draft, prompt: e.target.value })}
-                />
-              </Field>
+              <MathField
+                label="Prompt"
+                rows={4}
+                value={draft.prompt}
+                onChange={(v) => setDraft({ ...draft, prompt: v })}
+              />
 
-              <Field label="Answer">
-                <Textarea
-                  rows={3}
-                  value={draft.answer ?? ""}
-                  onChange={(e) => setDraft({ ...draft, answer: e.target.value })}
-                />
-              </Field>
+              <MathField
+                label="Answer"
+                rows={3}
+                value={draft.answer ?? ""}
+                onChange={(v) => setDraft({ ...draft, answer: v })}
+              />
 
-              <Field label="Solution">
-                <Textarea
-                  rows={3}
-                  value={draft.solution ?? ""}
-                  onChange={(e) =>
-                    setDraft({ ...draft, solution: e.target.value })
-                  }
-                />
-              </Field>
+              <MathField
+                label="Solution"
+                rows={3}
+                value={draft.solution ?? ""}
+                onChange={(v) => setDraft({ ...draft, solution: v })}
+              />
 
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Command term">

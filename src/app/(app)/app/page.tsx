@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MathText } from "@/components/ui/math-text";
 import {
   ArrowRight,
   Clock,
@@ -303,9 +304,12 @@ export default async function DashboardPage() {
                       href={`/questions/${q.id}`}
                       className="flex items-center gap-4 py-3 transition-colors hover:text-accent"
                     >
-                      <span className="line-clamp-1 flex-1 font-serif text-[15px]">
+                      <MathText
+                        as="span"
+                        className="line-clamp-1 flex-1 font-serif text-[15px]"
+                      >
                         {q.prompt}
-                      </span>
+                      </MathText>
                       {q.topics && (
                         <Badge variant="outline" className="shrink-0">
                           {q.topics.name}

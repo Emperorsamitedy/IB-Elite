@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MathText } from "@/components/ui/math-text";
 import { FileQuestion } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
@@ -109,9 +110,12 @@ export default async function QuestionBrowserPage({
                       [{q.marks}]
                     </span>
                     <div className="min-w-0 flex-1">
-                      <p className="line-clamp-1 font-serif text-[15px] group-hover:text-accent">
+                      <MathText
+                        as="p"
+                        className="line-clamp-1 font-serif text-[15px] group-hover:text-accent"
+                      >
                         {q.title || q.prompt}
-                      </p>
+                      </MathText>
                       <p className="mt-0.5 font-mono text-[11px] uppercase tracking-[0.06em] text-muted-foreground">
                         {topic?.subjects?.name} · {topic?.name}
                         {q.paper ? ` · ${q.paper}` : ""}

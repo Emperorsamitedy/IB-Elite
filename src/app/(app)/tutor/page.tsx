@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { MathText } from "@/components/ui/math-text";
 import { MessageSquareText, MessageSquare, AlertCircle, ArrowRight } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { getEntitlement, FREE_LIMITS } from "@/lib/subscription";
@@ -85,9 +86,12 @@ export default async function TutorPage() {
                 <Link key={m.question_id} href={`/questions/${m.question_id}`}>
                   <Card interactive>
                     <CardContent className="flex items-center gap-3 p-4">
-                      <span className="line-clamp-1 flex-1 text-sm">
+                      <MathText
+                        as="span"
+                        className="line-clamp-1 flex-1 text-sm"
+                      >
                         {q.prompt}
-                      </span>
+                      </MathText>
                       {q.topics && (
                         <Badge variant="outline">{q.topics.name}</Badge>
                       )}
@@ -117,9 +121,12 @@ export default async function TutorPage() {
                 >
                   <Card interactive>
                     <CardContent className="flex items-center gap-3 p-4">
-                      <span className="line-clamp-1 flex-1 text-sm">
+                      <MathText
+                        as="span"
+                        className="line-clamp-1 flex-1 text-sm"
+                      >
                         {q?.prompt ?? c.title}
-                      </span>
+                      </MathText>
                       <span className="shrink-0 text-xs text-muted-foreground">
                         {formatRelativeTime(c.created_at)}
                       </span>

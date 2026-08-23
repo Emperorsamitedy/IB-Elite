@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Spinner } from "@/components/ui/misc";
+import { MathField } from "@/components/admin/math-field";
+import { QuestionFigures } from "@/components/admin/question-figures";
 import {
   createQuestion,
   updateQuestion,
@@ -245,33 +246,39 @@ export function QuestionForm({
             <Label>Title (optional)</Label>
             <Input value={title} onChange={(e) => setTitle(e.target.value)} />
           </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>Prompt</Label>
-            <Textarea
-              value={prompt}
-              onChange={(e) => setPrompt(e.target.value)}
-              rows={4}
-              placeholder="The question text…"
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>Answer (optional)</Label>
-            <Textarea
-              value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
-              rows={2}
-            />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label>Worked solution (optional)</Label>
-            <Textarea
-              value={solution}
-              onChange={(e) => setSolution(e.target.value)}
-              rows={4}
-            />
-          </div>
+          <MathField
+            label="Prompt"
+            value={prompt}
+            onChange={setPrompt}
+            rows={4}
+            placeholder="The question text… e.g. Solve $4^x = 16$."
+          />
+          <MathField
+            label="Answer (optional)"
+            value={answer}
+            onChange={setAnswer}
+            rows={2}
+          />
+          <MathField
+            label="Worked solution (optional)"
+            value={solution}
+            onChange={setSolution}
+            rows={4}
+            hint="Use $$…$$ for a step on its own line."
+          />
         </CardContent>
       </Card>
+
+      {questionId ? (
+        <QuestionFigures questionId={questionId} />
+      ) : (
+        <Card>
+          <CardContent className="p-6 text-sm text-muted-foreground">
+            Save the question first, then attach diagrams, graphs or
+            screenshots to it.
+          </CardContent>
+        </Card>
+      )}
 
       <Card>
         <CardContent className="grid gap-4 p-6 sm:grid-cols-2">
