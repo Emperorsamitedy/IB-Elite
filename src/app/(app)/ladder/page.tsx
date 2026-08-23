@@ -3,11 +3,13 @@ import { Swords, Trophy } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { getLeaderboard } from "@/lib/ladder/leaderboard";
-import { createSupabaseLadderStore } from "@/lib/ladder/supabase-store";
+import { getOrCreateSeason } from "@/lib/duel/service";
+import { createSupabaseDuelStore } from "@/lib/duel/supabase-store";
+import { leagueFor } from "@/lib/duel/elo";
+import { Badge } from "@/components/ui/badge";
+import { messages } from "@/lib/i18n/en";
 import { EmptyState } from "@/components/ui/misc";
 import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
 
 export const metadata = { title: "World Ladder" };
 
@@ -23,23 +25,12 @@ export default async function LadderIndexPage() {
       .order("sort_order"),
   ]);
 
-  const top = await getLeaderboard(createSupabaseLadderStore(), { limit: 10 });
-  // The board stores ids only; names come from profiles via the admin client
-  // (public read of every profile would leak the user directory).
-  const names = new Map<string, string>();
-  if (top.length > 0) {
-    const { data: profiles } = await createAdminClient()
-      .from("profiles")
-      .select("id, full_name")
-      .in(
-        "id",
-        top.map((r) => r.student_id),
-      );
-    for (const p of profiles ?? []) {
-      if (p.full_name) names.set(p.id, p.full_name);
-    }
-  }
-
+  const season = await getOrCreateSeason(createSupabaseDuelStore(), new Date());
+  const { data: myRatings } = await createAdminClient()
+    .from("subject_ratings")
+    .select("subject_id, elo, wins, losses, draws")
+    .eq("user_id", user.id)
+    .eq("season_id", season.id);
   const mineSet = new Set((mine ?? []).map((m) => m.subject_id));
   const all = subjects ?? [];
   const listed = all.filter((s) => mineSet.has(s.id));
@@ -82,55 +73,33 @@ export default async function LadderIndexPage() {
         />
       )}
 
-      <div>
-        <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
-          <Trophy className="h-4 w-4 text-accent" /> Leaderboard
-        </h2>
-        <Card className="mt-3">
-          <CardContent className="p-0">
-            {top.length === 0 ? (
-              <p className="px-5 py-8 text-center text-sm text-muted-foreground">
-                No matches finished yet — the first winner tops this board.
-              </p>
-            ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b border-border font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                    <th className="px-4 py-2.5 text-left font-medium">#</th>
-                    <th className="px-4 py-2.5 text-left font-medium">Student</th>
-                    <th className="px-4 py-2.5 text-right font-medium">Wins</th>
-                    <th className="px-4 py-2.5 text-right font-medium">Losses</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {top.map((row, i) => (
-                    <tr
-                      key={row.id}
-                      className={cn(
-                        "border-b border-border last:border-0",
-                        row.student_id === user.id && "bg-surface-2 font-medium",
-                      )}
-                    >
-                      <td className="px-4 py-2.5 font-mono text-xs">{i + 1}</td>
-                      <td className="px-4 py-2.5">
-                        {names.get(row.student_id) ?? "Anonymous"}
-                        {row.student_id === user.id && " (you)"}
-                        {row.school ? (
-                          <span className="ml-2 text-xs text-muted-foreground">
-                            {row.school}
-                          </span>
-                        ) : null}
-                      </td>
-                      <td className="px-4 py-2.5 text-right">{row.wins}</td>
-                      <td className="px-4 py-2.5 text-right">{row.losses}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      {(myRatings ?? []).length > 0 && (
+        <div>
+          <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
+            <Trophy className="h-4 w-4 text-accent" /> {messages.duel.yourRatings}
+          </h2>
+          <Card className="mt-3">
+            <CardContent className="flex flex-wrap gap-3 p-4">
+              {(myRatings ?? []).map((r) => {
+                const subject = all.find((s) => s.id === r.subject_id);
+                return (
+                  <div
+                    key={r.subject_id}
+                    className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm"
+                  >
+                    <span className="font-medium">{subject?.name ?? "—"}</span>
+                    <Badge variant="accent">{r.elo}</Badge>
+                    <Badge variant="outline">{leagueFor(r.elo)}</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {r.wins}W · {r.losses}L · {r.draws}D
+                    </span>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

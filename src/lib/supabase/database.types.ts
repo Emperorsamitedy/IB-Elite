@@ -125,6 +125,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_flags: {
+        Row: {
+          config: Json
+          enabled: boolean
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          enabled?: boolean
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          enabled?: boolean
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookmarks: {
         Row: {
           created_at: string
@@ -189,6 +210,98 @@ export type Database = {
           },
         ]
       }
+      duel_challenges: {
+        Row: {
+          claimed_by: string | null
+          created_at: string
+          creator_id: string
+          expires_at: string
+          id: string
+          level_code: string
+          match_id: string | null
+          mode: string
+          opponent_id: string | null
+          subject_id: string
+          token: string
+        }
+        Insert: {
+          claimed_by?: string | null
+          created_at?: string
+          creator_id: string
+          expires_at?: string
+          id?: string
+          level_code?: string
+          match_id?: string | null
+          mode?: string
+          opponent_id?: string | null
+          subject_id: string
+          token: string
+        }
+        Update: {
+          claimed_by?: string | null
+          created_at?: string
+          creator_id?: string
+          expires_at?: string
+          id?: string
+          level_code?: string
+          match_id?: string | null
+          mode?: string
+          opponent_id?: string | null
+          subject_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duel_challenges_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "ladder_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duel_challenges_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      duel_queue: {
+        Row: {
+          elo: number
+          enqueued_at: string
+          level_code: string
+          mode: string
+          subject_id: string
+          user_id: string
+        }
+        Insert: {
+          elo?: number
+          enqueued_at?: string
+          level_code?: string
+          mode?: string
+          subject_id: string
+          user_id: string
+        }
+        Update: {
+          elo?: number
+          enqueued_at?: string
+          level_code?: string
+          mode?: string
+          subject_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duel_queue_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       exam_dates: {
         Row: {
           created_at: string
@@ -234,6 +347,45 @@ export type Database = {
           },
         ]
       }
+      integrity_reviews: {
+        Row: {
+          created_at: string
+          details: Json
+          id: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string
+          source_kind: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          id?: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id: string
+          source_kind: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string
+          source_kind?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ladder_leaderboard: {
         Row: {
           country: string | null
@@ -270,44 +422,60 @@ export type Database = {
           ended_at: string | null
           id: string
           level_code: string
+          mode: string
           paper_ref: string | null
           paper_year: number | null
           question_ids: string[]
+          season_id: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["ladder_status"]
           student_a_id: string
           student_b_id: string | null
           subject_id: string
+          time_limit_seconds: number
         }
         Insert: {
           created_at?: string
           ended_at?: string | null
           id?: string
           level_code?: string
+          mode?: string
           paper_ref?: string | null
           paper_year?: number | null
           question_ids?: string[]
+          season_id?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["ladder_status"]
           student_a_id: string
           student_b_id?: string | null
           subject_id: string
+          time_limit_seconds?: number
         }
         Update: {
           created_at?: string
           ended_at?: string | null
           id?: string
           level_code?: string
+          mode?: string
           paper_ref?: string | null
           paper_year?: number | null
           question_ids?: string[]
+          season_id?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["ladder_status"]
           student_a_id?: string
           student_b_id?: string | null
           subject_id?: string
+          time_limit_seconds?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "ladder_matches_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ladder_matches_subject_id_fkey"
             columns: ["subject_id"]
@@ -390,6 +558,57 @@ export type Database = {
           },
         ]
       }
+      match_answers: {
+        Row: {
+          answer: string | null
+          answered_at: string | null
+          id: string
+          is_correct: boolean | null
+          match_id: string
+          question_id: string
+          question_index: number
+          served_at: string
+          student_id: string
+        }
+        Insert: {
+          answer?: string | null
+          answered_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          match_id: string
+          question_id: string
+          question_index: number
+          served_at?: string
+          student_id: string
+        }
+        Update: {
+          answer?: string | null
+          answered_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          match_id?: string
+          question_id?: string
+          question_index?: number
+          served_at?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_answers_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "ladder_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mistakes: {
         Row: {
           created_at: string
@@ -466,6 +685,95 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_optouts: {
+        Row: {
+          category: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          category: string
+          created_at: string
+          href: string | null
+          id: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          category: string
+          created_at?: string
+          href?: string | null
+          id?: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          href?: string | null
+          id?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      performance_events: {
+        Row: {
+          created_at: string
+          id: string
+          integrity_flags: Json
+          kind: string
+          payload: Json
+          quarantined: boolean
+          subject_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          integrity_flags?: Json
+          kind: string
+          payload?: Json
+          quarantined?: boolean
+          subject_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          integrity_flags?: Json
+          kind?: string
+          payload?: Json
+          quarantined?: boolean
+          subject_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_events_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
             referencedColumns: ["id"]
           },
         ]
@@ -575,6 +883,7 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          display_name: string
           full_name: string | null
           id: string
           onboarded: boolean
@@ -584,6 +893,7 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          display_name: string
           full_name?: string | null
           id: string
           onboarded?: boolean
@@ -593,6 +903,7 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          display_name?: string
           full_name?: string | null
           id?: string
           onboarded?: boolean
@@ -702,6 +1013,8 @@ export type Database = {
       questions: {
         Row: {
           answer: string | null
+          answer_key: Json | null
+          answer_type: string
           calculator: boolean | null
           command_term: string | null
           created_at: string
@@ -732,6 +1045,8 @@ export type Database = {
         }
         Insert: {
           answer?: string | null
+          answer_key?: Json | null
+          answer_type?: string
           calculator?: boolean | null
           command_term?: string | null
           created_at?: string
@@ -762,6 +1077,8 @@ export type Database = {
         }
         Update: {
           answer?: string | null
+          answer_key?: Json | null
+          answer_type?: string
           calculator?: boolean | null
           command_term?: string | null
           created_at?: string
@@ -821,6 +1138,30 @@ export type Database = {
           },
         ]
       }
+      rating_algorithm_versions: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          name: string
+          version: number
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          name: string
+          version: number
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          version?: number
+        }
+        Relationships: []
+      }
       scans: {
         Row: {
           annotation_result: Json | null
@@ -870,6 +1211,75 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      season_placements: {
+        Row: {
+          created_at: string
+          elo: number
+          league: string
+          rank: number
+          season_id: string
+          subject_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          elo: number
+          league: string
+          rank: number
+          season_id: string
+          subject_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          elo?: number
+          league?: string
+          rank?: number
+          season_id?: string
+          subject_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_placements_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_placements_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasons: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          slug: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          slug: string
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          slug?: string
+          starts_at?: string
+        }
+        Relationships: []
       }
       study_blocks: {
         Row: {
@@ -1025,6 +1435,57 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      subject_ratings: {
+        Row: {
+          draws: number
+          elo: number
+          losses: number
+          matches_played: number
+          season_id: string
+          subject_id: string
+          updated_at: string
+          user_id: string
+          wins: number
+        }
+        Insert: {
+          draws?: number
+          elo?: number
+          losses?: number
+          matches_played?: number
+          season_id: string
+          subject_id: string
+          updated_at?: string
+          user_id: string
+          wins?: number
+        }
+        Update: {
+          draws?: number
+          elo?: number
+          losses?: number
+          matches_played?: number
+          season_id?: string
+          subject_id?: string
+          updated_at?: string
+          user_id?: string
+          wins?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_ratings_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_ratings_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subjects: {
         Row: {
@@ -1234,47 +1695,6 @@ export type Database = {
           },
         ]
       }
-      whiteboards: {
-        Row: {
-          canvas_data: Json
-          created_at: string
-          id: string
-          question_id: string | null
-          student_id: string
-          thumbnail_path: string | null
-          title: string | null
-          updated_at: string
-        }
-        Insert: {
-          canvas_data?: Json
-          created_at?: string
-          id?: string
-          question_id?: string | null
-          student_id: string
-          thumbnail_path?: string | null
-          title?: string | null
-          updated_at?: string
-        }
-        Update: {
-          canvas_data?: Json
-          created_at?: string
-          id?: string
-          question_id?: string | null
-          student_id?: string
-          thumbnail_path?: string | null
-          title?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "whiteboards_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "questions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_preferences: {
         Row: {
           daily_target: number
@@ -1337,6 +1757,47 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whiteboards: {
+        Row: {
+          canvas_data: Json
+          created_at: string
+          id: string
+          question_id: string | null
+          student_id: string
+          thumbnail_path: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          canvas_data?: Json
+          created_at?: string
+          id?: string
+          question_id?: string | null
+          student_id: string
+          thumbnail_path?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canvas_data?: Json
+          created_at?: string
+          id?: string
+          question_id?: string | null
+          student_id?: string
+          thumbnail_path?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whiteboards_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
             referencedColumns: ["id"]
           },
         ]

@@ -85,6 +85,29 @@ export function QuestionForm({
   const [status, setStatus] = React.useState<ContentStatus>(
     initial?.status ?? "draft",
   );
+  const initialKey = (initial?.answerKey ?? null) as {
+    options?: string[];
+    correct?: number;
+    value?: number;
+    tolerance?: number;
+    accept?: string[];
+  } | null;
+  const [answerType, setAnswerType] = React.useState<
+    "free" | "mcq" | "numeric" | "exact"
+  >(initial?.answerType ?? "free");
+  const [mcqOptions, setMcqOptions] = React.useState(
+    (initialKey?.options ?? []).join("\n"),
+  );
+  const [mcqCorrect, setMcqCorrect] = React.useState(initialKey?.correct ?? 0);
+  const [numValue, setNumValue] = React.useState<string>(
+    initialKey?.value !== undefined ? String(initialKey.value) : "",
+  );
+  const [numTolerance, setNumTolerance] = React.useState<string>(
+    initialKey?.tolerance !== undefined ? String(initialKey.tolerance) : "0",
+  );
+  const [exactAccept, setExactAccept] = React.useState(
+    (initialKey?.accept ?? []).join("\n"),
+  );
 
   const subject = subjects.find((s) => s.id === subjectId);
   const topic = subject?.topics.find((t) => t.id === topicId);
@@ -110,6 +133,28 @@ export function QuestionForm({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [topicId]);
+
+  function buildAnswerKey(): QuestionFormValues["answerKey"] {
+    if (answerType === "mcq") {
+      const options = mcqOptions
+        .split("\n")
+        .map((o) => o.trim())
+        .filter(Boolean);
+      return { options, correct: Math.min(mcqCorrect, options.length - 1) };
+    }
+    if (answerType === "numeric") {
+      return { value: Number(numValue), tolerance: Number(numTolerance) || 0 };
+    }
+    if (answerType === "exact") {
+      return {
+        accept: exactAccept
+          .split("\n")
+          .map((a) => a.trim())
+          .filter(Boolean),
+      };
+    }
+    return null;
+  }
 
   const submit = () => {
     if (!subjectId || !topicId || prompt.trim().length < 3) {
@@ -140,6 +185,8 @@ export function QuestionForm({
       source: source || null,
       license: license || null,
       status,
+      answerType,
+      answerKey: buildAnswerKey(),
     };
     start(async () => {
       const res = questionId
@@ -266,6 +313,84 @@ export function QuestionForm({
             rows={4}
             hint="Use $$…$$ for a step on its own line."
           />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardContent className="flex flex-col gap-4 p-6">
+          <div>
+            <h2 className="text-sm font-semibold">Duel answer key</h2>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Structured answers are auto-marked by the server, which makes the
+              question eligible for Ranked Duels. Free-text questions stay out
+              of the duel pool.
+            </p>
+          </div>
+          <div className="flex flex-col gap-1.5 sm:max-w-[16rem]">
+            <Label>Answer format</Label>
+            <Select
+              value={answerType}
+              onChange={(v) => setAnswerType(v as typeof answerType)}
+            >
+              <option value="free">Free text (not duel-eligible)</option>
+              <option value="mcq">Multiple choice</option>
+              <option value="numeric">Numeric with tolerance</option>
+              <option value="exact">Exact match</option>
+            </Select>
+          </div>
+          {answerType === "mcq" && (
+            <>
+              <div className="flex flex-col gap-1.5">
+                <Label>Options (one per line)</Label>
+                <textarea
+                  className="min-h-24 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+                  value={mcqOptions}
+                  onChange={(e) => setMcqOptions(e.target.value)}
+                />
+              </div>
+              <div className="flex flex-col gap-1.5 sm:max-w-[16rem]">
+                <Label>Correct option (1-based)</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={mcqCorrect + 1}
+                  onChange={(e) =>
+                    setMcqCorrect(Math.max(0, Number(e.target.value) - 1))
+                  }
+                />
+              </div>
+            </>
+          )}
+          {answerType === "numeric" && (
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="flex flex-col gap-1.5">
+                <Label>Value</Label>
+                <Input
+                  value={numValue}
+                  onChange={(e) => setNumValue(e.target.value)}
+                  placeholder="9.81"
+                />
+              </div>
+              <div className="flex flex-col gap-1.5">
+                <Label>Tolerance (±)</Label>
+                <Input
+                  value={numTolerance}
+                  onChange={(e) => setNumTolerance(e.target.value)}
+                  placeholder="0.01"
+                />
+              </div>
+            </div>
+          )}
+          {answerType === "exact" && (
+            <div className="flex flex-col gap-1.5">
+              <Label>Accepted answers (one per line, case-insensitive)</Label>
+              <textarea
+                className="min-h-20 rounded-lg border border-input bg-background px-3 py-2 text-sm outline-none focus:border-accent"
+                value={exactAccept}
+                onChange={(e) => setExactAccept(e.target.value)}
+              />
+            </div>
+          )}
         </CardContent>
       </Card>
 

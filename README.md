@@ -22,8 +22,8 @@ npm run dev                       # http://localhost:3000
 
 Stripe and AI keys are optional: billing shows as "not configured" and the tutor
 falls back to deterministic offline hints when no key is present. Supabase
-Realtime and Analytics are disabled in `supabase/config.toml` — the World
-Ladder uses Pusher for realtime, and Analytics only powers the Studio Logs tab.
+Realtime and Analytics are disabled in `supabase/config.toml` — Ranked Duels
+poll for live state, and Analytics only powers the Studio Logs tab.
 
 ### Environment variables
 
@@ -56,6 +56,20 @@ cannot serve pages until the two Supabase values are set.
 3. In Supabase → Authentication → URL Configuration, set the site URL to your
    Vercel domain and add `https://<domain>/auth/callback` as a redirect URL.
 4. Redeploy.
+
+## Ranked Duels
+
+`/ladder` is the competitive arena: per-subject Elo (monthly seasons, Bronze →
+Grandmaster leagues, soft rating reset), skill-based matchmaking with a
+widening search window, and server-authoritative play — the server stamps
+per-question timing and grades every answer against a structured key, so the
+client is never trusted. Losses feed the mistake notebook and the
+`performance_events` ledger; statistical outliers (impossible speed, sudden
+accuracy jumps) are flagged into `integrity_reviews` and rating changes are
+withheld pending review. Friendly matches and shareable challenge links
+(`/duel/challenge/<token>`, works logged out and tracks signup attribution)
+carry no rating. Questions enter the duel pool once an admin gives them a
+structured answer key (MCQ / numeric / exact) in the question editor.
 
 ## Whiteboard & scanning
 

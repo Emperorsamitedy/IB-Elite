@@ -1,4 +1,5 @@
 import {
+  Bell,
   Home,
   Dumbbell,
   Library,
@@ -15,6 +16,7 @@ import {
 } from "lucide-react";
 
 export const ICONS: Record<string, LucideIcon> = {
+  Bell,
   Home,
   Dumbbell,
   Library,

@@ -5,12 +5,20 @@ import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
 import type { PlanIntensity } from "@/lib/types";
 
-export async function updateProfile(input: { fullName: string }) {
+export async function updateProfile(input: {
+  fullName: string;
+  displayName?: string;
+}) {
   const user = await requireUser();
   const supabase = await createClient();
+  const displayName = input.displayName?.trim().slice(0, 40);
   await supabase
     .from("profiles")
-    .update({ full_name: input.fullName.trim() || null })
+    .update({
+      full_name: input.fullName.trim() || null,
+      // Public pseudonym — the only name other students ever see.
+      ...(displayName ? { display_name: displayName } : {}),
+    })
     .eq("id", user.id);
   revalidatePath("/settings");
   return { ok: true };

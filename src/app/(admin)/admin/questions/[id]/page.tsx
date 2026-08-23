@@ -55,6 +55,8 @@ export default async function EditQuestionPage({
     source: q.source,
     license: q.license,
     status: q.status,
+    answerType: (q.answer_type ?? "free") as QuestionFormValues["answerType"],
+    answerKey: q.answer_key as QuestionFormValues["answerKey"],
   };
 
   return (

@@ -9,6 +9,8 @@ const PUBLIC_PATHS = [
   "/register",
   "/forgot-password",
   "/auth",
+  // Challenge links are the acquisition loop: they must render logged out.
+  "/duel/challenge",
 ];
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password"];

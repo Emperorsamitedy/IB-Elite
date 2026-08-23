@@ -41,6 +41,7 @@ export default async function SettingsPage() {
       <SettingsView
         profile={{
           fullName: profile?.full_name ?? "",
+          displayName: profile?.display_name ?? "",
           email: user.email ?? "",
         }}
         preferences={{
