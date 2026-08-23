@@ -10,9 +10,9 @@ export function isScanOcrConfigured(): boolean {
 
 /**
  * Gemini first — it reads mathematics and returns LaTeX, where OCR.space
- * engine 3 mangles it — with OCR.space as the fallback. When neither key is
- * set, `read` throws a message the student can act on rather than the scan
- * hanging in PROCESSING for ever.
+ * engine 3 mangles it — with OCR.space as the fallback. OCR.space always
+ * answers, on its shared demo key when no key of our own is set, so the last
+ * branch is only reachable if that ever stops being true.
  */
 export function createScanOcr(storage: ScanStorage): ScanOcr {
   if (isGeminiConfigured()) return createGeminiOcr(storage);

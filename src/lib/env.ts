@@ -40,8 +40,11 @@ export const serverEnv = {
   supabaseServiceRoleKey: process.env.SUPABASE_SERVICE_ROLE_KEY ?? "",
   openaiApiKey: process.env.OPENAI_API_KEY ?? "",
   openaiModel: process.env.OPENAI_MODEL ?? "gpt-4o-mini",
+  // Free-tier OCR for the whiteboard scanner. Both are optional: with no keys
+  // at all, scanning falls back to OCR.space's public demo key.
   geminiApiKey: process.env.GEMINI_API_KEY ?? "",
   geminiModel: process.env.GEMINI_MODEL ?? "gemini-2.0-flash",
+  ocrSpaceApiKey: process.env.OCR_SPACE_API_KEY ?? "",
   stripeSecretKey: process.env.STRIPE_SECRET_KEY ?? "",
   stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET ?? "",
   // `STRIPE_PRICE_MONTHLY`/`_ANNUAL` are the pre-Max names, still honoured.
@@ -55,6 +58,6 @@ export const serverEnv = {
 export const featureFlags = {
   ai: Boolean(process.env.OPENAI_API_KEY),
   stripe: Boolean(process.env.STRIPE_SECRET_KEY),
-  /** Handwriting scanning needs one of the two OCR providers. */
-  scan: Boolean(process.env.GEMINI_API_KEY || process.env.OCR_SPACE_API_KEY),
+  // Scanning always works — the OCR.space demo key needs no configuration.
+  scan: true,
 };

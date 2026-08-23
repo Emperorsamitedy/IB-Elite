@@ -1,4 +1,4 @@
-/** Fabric's `canvas.toJSON()` output — opaque to us, replayed verbatim. */
+/** A serialised board — opaque to the server, replayed verbatim by the canvas. */
 export type CanvasData = Record<string, unknown>;
 
 export type Whiteboard = {

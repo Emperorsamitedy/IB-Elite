@@ -1,5 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { createOcrSpaceOcr } from "./ocr-space";
+import {
+  createOcrSpaceOcr,
+  isUsingDemoKey,
+  OCR_SPACE_DEMO_KEY,
+} from "./ocr-space";
 import type { ScanStorage } from "./types";
 
 function storageReturning(bytes: ArrayBuffer): ScanStorage {
@@ -100,10 +104,31 @@ describe("createOcrSpaceOcr", () => {
     expect(fetchMock).not.toHaveBeenCalled();
   });
 
-  it("throws when the key is missing", async () => {
+  it("falls back to the shared demo key when none is configured", async () => {
     delete process.env.OCR_SPACE_API_KEY;
+    const fetchMock = vi.fn<(url: string, init: RequestInit) => Promise<Response>>(
+      async () => jsonResponse(OK_PAYLOAD),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+
+    await createOcrSpaceOcr(storageReturning(new ArrayBuffer(8))).read("a.jpg");
+
+    const [, init] = fetchMock.mock.calls[0];
+    expect((init.headers as Record<string, string>).apikey).toBe(
+      OCR_SPACE_DEMO_KEY,
+    );
+    expect(isUsingDemoKey()).toBe(true);
+  });
+
+  it("reports a rate-limited demo key as such", async () => {
+    delete process.env.OCR_SPACE_API_KEY;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("", { status: 403 })),
+    );
+
     await expect(
       createOcrSpaceOcr(storageReturning(new ArrayBuffer(8))).read("a.jpg"),
-    ).rejects.toThrow("OCR_SPACE_API_KEY is not configured.");
+    ).rejects.toThrow(/shared free OCR key is rate limited/);
   });
 });

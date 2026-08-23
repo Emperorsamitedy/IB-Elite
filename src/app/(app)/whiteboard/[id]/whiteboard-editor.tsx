@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import type { CanvasData } from "@/lib/whiteboard/types";
 
-// Fabric touches `window` on import, so the canvas is client-only.
+// The board is canvas-only, so it is rendered on the client.
 const WhiteboardCanvas = dynamic(
   () => import("@/components/whiteboard/whiteboard-canvas"),
   {

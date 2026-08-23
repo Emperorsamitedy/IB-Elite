@@ -55,6 +55,28 @@ cannot serve pages until the two Supabase values are set.
    Vercel domain and add `https://<domain>/auth/callback` as a redirect URL.
 4. Redeploy.
 
+## Whiteboard & scanning
+
+`/whiteboard` is a pressure-sensitive scratch sheet (pen, highlighter, eraser,
+ruled/grid/plain paper, undo/redo, PNG export) that saves to the browser as you
+work. Two buttons run OCR through the `/api/scan` route:
+
+- **Scan a question** — photograph a past paper; the photo is placed on the
+  sheet and its text is transcribed.
+- **Read my working** — the sheet is flattened to dark-ink-on-white and read
+  back, so you can copy your handwritten working out as text.
+
+Scanning uses free providers only, tried in order:
+
+| Provider | Env var | Free tier |
+| --- | --- | --- |
+| Google AI Studio (best at handwriting and maths) | `GEMINI_API_KEY` | [aistudio.google.com/apikey](https://aistudio.google.com/apikey) |
+| OCR.space | `OCR_SPACE_API_KEY` | [25k scans/month](https://ocr.space/ocrapi/freekey) |
+
+With no keys at all it still works: the route falls back to OCR.space's public
+demo key, which is rate limited but needs no signup. Photos are compressed
+client-side to stay under the free tier's 1 MB cap.
+
 ## Content model
 
 Navigation is rendered entirely from the database, so the syllabus can change
