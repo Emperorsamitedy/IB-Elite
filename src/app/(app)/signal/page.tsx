@@ -11,6 +11,10 @@ import {
   CalibrationForm,
   SignalProfileControls,
 } from "@/components/signal/signal-controls";
+import {
+  ContactRequests,
+  type ContactRow,
+} from "@/components/signal/contact-requests";
 import { messages } from "@/lib/i18n/en";
 
 export const metadata = { title: messages.signal.title };
@@ -42,6 +46,18 @@ export default async function SignalPage() {
     ]);
 
   const accuracy = calibrationAccuracy(reports ?? []);
+  const { data: contactRows } = await admin
+    .from("contact_requests")
+    .select("id, message, created_at, institutions(name)")
+    .eq("student_id", user.id)
+    .eq("status", "pending");
+  const contacts: ContactRow[] = (contactRows ?? []).map((r) => ({
+    id: r.id,
+    institutionName:
+      (r.institutions as unknown as { name?: string })?.name ?? "Institution",
+    message: r.message,
+    created_at: r.created_at,
+  }));
   const subjects = (ratings ?? []).map((r) => ({
     id: r.subject_id,
     name: (r.subjects as unknown as { name?: string })?.name ?? "—",
@@ -95,6 +111,8 @@ export default async function SignalPage() {
           </CardContent>
         </Card>
       )}
+
+      <ContactRequests requests={contacts} />
 
       <SignalProfileControls
         userId={user.id}

@@ -125,6 +125,17 @@ report time and power public accuracy stats. The scout-portal data model
 (institutions, approval-gated contact requests, immutable audit log) ships
 now but stays behind `app_flags.scout_portal`.
 
+## Scout portal
+
+A separate institutional surface (`/scout`, feature-flagged off:
+`app_flags.scout_portal`). Approved institutions (created at
+`/admin/institutions`) search **opted-in public Signal profiles only**, by
+subject, rating band, trajectory and country; results are pseudonymous.
+Identity moves solely through contact requests the student approves on
+their Signal page — approval shares the name with that one institution;
+scanned work is never shared. Every search, request and response is
+recorded in the immutable `institution_audit_log`.
+
 ## Whiteboard & scanning
 
 `/whiteboard` is a pressure-sensitive scratch sheet (pen, highlighter, eraser,

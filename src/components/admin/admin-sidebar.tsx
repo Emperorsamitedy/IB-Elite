@@ -11,6 +11,7 @@ import {
   ArrowLeft,
   Globe,
   School,
+  Binoculars,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
@@ -21,6 +22,7 @@ const SECTIONS = [
   { href: "/admin/curriculum", label: "Curriculum", icon: FolderTree },
   { href: "/admin/mock", label: "World Mock", icon: Globe },
   { href: "/admin/schools", label: "Schools", icon: School },
+  { href: "/admin/institutions", label: "Institutions", icon: Binoculars },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
