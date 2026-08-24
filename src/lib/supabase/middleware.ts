@@ -11,6 +11,8 @@ const PUBLIC_PATHS = [
   "/auth",
   // Challenge links are the acquisition loop: they must render logged out.
   "/duel/challenge",
+  // Share cards are posted publicly; the route itself gates on `released`.
+  "/api/mock/card",
 ];
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password"];

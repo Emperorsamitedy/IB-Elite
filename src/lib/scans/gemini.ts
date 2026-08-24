@@ -46,7 +46,7 @@ type GeminiResponse = {
 const RETRY_STATUSES = new Set([429, 503]);
 
 /** One JSON-mode call. Throws with the API's own message so scans fail loudly. */
-async function callGemini(parts: GeminiPart[], attempt = 0): Promise<string> {
+export async function callGemini(parts: GeminiPart[], attempt = 0): Promise<string> {
   const key = process.env.GEMINI_API_KEY;
   if (!key) throw new Error("GEMINI_API_KEY is not configured.");
 
@@ -96,7 +96,7 @@ async function callGemini(parts: GeminiPart[], attempt = 0): Promise<string> {
   return text;
 }
 
-function parseJson<T>(raw: string): T {
+export function parseJson<T>(raw: string): T {
   // JSON mode is requested, but a fenced block still slips through sometimes.
   const cleaned = raw.replace(/^```(?:json)?/i, "").replace(/```$/, "").trim();
   try {

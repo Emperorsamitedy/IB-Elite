@@ -654,6 +654,220 @@ export type Database = {
           },
         ]
       }
+      mock_entries: {
+        Row: {
+          created_at: string
+          id: string
+          sitting_id: string
+          started_at: string | null
+          status: string
+          submitted_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          sitting_id: string
+          started_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          sitting_id?: string
+          started_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_entries_sitting_id_fkey"
+            columns: ["sitting_id"]
+            isOneToOne: false
+            referencedRelation: "mock_sittings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_papers: {
+        Row: {
+          body: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          language: string
+          level_code: string
+          markscheme: Json
+          status: string
+          subject_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          language?: string
+          level_code?: string
+          markscheme?: Json
+          status?: string
+          subject_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          language?: string
+          level_code?: string
+          markscheme?: Json
+          status?: string
+          subject_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_papers_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_results: {
+        Row: {
+          country_percentile: number | null
+          country_rank: number | null
+          created_at: string
+          criteria: Json
+          entry_id: string
+          global_percentile: number | null
+          grader: string
+          released: boolean
+          total_awarded: number
+          total_max: number
+          updated_at: string
+        }
+        Insert: {
+          country_percentile?: number | null
+          country_rank?: number | null
+          created_at?: string
+          criteria?: Json
+          entry_id: string
+          global_percentile?: number | null
+          grader?: string
+          released?: boolean
+          total_awarded?: number
+          total_max?: number
+          updated_at?: string
+        }
+        Update: {
+          country_percentile?: number | null
+          country_rank?: number | null
+          created_at?: string
+          criteria?: Json
+          entry_id?: string
+          global_percentile?: number | null
+          grader?: string
+          released?: boolean
+          total_awarded?: number
+          total_max?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_results_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: true
+            referencedRelation: "mock_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_scripts: {
+        Row: {
+          created_at: string
+          entry_id: string
+          id: string
+          image_path: string
+          ocr_text: string | null
+          page_index: number
+        }
+        Insert: {
+          created_at?: string
+          entry_id: string
+          id?: string
+          image_path: string
+          ocr_text?: string | null
+          page_index?: number
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string
+          id?: string
+          image_path?: string
+          ocr_text?: string | null
+          page_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_scripts_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "mock_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_sittings: {
+        Row: {
+          band: string
+          closes_at: string
+          created_at: string
+          id: string
+          opens_at: string
+          paper_id: string
+          results_at: string
+          status: string
+        }
+        Insert: {
+          band: string
+          closes_at: string
+          created_at?: string
+          id?: string
+          opens_at: string
+          paper_id: string
+          results_at: string
+          status?: string
+        }
+        Update: {
+          band?: string
+          closes_at?: string
+          created_at?: string
+          id?: string
+          opens_at?: string
+          paper_id?: string
+          results_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_sittings_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "mock_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           body: string
@@ -882,6 +1096,7 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          country: string | null
           created_at: string
           display_name: string
           full_name: string | null
@@ -892,6 +1107,7 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
           display_name: string
           full_name?: string | null
@@ -902,6 +1118,7 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
           display_name?: string
           full_name?: string | null
@@ -1807,6 +2024,24 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      claim_mock_entries: {
+        Args: { batch: number }
+        Returns: {
+          created_at: string
+          id: string
+          sitting_id: string
+          started_at: string | null
+          status: string
+          submitted_at: string | null
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "mock_entries"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {

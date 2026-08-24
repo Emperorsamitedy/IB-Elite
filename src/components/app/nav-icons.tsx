@@ -1,5 +1,6 @@
 import {
   Bell,
+  Globe,
   Home,
   Dumbbell,
   Library,
@@ -17,6 +18,7 @@ import {
 
 export const ICONS: Record<string, LucideIcon> = {
   Bell,
+  Globe,
   Home,
   Dumbbell,
   Library,

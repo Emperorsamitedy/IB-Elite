@@ -71,6 +71,23 @@ withheld pending review. Friendly matches and shareable challenge links
 carry no rating. Questions enter the duel pool once an admin gives them a
 structured answer key (MCQ / numeric / exact) in the question editor.
 
+## World Mock
+
+A monthly, globally synchronized mock sitting (feature-flagged:
+`app_flags.world_mock`). Admins author an exam-standard paper with a
+per-criterion markscheme at `/admin/mock`, calibrate the AI marker on sample
+scripts, and schedule three timezone-band sittings. The paper body is only
+served at the bell; each student's clock is server-stamped from their own
+start; scripts are handwritten, photographed and submitted before
+`min(own duration, window close) + 60s`. A cron heartbeat
+(`POST /api/mock/cron`, `x-cron-secret`) OCRs and grades scripts per
+criterion overnight, quarantines integrity outliers, then on Results Day
+computes global and country percentiles across all bands (late and
+quarantined scripts get marks but no rank). Free tier: mark + percentiles +
+shareable card (`/api/mock/card/<entryId>`). Pro: criterion breakdown,
+top-decile comparison and a practice plan targeting the weakest criteria.
+Operating guide: `docs/world-mock-runbook.md`.
+
 ## Whiteboard & scanning
 
 `/whiteboard` is a pressure-sensitive scratch sheet (pen, highlighter, eraser,

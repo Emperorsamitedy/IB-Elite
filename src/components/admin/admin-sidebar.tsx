@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  LayoutDashboard,
+import {  LayoutDashboard,
   FileQuestion,
   FolderTree,
   Users,
   Settings,
   ArrowLeft,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Logo } from "@/components/logo";
@@ -17,6 +17,7 @@ const SECTIONS = [
   { href: "/admin", label: "Overview", icon: LayoutDashboard, exact: true },
   { href: "/admin/questions", label: "Questions", icon: FileQuestion },
   { href: "/admin/curriculum", label: "Curriculum", icon: FolderTree },
+  { href: "/admin/mock", label: "World Mock", icon: Globe },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];

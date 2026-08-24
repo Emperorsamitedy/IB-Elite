@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Settings, Shield } from "lucide-react";
+import { Globe, Settings, Shield } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { NAV_ITEMS } from "@/lib/constants";
 import { ICONS } from "@/components/app/nav-icons";
@@ -23,7 +23,13 @@ function itemClass(active: boolean) {
   );
 }
 
-export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
+export function AppSidebar({
+  isAdmin,
+  mockEnabled,
+}: {
+  isAdmin: boolean;
+  mockEnabled?: boolean;
+}) {
   const pathname = usePathname();
 
   return (
@@ -35,6 +41,19 @@ export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
       </div>
 
       <nav className="flex-1 py-3">
+        {mockEnabled && (
+          <Link href="/mock" className={itemClass(isActive(pathname, "/mock"))}>
+            <Globe
+              className={cn(
+                "h-[1.15rem] w-[1.15rem] shrink-0",
+                isActive(pathname, "/mock")
+                  ? "text-accent"
+                  : "text-muted-foreground",
+              )}
+            />
+            World Mock
+          </Link>
+        )}
         {NAV_ITEMS.map((item) => {
           const Icon = ICONS[item.icon];
           const active = isActive(pathname, item.href);
