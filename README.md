@@ -88,6 +88,24 @@ shareable card (`/api/mock/card/<entryId>`). Pro: criterion breakdown,
 top-decile comparison and a practice plan targeting the weakest criteria.
 Operating guide: `docs/world-mock-runbook.md`.
 
+## School Wars
+
+A persistent school-vs-school ladder (feature-flagged:
+`app_flags.school_wars`). Students opt into a school from a searchable
+registry (`/schools`), request unlisted schools for admin verification
+(`/admin/schools`), or join their country's regional team so nobody is
+locked out. School scores are recomputed each heartbeat
+(`POST /api/school/cron`) from the performance ledger:
+participation-weighted averages with a per-member cap and a breadth boost,
+so an engaged 60-student school beats a passive 2,000-student one and the
+winning strategy is always activating more classmates. The heartbeat also
+pairs similarly ranked schools (same country preferred) into 7-day Rivalry
+Weeks with a live scoreboard, lead-change notifications, a
+participation-gap recruitment prompt with attributed invite links, and
+preset-only inter-school banners (no free text ever crosses school lines).
+Seasons align with duel seasons; a Top-100 snapshot is written when each
+season ends.
+
 ## Whiteboard & scanning
 
 `/whiteboard` is a pressure-sensitive scratch sheet (pen, highlighter, eraser,

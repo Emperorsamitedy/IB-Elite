@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Globe, Settings, Shield } from "lucide-react";
+import { Globe, School, Settings, Shield } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { NAV_ITEMS } from "@/lib/constants";
 import { ICONS } from "@/components/app/nav-icons";
@@ -26,9 +26,11 @@ function itemClass(active: boolean) {
 export function AppSidebar({
   isAdmin,
   mockEnabled,
+  schoolsEnabled,
 }: {
   isAdmin: boolean;
   mockEnabled?: boolean;
+  schoolsEnabled?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -52,6 +54,22 @@ export function AppSidebar({
               )}
             />
             World Mock
+          </Link>
+        )}
+        {schoolsEnabled && (
+          <Link
+            href="/schools"
+            className={itemClass(isActive(pathname, "/schools"))}
+          >
+            <School
+              className={cn(
+                "h-[1.15rem] w-[1.15rem] shrink-0",
+                isActive(pathname, "/schools")
+                  ? "text-accent"
+                  : "text-muted-foreground",
+              )}
+            />
+            School Wars
           </Link>
         )}
         {NAV_ITEMS.map((item) => {

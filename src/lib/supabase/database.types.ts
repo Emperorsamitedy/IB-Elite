@@ -1379,6 +1379,112 @@ export type Database = {
         }
         Relationships: []
       }
+      rivalries: {
+        Row: {
+          a_score: number
+          b_score: number
+          created_at: string
+          ends_at: string
+          id: string
+          last_leader: string | null
+          school_a: string
+          school_b: string
+          season_id: string
+          starts_at: string
+          status: string
+        }
+        Insert: {
+          a_score?: number
+          b_score?: number
+          created_at?: string
+          ends_at: string
+          id?: string
+          last_leader?: string | null
+          school_a: string
+          school_b: string
+          season_id: string
+          starts_at: string
+          status?: string
+        }
+        Update: {
+          a_score?: number
+          b_score?: number
+          created_at?: string
+          ends_at?: string
+          id?: string
+          last_leader?: string | null
+          school_a?: string
+          school_b?: string
+          season_id?: string
+          starts_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rivalries_school_a_fkey"
+            columns: ["school_a"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rivalries_school_b_fkey"
+            columns: ["school_b"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rivalries_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rivalry_banners: {
+        Row: {
+          created_at: string
+          id: string
+          preset_key: string
+          rivalry_id: string
+          school_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          preset_key: string
+          rivalry_id: string
+          school_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          preset_key?: string
+          rivalry_id?: string
+          school_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rivalry_banners_rivalry_id_fkey"
+            columns: ["rivalry_id"]
+            isOneToOne: false
+            referencedRelation: "rivalries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rivalry_banners_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scans: {
         Row: {
           annotation_result: Json | null
@@ -1429,6 +1535,163 @@ export type Database = {
           },
         ]
       }
+      school_members: {
+        Row: {
+          joined_at: string
+          school_id: string
+          user_id: string
+        }
+        Insert: {
+          joined_at?: string
+          school_id: string
+          user_id: string
+        }
+        Update: {
+          joined_at?: string
+          school_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_members_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_requests: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          id: string
+          name: string
+          requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          school_id: string | null
+          status: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          school_id?: string | null
+          status?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          school_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_requests_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_scores: {
+        Row: {
+          active_members: number
+          member_count: number
+          school_id: string
+          score: number
+          season_id: string
+          updated_at: string
+        }
+        Insert: {
+          active_members?: number
+          member_count?: number
+          school_id: string
+          score?: number
+          season_id: string
+          updated_at?: string
+        }
+        Update: {
+          active_members?: number
+          member_count?: number
+          school_id?: string
+          score?: number
+          season_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_scores_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_scores_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schools: {
+        Row: {
+          city: string | null
+          color: string
+          country: string | null
+          created_at: string
+          created_by: string | null
+          crest_emoji: string
+          id: string
+          kind: string
+          name: string
+          slug: string
+          verified: boolean
+        }
+        Insert: {
+          city?: string | null
+          color?: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          crest_emoji?: string
+          id?: string
+          kind?: string
+          name: string
+          slug: string
+          verified?: boolean
+        }
+        Update: {
+          city?: string | null
+          color?: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          crest_emoji?: string
+          id?: string
+          kind?: string
+          name?: string
+          slug?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
       season_placements: {
         Row: {
           created_at: string
@@ -1470,6 +1733,48 @@ export type Database = {
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      season_school_snapshots: {
+        Row: {
+          active_members: number
+          created_at: string
+          rank: number
+          school_id: string
+          score: number
+          season_id: string
+        }
+        Insert: {
+          active_members: number
+          created_at?: string
+          rank: number
+          school_id: string
+          score: number
+          season_id: string
+        }
+        Update: {
+          active_members?: number
+          created_at?: string
+          rank?: number
+          school_id?: string
+          score?: number
+          season_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_school_snapshots_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_school_snapshots_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
             referencedColumns: ["id"]
           },
         ]

@@ -7,6 +7,7 @@ import {
 import { createScanOcr, isScanOcrConfigured } from "@/lib/scans/ocr";
 import { ScanUploadError, uploadScan } from "@/lib/scans/upload";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 /** OCR plus marking runs inside the request: a serverless function can be
  * frozen the moment it responds, so fire-and-forget work never finished and
@@ -54,6 +55,32 @@ export async function POST(request: NextRequest) {
 
     // processScan never throws; it records FAILED with a message instead.
     const processed = await processScan(store, createScanOcr(storage), scan.id);
+
+    // Graded practice feeds the performance ledger (school scores, Signal).
+    if (processed?.status === "ANNOTATED" && processed.annotation_result) {
+      const annotation = processed.annotation_result;
+      const { data: question } = await supabase
+        .from("questions")
+        .select("subject_id, topic_id")
+        .eq("id", questionId)
+        .maybeSingle();
+      await createAdminClient()
+        .from("performance_events")
+        .insert({
+          user_id: user.id,
+          subject_id: question?.subject_id ?? null,
+          kind: "practice_result",
+          payload: {
+            scanId: scan.id,
+            questionId,
+            topicId: question?.topic_id ?? null,
+            awarded: annotation.awarded,
+            total: annotation.total,
+            source: annotation.source,
+          },
+        })
+        .then(() => undefined, () => undefined); // ledger writes never block a scan
+    }
 
     return NextResponse.json(
       { scanId: scan.id, status: processed?.status ?? scan.status },

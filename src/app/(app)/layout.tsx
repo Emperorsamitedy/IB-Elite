@@ -19,11 +19,16 @@ export default async function AppLayout({
   if (!profile?.onboarded) redirect("/onboarding");
   const isAdmin = profile.role === "admin";
   const mockEnabled = await getFlag("world_mock");
+  const schoolsEnabled = await getFlag("school_wars");
 
   return (
     <AssistantProvider>
       <div className="min-h-dvh">
-        <AppSidebar isAdmin={isAdmin} mockEnabled={mockEnabled} />
+        <AppSidebar
+          isAdmin={isAdmin}
+          mockEnabled={mockEnabled}
+          schoolsEnabled={schoolsEnabled}
+        />
         <div className="md:pl-60">
           <AppTopbar
             name={profile?.full_name ?? null}
