@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Globe, School, Settings, Shield } from "lucide-react";
+import { Globe, Radio, School, Settings, Shield } from "lucide-react";
 import { Logo } from "@/components/logo";
 import { NAV_ITEMS } from "@/lib/constants";
 import { ICONS } from "@/components/app/nav-icons";
@@ -27,10 +27,12 @@ export function AppSidebar({
   isAdmin,
   mockEnabled,
   schoolsEnabled,
+  signalEnabled,
 }: {
   isAdmin: boolean;
   mockEnabled?: boolean;
   schoolsEnabled?: boolean;
+  signalEnabled?: boolean;
 }) {
   const pathname = usePathname();
 
@@ -70,6 +72,19 @@ export function AppSidebar({
               )}
             />
             School Wars
+          </Link>
+        )}
+        {signalEnabled && (
+          <Link href="/signal" className={itemClass(isActive(pathname, "/signal"))}>
+            <Radio
+              className={cn(
+                "h-[1.15rem] w-[1.15rem] shrink-0",
+                isActive(pathname, "/signal")
+                  ? "text-accent"
+                  : "text-muted-foreground",
+              )}
+            />
+            The Signal
           </Link>
         )}
         {NAV_ITEMS.map((item) => {

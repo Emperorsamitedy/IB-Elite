@@ -106,6 +106,25 @@ preset-only inter-school banners (no free text ever crosses school lines).
 Seasons align with duel seasons; a Top-100 snapshot is written when each
 season ends.
 
+## The Signal
+
+A verified, versioned academic rating per subject (feature-flagged:
+`app_flags.signal`), derived entirely from the immutable
+`performance_events` ledger: World Mock percentiles weigh most, ranked duel
+Elo next, graded practice least. Each rating carries a confidence (grows
+with sample size and evidence diversity), a trajectory
+(improving/stable/declining), and a verification tier — Verified requires a
+body of clean evidence across two evidence kinds and zero pending or upheld
+integrity reviews; Proctored is reserved for supervised sittings. Ratings
+are recomputed by `POST /api/signal/cron` under a versioned algorithm
+(`rating_algorithm_versions`) so any rating can be recomputed and
+explained. Public profiles are opt-in and field-by-field student-controlled
+(`/signal`, public page `/signal/p/<id>` shows the pseudonym only; private
+profiles 404). Voluntary calibration receipts freeze the prediction at
+report time and power public accuracy stats. The scout-portal data model
+(institutions, approval-gated contact requests, immutable audit log) ships
+now but stays behind `app_flags.scout_portal`.
+
 ## Whiteboard & scanning
 
 `/whiteboard` is a pressure-sensitive scratch sheet (pen, highlighter, eraser,

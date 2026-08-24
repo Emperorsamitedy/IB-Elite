@@ -20,6 +20,7 @@ export default async function AppLayout({
   const isAdmin = profile.role === "admin";
   const mockEnabled = await getFlag("world_mock");
   const schoolsEnabled = await getFlag("school_wars");
+  const signalEnabled = await getFlag("signal");
 
   return (
     <AssistantProvider>
@@ -28,6 +29,7 @@ export default async function AppLayout({
           isAdmin={isAdmin}
           mockEnabled={mockEnabled}
           schoolsEnabled={schoolsEnabled}
+          signalEnabled={signalEnabled}
         />
         <div className="md:pl-60">
           <AppTopbar

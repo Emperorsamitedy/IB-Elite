@@ -172,6 +172,85 @@ export type Database = {
           },
         ]
       }
+      calibration_reports: {
+        Row: {
+          created_at: string
+          exam_session: string
+          id: string
+          official_grade: number
+          predicted_confidence: number
+          predicted_rating: number
+          subject_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exam_session: string
+          id?: string
+          official_grade: number
+          predicted_confidence: number
+          predicted_rating: number
+          subject_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          exam_session?: string
+          id?: string
+          official_grade?: number
+          predicted_confidence?: number
+          predicted_rating?: number
+          subject_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_reports_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_requests: {
+        Row: {
+          created_at: string
+          id: string
+          institution_id: string
+          message: string | null
+          responded_at: string | null
+          status: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          institution_id: string
+          message?: string | null
+          responded_at?: string | null
+          status?: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          institution_id?: string
+          message?: string | null
+          responded_at?: string | null
+          status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_requests_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       deadlines: {
         Row: {
           created_at: string
@@ -346,6 +425,94 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      institution_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          institution_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          institution_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          institution_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "institution_audit_log_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      institution_members: {
+        Row: {
+          created_at: string
+          institution_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          institution_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          institution_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "institution_members_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      institutions: {
+        Row: {
+          approved: boolean
+          created_at: string
+          id: string
+          kind: string
+          name: string
+        }
+        Insert: {
+          approved?: boolean
+          created_at?: string
+          id?: string
+          kind?: string
+          name: string
+        }
+        Update: {
+          approved?: boolean
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+        }
+        Relationships: []
       }
       integrity_reviews: {
         Row: {
@@ -1802,6 +1969,83 @@ export type Database = {
           starts_at?: string
         }
         Relationships: []
+      }
+      signal_profiles: {
+        Row: {
+          created_at: string
+          public: boolean
+          show_country: boolean
+          show_history: boolean
+          show_trajectory: boolean
+          subject_ids: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          public?: boolean
+          show_country?: boolean
+          show_history?: boolean
+          show_trajectory?: boolean
+          subject_ids?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          public?: boolean
+          show_country?: boolean
+          show_history?: boolean
+          show_trajectory?: boolean
+          subject_ids?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      signal_ratings: {
+        Row: {
+          algorithm_version: number
+          computed_at: string
+          confidence: number
+          rating: number
+          sample_size: number
+          subject_id: string
+          trajectory: string
+          user_id: string
+          verification_tier: string
+        }
+        Insert: {
+          algorithm_version?: number
+          computed_at?: string
+          confidence: number
+          rating: number
+          sample_size: number
+          subject_id: string
+          trajectory: string
+          user_id: string
+          verification_tier?: string
+        }
+        Update: {
+          algorithm_version?: number
+          computed_at?: string
+          confidence?: number
+          rating?: number
+          sample_size?: number
+          subject_id?: string
+          trajectory?: string
+          user_id?: string
+          verification_tier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_ratings_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       study_blocks: {
         Row: {

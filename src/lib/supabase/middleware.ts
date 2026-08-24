@@ -13,6 +13,8 @@ const PUBLIC_PATHS = [
   "/duel/challenge",
   // Share cards are posted publicly; the route itself gates on `released`.
   "/api/mock/card",
+  // Opt-in public Signal profiles; private ones 404 in the page itself.
+  "/signal/p",
 ];
 
 const AUTH_PATHS = ["/login", "/register", "/forgot-password"];
