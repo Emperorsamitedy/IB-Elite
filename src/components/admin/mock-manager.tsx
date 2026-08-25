@@ -40,6 +40,7 @@ export type AdminMockPaper = {
     closes_at: string;
     results_at: string;
     status: string;
+    body_override: string | null;
   }[];
   entries: number;
 };
@@ -242,6 +243,7 @@ function PaperEditor({
         opensAt: existing ? toLocal(existing.opens_at) : "",
         closesAt: existing ? toLocal(existing.closes_at) : "",
         resultsAt: existing ? toLocal(existing.results_at) : "",
+        bodyOverride: existing?.body_override ?? "",
       };
     }),
   );
@@ -279,6 +281,7 @@ function PaperEditor({
             opensAt: new Date(s.opensAt).toISOString(),
             closesAt: new Date(s.closesAt).toISOString(),
             resultsAt: new Date(s.resultsAt).toISOString(),
+            bodyOverride: s.bodyOverride || undefined,
           })),
         );
         if (scheduled.error) {
@@ -481,6 +484,33 @@ function PaperEditor({
             Columns: opens · closes · results day. Leave a band empty to skip
             it.
           </p>
+          <details className="text-sm">
+            <summary className="cursor-pointer text-muted-foreground">
+              Per-band paper variants (leak containment)
+            </summary>
+            <div className="mt-2 flex flex-col gap-2">
+              <p className="text-xs text-muted-foreground">
+                Earlier bands can leak the paper before later bands sit. Give
+                a band its own body (same markscheme, different numbers) and
+                that band serves it instead of the shared paper.
+              </p>
+              {sittings.map((sitting, i) => (
+                <div key={sitting.band} className="flex flex-col gap-1">
+                  <span className="font-mono text-xs uppercase text-muted-foreground">
+                    {BAND_LABELS[sitting.band]}
+                  </span>
+                  <textarea
+                    className="min-h-20 rounded-lg border border-input bg-background px-3 py-2 font-mono text-sm"
+                    placeholder="Blank = shared paper body"
+                    value={sitting.bodyOverride}
+                    onChange={(e) =>
+                      updateAt(setSittings, i, { bodyOverride: e.target.value })
+                    }
+                  />
+                </div>
+              ))}
+            </div>
+          </details>
         </CardContent>
       </Card>
 

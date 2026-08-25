@@ -86,7 +86,11 @@ export async function startEntry(
   const deadline = new Date(
     Math.min(own, new Date(sitting.closes_at).getTime()),
   ).toISOString();
-  return { entry, paper, deadline };
+  // A band with its own variant serves that body — leak containment.
+  const served = sitting.body_override
+    ? { ...paper, body: sitting.body_override }
+    : paper;
+  return { entry, paper: served, deadline };
 }
 
 /** Marks the script set final. Late arrivals are graded but never ranked. */
@@ -125,6 +129,17 @@ export async function submitEntry(
 // ---------------------------------------------------------------
 
 export type GradeBatchResult = { graded: number; quarantined: number };
+
+/**
+ * Handwriting-consistency seam: compares this entry's script against the
+ * student's earlier scripts. `null` = could not check (no history, no
+ * vision model); a non-null verdict only ever FLAGS for human review.
+ */
+export type HandwritingCheck = (
+  userId: string,
+  entryId: string,
+  scriptPaths: string[],
+) => Promise<{ consistent: boolean; detail: string } | null>;
 
 /** How long a claim may hold an entry before it counts as abandoned. */
 export const GRADING_STALE_MINUTES = 15;
@@ -174,6 +189,7 @@ export async function gradeBatch(
   readScript: (imagePath: string) => Promise<OcrResult>,
   batch: number,
   now: Date,
+  handwriting?: HandwritingCheck,
 ): Promise<GradeBatchResult> {
   const claimed = await store.claimEntries(batch);
   let graded = 0;
@@ -228,6 +244,24 @@ export async function gradeBatch(
       scoreShare,
       historyScoreShare: await store.historyScoreShare(entry.user_id),
     });
+    // Handwriting forensics: flag-only, never quarantine — a new pen, a
+    // broken wrist or a bad photo must not cost anyone their ranking.
+    if (handwriting) {
+      const verdict = await handwriting(
+        entry.user_id,
+        entry.id,
+        scripts.map((s) => s.image_path),
+      ).catch(() => null);
+      if (verdict && !verdict.consistent) {
+        await store.createIntegrityReview({
+          userId: entry.user_id,
+          sourceId: entry.id,
+          reason: "handwriting_mismatch",
+          details: { detail: verdict.detail },
+        });
+      }
+    }
+
     const quarantine = shouldQuarantineMock(flags);
     if (flags.length > 0) {
       await store.createIntegrityReview({

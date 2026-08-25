@@ -6,6 +6,7 @@ import {
   releaseDueResults,
   requeueStuckEntries,
 } from "@/lib/mock/service";
+import { createHandwritingCheck } from "@/lib/mock/handwriting";
 import { createSupabaseMockStore } from "@/lib/mock/supabase-store";
 import { createScanOcr, isScanOcrConfigured } from "@/lib/scans/ocr";
 import { createSupabaseScanStorage } from "@/lib/scans/supabase-store";
@@ -44,6 +45,7 @@ export async function POST(request: NextRequest) {
 
   const store = createSupabaseMockStore();
   const storage = createSupabaseScanStorage();
+  const handwriting = createHandwritingCheck(store, storage);
   const readScript = isScanOcrConfigured()
     ? (path: string) => createScanOcr(storage).read(path)
     : async () => ({ text: "", words: [] });
@@ -56,7 +58,14 @@ export async function POST(request: NextRequest) {
   let graded = 0;
   let quarantined = 0;
   while (Date.now() - startedAt < 200_000) {
-    const out = await gradeBatch(store, createMockGrader(), readScript, 5, new Date());
+    const out = await gradeBatch(
+      store,
+      createMockGrader(),
+      readScript,
+      5,
+      new Date(),
+      handwriting,
+    );
     graded += out.graded;
     quarantined += out.quarantined;
     if (out.graded === 0) break;

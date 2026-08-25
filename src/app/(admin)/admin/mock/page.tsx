@@ -17,7 +17,7 @@ export default async function AdminMockPage() {
     admin
       .from("mock_papers")
       .select(
-        "id, subject_id, level_code, title, body, duration_minutes, markscheme, status, mock_sittings(band, opens_at, closes_at, results_at, status, mock_entries(id))",
+        "id, subject_id, level_code, title, body, duration_minutes, markscheme, status, mock_sittings(band, opens_at, closes_at, results_at, status, body_override, mock_entries(id))",
       )
       .order("created_at", { ascending: false }),
     admin
@@ -33,6 +33,7 @@ export default async function AdminMockPage() {
       closes_at: string;
       results_at: string;
       status: string;
+      body_override: string | null;
       mock_entries?: { id: string }[];
     }[];
     return {
@@ -52,6 +53,7 @@ export default async function AdminMockPage() {
         closes_at: s.closes_at,
         results_at: s.results_at,
         status: s.status,
+        body_override: s.body_override,
       })),
       entries: sittings.reduce(
         (sum, s) => sum + (s.mock_entries?.length ?? 0),

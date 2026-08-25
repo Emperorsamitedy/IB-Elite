@@ -1009,6 +1009,7 @@ export type Database = {
       mock_sittings: {
         Row: {
           band: string
+          body_override: string | null
           closes_at: string
           created_at: string
           id: string
@@ -1019,6 +1020,7 @@ export type Database = {
         }
         Insert: {
           band: string
+          body_override?: string | null
           closes_at: string
           created_at?: string
           id?: string
@@ -1029,6 +1031,7 @@ export type Database = {
         }
         Update: {
           band?: string
+          body_override?: string | null
           closes_at?: string
           created_at?: string
           id?: string
