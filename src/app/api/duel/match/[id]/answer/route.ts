@@ -3,6 +3,7 @@ import { z } from "zod";
 import { submitAnswer } from "@/lib/duel/service";
 import { createSupabaseDuelStore } from "@/lib/duel/supabase-store";
 import { duelErrorResponse, requireUser } from "../../../util";
+import { rateLimitOk, RATE_LIMITED_MESSAGE } from "@/lib/anti-abuse";
 
 const bodySchema = z.object({
   questionIndex: z.number().int().min(0).max(50),
@@ -15,6 +16,10 @@ export async function POST(
 ) {
   const user = await requireUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await rateLimitOk("duelAnswer", user.id))) {
+    return NextResponse.json({ error: RATE_LIMITED_MESSAGE }, { status: 429 });
+  }
+
   const { id } = await params;
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));

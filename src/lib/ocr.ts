@@ -150,6 +150,12 @@ async function scanWithOcrSpace(image: Decoded): Promise<ScanResult> {
  * keyless OCR.space free API.
  */
 export async function recogniseText(dataUrl: string): Promise<ScanResult> {
+  if (!ocrSpaceKey() && !process.env.GEMINI_API_KEY) {
+    throw new ScanError(
+      "Scanning is not configured on this server yet. Set GEMINI_API_KEY or OCR_SPACE_API_KEY.",
+      503,
+    );
+  }
   const image = decodeDataUrl(dataUrl);
 
   try {
@@ -157,8 +163,14 @@ export async function recogniseText(dataUrl: string): Promise<ScanResult> {
     if (gemini && gemini.text) return gemini;
   } catch (error) {
     if (error instanceof ScanError) throw error;
-    // Network/timeout — fall back to OCR.space.
+    // Network/timeout — fall back to OCR.space when it has a key.
   }
 
+  if (!ocrSpaceKey()) {
+    throw new ScanError(
+      "Handwriting recognition is temporarily unavailable. Try again shortly.",
+      503,
+    );
+  }
   return scanWithOcrSpace(image);
 }

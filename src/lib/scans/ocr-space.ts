@@ -14,16 +14,18 @@ const HANDWRITING_ENGINE = "3";
 export const OCR_SPACE_FREE_TIER_BYTES = 1024 * 1024;
 
 /**
- * The key OCR.space publishes for testing. Scanning works with no setup at
- * all by falling back to it — it is rate limited and shared, so a personal
- * free key (25k scans/month, https://ocr.space/ocrapi/freekey) is worth the
- * two minutes it takes to get.
+ * The key OCR.space publishes for testing. In development scanning works
+ * with no setup by falling back to it; in production it is DISABLED —
+ * students' handwriting must never ride a shared third-party demo key.
+ * A personal free key (25k scans/month, https://ocr.space/ocrapi/freekey)
+ * takes two minutes to get.
  */
 export const OCR_SPACE_DEMO_KEY = "helloworld";
 
-/** The configured key, or the shared demo key when none is set. */
+/** The configured key; the shared demo key only ever outside production. */
 export function ocrSpaceKey(): string {
-  return process.env.OCR_SPACE_API_KEY || OCR_SPACE_DEMO_KEY;
+  if (process.env.OCR_SPACE_API_KEY) return process.env.OCR_SPACE_API_KEY;
+  return process.env.NODE_ENV === "production" ? "" : OCR_SPACE_DEMO_KEY;
 }
 
 type OcrSpaceWord = {
@@ -71,11 +73,11 @@ function extensionFor(imagePath: string): string {
 }
 
 /**
- * Always true: without a key of their own, scans fall back to OCR.space's
- * public demo key rather than failing.
+ * True when a usable key exists — a real key anywhere, or the demo
+ * fallback outside production.
  */
 export function isOcrConfigured(): boolean {
-  return true;
+  return Boolean(ocrSpaceKey());
 }
 
 /** Whether scans are running on the shared demo key rather than a real one. */

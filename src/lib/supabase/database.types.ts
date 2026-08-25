@@ -1531,6 +1531,24 @@ export type Database = {
           },
         ]
       }
+      rate_limits: {
+        Row: {
+          count: number
+          key: string
+          window_start: string
+        }
+        Insert: {
+          count?: number
+          key: string
+          window_start: string
+        }
+        Update: {
+          count?: number
+          key?: string
+          window_start?: string
+        }
+        Relationships: []
+      }
       rating_algorithm_versions: {
         Row: {
           config: Json
@@ -2582,6 +2600,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_rate_limit: {
+        Args: { p_key: string; p_max: number; p_window_seconds: number }
+        Returns: boolean
+      }
       claim_mock_entries: {
         Args: { batch: number }
         Returns: {

@@ -2,7 +2,11 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { queueForDuel, tryPair } from "@/lib/duel/service";
 import { createSupabaseDuelStore } from "@/lib/duel/supabase-store";
-import { ipHashFromHeaders } from "@/lib/anti-abuse";
+import {
+  ipHashFromHeaders,
+  rateLimitOk,
+  RATE_LIMITED_MESSAGE,
+} from "@/lib/anti-abuse";
 import { duelErrorResponse, requireUser, track } from "../util";
 
 const bodySchema = z.object({
@@ -13,6 +17,9 @@ const bodySchema = z.object({
 export async function POST(request: NextRequest) {
   const user = await requireUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await rateLimitOk("duelQueue", user.id))) {
+    return NextResponse.json({ error: RATE_LIMITED_MESSAGE }, { status: 429 });
+  }
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {

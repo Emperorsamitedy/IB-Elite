@@ -7,6 +7,7 @@ import {
 import { createScanOcr, isScanOcrConfigured } from "@/lib/scans/ocr";
 import { ScanUploadError, uploadScan } from "@/lib/scans/upload";
 import { createClient } from "@/lib/supabase/server";
+import { rateLimitOk, RATE_LIMITED_MESSAGE } from "@/lib/anti-abuse";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 /** OCR plus marking runs inside the request: a serverless function can be
@@ -20,6 +21,10 @@ export async function POST(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await rateLimitOk("scanUpload", user.id))) {
+    return NextResponse.json({ error: RATE_LIMITED_MESSAGE }, { status: 429 });
+  }
+
 
   const form = await request.formData().catch(() => null);
   const file = form?.get("file");

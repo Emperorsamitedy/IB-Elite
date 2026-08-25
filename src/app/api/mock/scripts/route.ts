@@ -3,6 +3,7 @@ import { createSupabaseMockStore } from "@/lib/mock/supabase-store";
 import { createSupabaseScanStorage } from "@/lib/scans/supabase-store";
 import { ALLOWED_TYPES, MAX_UPLOAD_BYTES } from "@/lib/scans/upload";
 import { sittingPhase } from "@/lib/mock/windows";
+import { rateLimitOk, RATE_LIMITED_MESSAGE } from "@/lib/anti-abuse";
 import { mockErrorResponse, requireMockUser } from "../util";
 
 export const maxDuration = 60;
@@ -11,6 +12,9 @@ export const maxDuration = 60;
 export async function POST(request: NextRequest) {
   const gate = await requireMockUser();
   if ("error" in gate) return gate.error;
+  if (!(await rateLimitOk("mockScript", gate.user.id))) {
+    return NextResponse.json({ error: RATE_LIMITED_MESSAGE }, { status: 429 });
+  }
 
   const form = await request.formData().catch(() => null);
   const file = form?.get("file");
