@@ -1,5 +1,6 @@
 import type { Json } from "@/lib/supabase/database.types";
 import type { CriterionAward, EntryStatus, MockBand } from "./types";
+import type { OcrWord } from "@/lib/scans/types";
 
 export type MockPaper = {
   id: string;
@@ -39,6 +40,7 @@ export type MockScript = {
   page_index: number;
   image_path: string;
   ocr_text: string | null;
+  ocr_boxes: OcrWord[] | null;
 };
 
 export type MockResultRow = {
@@ -97,7 +99,11 @@ export type MockStore = {
     imagePath: string,
   ): Promise<MockScript>;
   listScripts(entryId: string): Promise<MockScript[]>;
-  setScriptOcr(scriptId: string, text: string): Promise<void>;
+  setScriptOcr(
+    scriptId: string,
+    text: string,
+    boxes: OcrWord[],
+  ): Promise<void>;
 
   upsertResult(row: MockResultRow): Promise<void>;
   getResult(entryId: string): Promise<MockResultRow | null>;

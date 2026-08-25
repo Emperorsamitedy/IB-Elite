@@ -28,12 +28,13 @@ Markscheme criteria (JSON): ${JSON.stringify(
 )}
 
 Return JSON only, shaped exactly:
-{"criteria":[{"criterionId":"<id>","awarded":<integer 0..maxMarks>,"comment":"<one short examiner sentence>"}]}
+{"criteria":[{"criterionId":"<id>","awarded":<integer 0..maxMarks>,"comment":"<one short examiner sentence>","evidence":"<short verbatim phrase copied from the transcript that earned or lost the marks, or null>"}]}
 
 Rules:
 - Mark positively: award what the evidence in the script earns, nothing more.
 - Award 0 for a criterion with no relevant evidence.
 - Every criterion from the markscheme must appear exactly once.
+- evidence must be copied character-for-character from the transcript.
 - Keep comments specific to this script.`;
 
 /** Examiner-style marking through Gemini. */
@@ -45,7 +46,12 @@ export function createGeminiMockGrader(): MockGrader {
         { text: `Student transcript:\n${transcript}` },
       ]);
       const parsed = parseJson<{
-        criteria?: { criterionId?: string; awarded?: number; comment?: string }[];
+        criteria?: {
+          criterionId?: string;
+          awarded?: number;
+          comment?: string;
+          evidence?: string | null;
+        }[];
       }>(raw);
       const byId = new Map(
         (parsed.criteria ?? []).map((c) => [c.criterionId, c]),
@@ -58,6 +64,7 @@ export function createGeminiMockGrader(): MockGrader {
           maxMarks: c.maxMarks,
           awarded: clampAward(got?.awarded, c.maxMarks),
           comment: got?.comment?.slice(0, 400) ?? null,
+          evidence: got?.evidence?.slice(0, 200) ?? null,
         };
       });
       return {

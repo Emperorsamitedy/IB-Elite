@@ -68,8 +68,10 @@ function makeStore(countries: Record<string, string> = {}) {
   });
 }
 
-const readScript = async (path: string) =>
-  path.includes("empty") ? "" : "a".repeat(120);
+const readScript = async (path: string) => ({
+  text: path.includes("empty") ? "" : "a".repeat(120),
+  words: [],
+});
 
 async function sitAndSubmit(
   store: ReturnType<typeof makeStore>,
@@ -216,7 +218,10 @@ describe("results day", () => {
       store,
       grader,
       // Long enough that the empty-script integrity check stays quiet.
-      async (path) => `${"x".repeat(120)}|${path.replace(/\D/g, "")}`,
+      async (path) => ({
+        text: `${"x".repeat(120)}|${path.replace(/\D/g, "")}`,
+        words: [],
+      }),
       50,
       new Date("2026-09-06T02:00:00Z"),
     );
@@ -347,5 +352,67 @@ describe("stuck-grading recovery", () => {
     const swept = await requeueStuckEntries(store, new Date(), 15);
     expect(swept.requeued).toBe(0);
     expect(store.entries[0].status).toBe("grading");
+  });
+});
+
+describe("annotated script anchoring", () => {
+  it("pins each criterion's evidence to a page and box", async () => {
+    const store = makeStore();
+    const { entry } = await startEntry(
+      store,
+      { sittingId: SITTING.id, userId: "alice" },
+      new Date("2026-09-05T16:05:00Z"),
+    );
+    await store.addScript(entry.id, 0, "p/page0.jpg");
+    await store.addScript(entry.id, 1, "p/page1.jpg");
+    await submitEntry(
+      store,
+      { sittingId: SITTING.id, userId: "alice" },
+      new Date("2026-09-05T17:20:00Z"),
+    );
+
+    const grader: MockGrader = {
+      async grade(_t, criteria) {
+        const awards = criteria.map((c, i) => ({
+          criterionId: c.id,
+          title: c.title,
+          maxMarks: c.maxMarks,
+          awarded: c.maxMarks,
+          comment: null,
+          evidence: i === 0 ? "swaps x and y" : "x equals two",
+        }));
+        return {
+          criteria: awards,
+          totalAwarded: awards.reduce((s, a) => s + a.awarded, 0),
+          totalMax: 10,
+          grader: "ai" as const,
+        };
+      },
+    };
+    const pageOcr = async (path: string) =>
+      path.includes("page0")
+        ? {
+            text: "I swaps x and y to invert the function ".repeat(3),
+            words: [
+              { text: "swaps x and y to invert", box: { x: 10, y: 20, width: 200, height: 24 } },
+            ],
+          }
+        : {
+            text: "therefore x equals two exactly ".repeat(4),
+            words: [
+              { text: "therefore x equals two", box: { x: 5, y: 300, width: 180, height: 22 } },
+            ],
+          };
+
+    await gradeBatch(store, grader, pageOcr, 10, new Date("2026-09-06T02:00:00Z"));
+
+    const result = store.results[0];
+    const [first, second] = result.criteria;
+    expect(first.pageIndex).toBe(0);
+    expect(first.box).toEqual({ x: 10, y: 20, width: 200, height: 24 });
+    expect(second.pageIndex).toBe(1);
+    expect(second.box).toEqual({ x: 5, y: 300, width: 180, height: 22 });
+    // Boxes survive the store round-trip on the scripts too.
+    expect(store.scripts[0].ocr_boxes).toHaveLength(1);
   });
 });

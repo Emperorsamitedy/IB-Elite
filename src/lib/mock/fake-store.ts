@@ -108,6 +108,7 @@ export function createFakeMockStore(seed: {
         page_index: pageIndex,
         image_path: imagePath,
         ocr_text: null,
+        ocr_boxes: null,
       };
       scripts.push(script);
       return script;
@@ -115,9 +116,12 @@ export function createFakeMockStore(seed: {
     async listScripts(entryId) {
       return scripts.filter((s) => s.entry_id === entryId);
     },
-    async setScriptOcr(scriptId, text) {
+    async setScriptOcr(scriptId, text, boxes) {
       const script = scripts.find((s) => s.id === scriptId);
-      if (script) script.ocr_text = text;
+      if (script) {
+        script.ocr_text = text;
+        script.ocr_boxes = boxes;
+      }
     },
     async upsertResult(row) {
       const i = results.findIndex((r) => r.entry_id === row.entry_id);

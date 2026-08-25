@@ -14,6 +14,8 @@ import type {
 } from "./store";
 import type { Criterion } from "./types";
 import { isLate, sittingPhase } from "./windows";
+import { findAnchor } from "@/lib/scans/rubric";
+import type { OcrResult } from "@/lib/scans/types";
 
 export class MockError extends Error {
   constructor(
@@ -169,7 +171,7 @@ export async function requeueStuckEntries(
 export async function gradeBatch(
   store: MockStore,
   grader: MockGrader,
-  readScript: (imagePath: string) => Promise<string>,
+  readScript: (imagePath: string) => Promise<OcrResult>,
   batch: number,
   now: Date,
 ): Promise<GradeBatchResult> {
@@ -183,19 +185,38 @@ export async function gradeBatch(
     if (!sitting || !paper) continue;
 
     const scripts = await store.listScripts(entry.id);
-    const pages: string[] = [];
+    const pages: OcrResult[] = [];
     for (const script of scripts) {
-      let text = script.ocr_text;
-      if (text === null) {
-        text = await readScript(script.image_path).catch(() => "");
-        await store.setScriptOcr(script.id, text);
+      let page: OcrResult;
+      if (script.ocr_text === null) {
+        page = await readScript(script.image_path).catch(() => ({
+          text: "",
+          words: [],
+        }));
+        await store.setScriptOcr(script.id, page.text, page.words);
+      } else {
+        page = { text: script.ocr_text, words: script.ocr_boxes ?? [] };
       }
-      pages.push(text);
+      pages.push(page);
     }
-    const transcript = pages.join("\n\n").trim();
+    const transcript = pages.map((p) => p.text).join("\n\n").trim();
 
     const criteria = criteriaOf(paper);
     const outcome = await grader.grade(transcript, criteria);
+
+    // Anchor each criterion's evidence to a page and box so the result
+    // view can draw the marks ON the scanned script.
+    for (const award of outcome.criteria) {
+      if (!award.evidence) continue;
+      for (let pageIndex = 0; pageIndex < pages.length; pageIndex++) {
+        const box = findAnchor(pages[pageIndex], [award.evidence]);
+        if (box) {
+          award.pageIndex = scripts[pageIndex]?.page_index ?? pageIndex;
+          award.box = box;
+          break;
+        }
+      }
+    }
 
     const scoreShare =
       outcome.totalMax > 0 ? outcome.totalAwarded / outcome.totalMax : 0;
