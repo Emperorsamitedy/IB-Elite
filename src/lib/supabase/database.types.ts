@@ -1586,6 +1586,7 @@ export type Database = {
           created_at: string
           ends_at: string
           id: string
+          last_lead_notified_at: string | null
           last_leader: string | null
           school_a: string
           school_b: string
@@ -1599,6 +1600,7 @@ export type Database = {
           created_at?: string
           ends_at: string
           id?: string
+          last_lead_notified_at?: string | null
           last_leader?: string | null
           school_a: string
           school_b: string
@@ -1612,6 +1614,7 @@ export type Database = {
           created_at?: string
           ends_at?: string
           id?: string
+          last_lead_notified_at?: string | null
           last_leader?: string | null
           school_a?: string
           school_b?: string

@@ -72,3 +72,15 @@ export function detectLeadChange(
   if (leader === null || leader === lastLeader) return null;
   return { newLeader: leader };
 }
+
+/** Minimum gap between lead-change pings to two whole schools. */
+export const LEAD_NOTIFY_COOLDOWN_MS = 2 * 60 * 60 * 1000;
+
+export function shouldNotifyLeadChange(
+  lastNotifiedIso: string | null,
+  now: Date,
+  cooldownMs: number = LEAD_NOTIFY_COOLDOWN_MS,
+): boolean {
+  if (!lastNotifiedIso) return true;
+  return now.getTime() - new Date(lastNotifiedIso).getTime() >= cooldownMs;
+}
