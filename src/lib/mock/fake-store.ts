@@ -59,6 +59,7 @@ export function createFakeMockStore(seed: {
         status: "entered",
         started_at: null,
         submitted_at: null,
+        grading_started_at: null,
       };
       entries.push(entry);
       return entry;
@@ -84,8 +85,21 @@ export function createFakeMockStore(seed: {
         ["submitted", "late"].includes(e.status),
       );
       const claimed = ready.slice(0, batch);
-      for (const entry of claimed) entry.status = "grading";
+      for (const entry of claimed) {
+        entry.status = "grading";
+        entry.grading_started_at = new Date().toISOString();
+      }
       return claimed.map((e) => ({ ...e }));
+    },
+    async listStuckGrading(cutoffIso) {
+      return entries
+        .filter(
+          (e) =>
+            e.status === "grading" &&
+            e.grading_started_at !== null &&
+            e.grading_started_at < cutoffIso,
+        )
+        .map((e) => ({ ...e }));
     },
     async addScript(entryId, pageIndex, imagePath) {
       const script: MockScript = {

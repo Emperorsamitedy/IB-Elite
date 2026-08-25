@@ -824,6 +824,7 @@ export type Database = {
       mock_entries: {
         Row: {
           created_at: string
+          grading_started_at: string | null
           id: string
           sitting_id: string
           started_at: string | null
@@ -833,6 +834,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          grading_started_at?: string | null
           id?: string
           sitting_id: string
           started_at?: string | null
@@ -842,6 +844,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          grading_started_at?: string | null
           id?: string
           sitting_id?: string
           started_at?: string | null
@@ -2577,6 +2580,7 @@ export type Database = {
         Args: { batch: number }
         Returns: {
           created_at: string
+          grading_started_at: string | null
           id: string
           sitting_id: string
           started_at: string | null
