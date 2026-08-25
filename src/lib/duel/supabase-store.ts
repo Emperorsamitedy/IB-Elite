@@ -1,7 +1,11 @@
 import "server-only";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { Json } from "@/lib/supabase/database.types";
-import { isDuelGradable, type AnswerType } from "./answers";
+import {
+  isDuelGradable,
+  preferRobustPool,
+  type AnswerType,
+} from "./answers";
 import type {
   Challenge,
   DuelMatch,
@@ -151,14 +155,17 @@ export function createSupabaseDuelStore(
         .neq("answer_type", "free")
         .limit(500);
       if (error) throw new Error(error.message);
-      const ids = (data ?? [])
-        .filter((q) => isDuelGradable(q.answer_type, q.answer_key))
-        .map((q) => q.id);
-      for (let i = ids.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [ids[i], ids[j]] = [ids[j], ids[i]];
-      }
-      return ids.slice(0, count);
+      const gradable = (data ?? []).filter((q) =>
+        isDuelGradable(q.answer_type, q.answer_key),
+      );
+      return preferRobustPool(gradable, count, (items) => {
+        const shuffled = [...items];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      });
     },
 
     async createMatch(input) {

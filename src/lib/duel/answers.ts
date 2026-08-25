@@ -32,11 +32,17 @@ export function gradeAnswer(
     }
     case "exact": {
       const accept = Array.isArray(key.accept) ? key.accept : [];
-      return accept.some(
-        (candidate) =>
-          typeof candidate === "string" &&
-          normalise(candidate) === normalise(value),
-      );
+      return accept.some((candidate) => {
+        if (typeof candidate !== "string") return false;
+        if (normalise(candidate) === normalise(value)) return true;
+        // "2.0", "2" and "2," must never disagree: when both sides parse
+        // as numbers, compare the numbers, not the spelling.
+        const target = Number(candidate.replace(/,/g, ""));
+        const given = Number(value.replace(/,/g, ""));
+        return (
+          Number.isFinite(target) && Number.isFinite(given) && target === given
+        );
+      });
     }
     default:
       return false;
@@ -90,4 +96,23 @@ export function isDuelGradable(
     answerKey !== null &&
     typeof answerKey === "object"
   );
+}
+
+/**
+ * Ranked pools favour formats that grade beyond dispute: MCQ and numeric
+ * first, exact-match strings only to fill a short pool. A wrongly-marked
+ * "wrong" costs rating, so brittle formats sit at the back of the queue.
+ */
+export function preferRobustPool<
+  T extends { id: string; answer_type: string },
+>(questions: T[], count: number, shuffle: (items: T[]) => T[]): string[] {
+  const robust = questions.filter(
+    (q) => q.answer_type === "mcq" || q.answer_type === "numeric",
+  );
+  const brittle = questions.filter(
+    (q) => q.answer_type !== "mcq" && q.answer_type !== "numeric",
+  );
+  return [...shuffle(robust), ...shuffle(brittle)]
+    .slice(0, count)
+    .map((q) => q.id);
 }

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { gradeAnswer, isDuelGradable } from "./answers";
+import { gradeAnswer, isDuelGradable, preferRobustPool } from "./answers";
 import {
   ELO_INITIAL,
   expectedScore,
@@ -40,6 +40,16 @@ describe("gradeAnswer", () => {
     expect(gradeAnswer("exact", key, "X=2")).toBe(true);
     expect(gradeAnswer("exact", key, " 2 ")).toBe(true);
     expect(gradeAnswer("exact", key, "x=3")).toBe(false);
+  });
+
+  // A ranked loss over "2.0" vs "2" would be theft, not grading.
+  it("treats numerically equal exact answers as equal", () => {
+    expect(gradeAnswer("exact", { accept: ["2"] }, "2.0")).toBe(true);
+    expect(gradeAnswer("exact", { accept: ["0.5"] }, ".5")).toBe(true);
+    expect(gradeAnswer("exact", { accept: ["1,000"] }, "1000")).toBe(true);
+    expect(gradeAnswer("exact", { accept: ["2"] }, "3")).toBe(false);
+    // Non-numeric strings still need the string to match.
+    expect(gradeAnswer("exact", { accept: ["x=2"] }, "2")).toBe(false);
   });
 
   // A malformed key must mark wrong, never crash a live match.
@@ -272,5 +282,31 @@ describe("same-network collusion defense", () => {
       ipHash: "net-1",
     };
     expect(pickOpponent(seeker, [other], now)?.userId).toBe("o");
+  });
+});
+
+describe("preferRobustPool", () => {
+  const identity = <T,>(items: T[]) => items;
+  const q = (id: string, answer_type: string) => ({ id, answer_type });
+
+  it("fills from MCQ and numeric before touching exact-match", () => {
+    const pool = [
+      q("e1", "exact"),
+      q("m1", "mcq"),
+      q("e2", "exact"),
+      q("n1", "numeric"),
+      q("m2", "mcq"),
+    ];
+    expect(preferRobustPool(pool, 3, identity)).toEqual(["m1", "n1", "m2"]);
+  });
+
+  it("uses exact only when the robust pool runs short", () => {
+    const pool = [q("m1", "mcq"), q("e1", "exact"), q("e2", "exact")];
+    expect(preferRobustPool(pool, 3, identity)).toEqual(["m1", "e1", "e2"]);
+  });
+
+  it("handles empty pools and small counts", () => {
+    expect(preferRobustPool([], 5, identity)).toEqual([]);
+    expect(preferRobustPool([q("e1", "exact")], 5, identity)).toEqual(["e1"]);
   });
 });
