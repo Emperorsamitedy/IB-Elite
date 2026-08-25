@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { recogniseText, ScanError } from "@/lib/ocr";
+import { rateLimitOk, RATE_LIMITED_MESSAGE } from "@/lib/anti-abuse";
 
 /** ~2.8M base64 characters ≈ 2 MB of image — the client compresses below this. */
 const MAX_IMAGE_CHARS = 2_800_000;
@@ -19,6 +20,10 @@ export async function POST(request: NextRequest) {
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (!(await rateLimitOk("scan", user.id))) {
+    return NextResponse.json({ error: RATE_LIMITED_MESSAGE }, { status: 429 });
+  }
+
 
   const parsed = bodySchema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) {

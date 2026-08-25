@@ -48,3 +48,43 @@ export async function verifyTurnstile(
     return true;
   }
 }
+
+import { createAdminClient } from "@/lib/supabase/admin";
+
+export type RateLimitRule = { max: number; windowSeconds: number };
+
+/** Per-route budgets — generous for honest use, hostile to scripts. */
+export const RATE_LIMITS = {
+  scan: { max: 30, windowSeconds: 3600 },
+  scanUpload: { max: 40, windowSeconds: 3600 },
+  duelQueue: { max: 30, windowSeconds: 600 },
+  duelAnswer: { max: 120, windowSeconds: 600 },
+  challengeCreate: { max: 15, windowSeconds: 3600 },
+  mockScript: { max: 40, windowSeconds: 3600 },
+} satisfies Record<string, RateLimitRule>;
+
+/**
+ * Fixed-window limiter backed by Postgres, so every serverless instance
+ * shares one budget. Fails OPEN: a database hiccup must degrade to
+ * "unlimited", never to "everyone blocked".
+ */
+export async function rateLimitOk(
+  scope: keyof typeof RATE_LIMITS,
+  subject: string,
+): Promise<boolean> {
+  const rule = RATE_LIMITS[scope];
+  try {
+    const { data, error } = await createAdminClient().rpc("check_rate_limit", {
+      p_key: `${scope}:${subject}`,
+      p_max: rule.max,
+      p_window_seconds: rule.windowSeconds,
+    });
+    if (error) return true;
+    return data === true;
+  } catch {
+    return true;
+  }
+}
+
+export const RATE_LIMITED_MESSAGE =
+  "You're doing that a little too fast — give it a minute and try again.";
