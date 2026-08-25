@@ -7,12 +7,19 @@ export type Criterion = {
   topicId?: string | null;
 };
 
+import type { BoundingBox } from "@/lib/scans/types";
+
 export type CriterionAward = {
   criterionId: string;
   title: string;
   maxMarks: number;
   awarded: number;
   comment: string | null;
+  /** Verbatim phrase the marks hang on; anchors the overlay. */
+  evidence?: string | null;
+  /** Which script page the evidence sits on, and where. */
+  pageIndex?: number | null;
+  box?: BoundingBox | null;
 };
 
 export type GradeOutcome = {

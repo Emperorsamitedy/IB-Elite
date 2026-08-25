@@ -78,6 +78,7 @@ export const messages = {
     countryRank: "Country rank",
     cohortTooSmall: "Percentiles appear once enough students have sat this paper.",
     criteria: "Criterion breakdown",
+    annotatedScript: "Your annotated script",
     topDecile: "Top 10% average",
     youAvg: "You",
     practicePlan: "Your practice plan",

@@ -45,8 +45,8 @@ export async function POST(request: NextRequest) {
   const store = createSupabaseMockStore();
   const storage = createSupabaseScanStorage();
   const readScript = isScanOcrConfigured()
-    ? async (path: string) => (await createScanOcr(storage).read(path)).text
-    : async () => "";
+    ? (path: string) => createScanOcr(storage).read(path)
+    : async () => ({ text: "", words: [] });
 
   // Recover entries a crashed worker left claimed, then grade.
   const { requeued } = await requeueStuckEntries(store, new Date());

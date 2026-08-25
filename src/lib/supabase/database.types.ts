@@ -974,6 +974,7 @@ export type Database = {
           entry_id: string
           id: string
           image_path: string
+          ocr_boxes: Json | null
           ocr_text: string | null
           page_index: number
         }
@@ -982,6 +983,7 @@ export type Database = {
           entry_id: string
           id?: string
           image_path: string
+          ocr_boxes?: Json | null
           ocr_text?: string | null
           page_index?: number
         }
@@ -990,6 +992,7 @@ export type Database = {
           entry_id?: string
           id?: string
           image_path?: string
+          ocr_boxes?: Json | null
           ocr_text?: string | null
           page_index?: number
         }

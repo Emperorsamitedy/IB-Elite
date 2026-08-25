@@ -15,6 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Countdown } from "@/components/mock/countdown";
 import { EnterSittingButton } from "@/components/mock/enter-button";
 import { MockRoom } from "@/components/mock/mock-room";
+import {
+  MockScriptViewer,
+  type ScriptPage,
+} from "@/components/mock/script-viewer";
+import { createSupabaseScanStorage } from "@/lib/scans/supabase-store";
 import { ShareCardButton } from "@/components/mock/share-card-button";
 import { StartSessionButton } from "@/components/app/start-session-button";
 import { messages } from "@/lib/i18n/en";
@@ -75,8 +80,23 @@ export default async function MockSittingPage({
 
   const entitlement = await getEntitlement(user.id);
 
-  // Pro extras: the top-decile comparison over this paper's released cohort.
+  // Pro extras: the annotated script pages and the top-decile comparison.
+  let scriptPages: ScriptPage[] = [];
   let topDecile: Map<string, number> | null = null;
+  if (result && entry && entitlement.isPro) {
+    const { data: scripts } = await admin
+      .from("mock_scripts")
+      .select("page_index, image_path")
+      .eq("entry_id", entry.id)
+      .order("page_index");
+    const storage = createSupabaseScanStorage();
+    scriptPages = await Promise.all(
+      (scripts ?? []).map(async (script) => ({
+        pageIndex: script.page_index,
+        url: await storage.signedUrl(script.image_path),
+      })),
+    );
+  }
   if (result && entitlement.isPro) {
     const { data: cohort } = await admin
       .from("mock_results")
@@ -247,6 +267,14 @@ export default async function MockSittingPage({
                   ))}
                 </CardContent>
               </Card>
+
+              {scriptPages.length > 0 && (
+                <Card>
+                  <CardContent className="py-6">
+                    <MockScriptViewer pages={scriptPages} awards={awards} />
+                  </CardContent>
+                </Card>
+              )}
 
               {weakest.length > 0 && (
                 <Card>

@@ -151,7 +151,7 @@ export function createSupabaseMockStore(
       const { data, error } = await client
         .from("mock_scripts")
         .insert({ entry_id: entryId, page_index: pageIndex, image_path: imagePath })
-        .select("id, entry_id, page_index, image_path, ocr_text")
+        .select("id, entry_id, page_index, image_path, ocr_text, ocr_boxes")
         .single();
       if (error) throw new Error(error.message);
       return data as MockScript;
@@ -160,14 +160,17 @@ export function createSupabaseMockStore(
     async listScripts(entryId) {
       const { data } = await client
         .from("mock_scripts")
-        .select("id, entry_id, page_index, image_path, ocr_text")
+        .select("id, entry_id, page_index, image_path, ocr_text, ocr_boxes")
         .eq("entry_id", entryId)
         .order("page_index");
       return (data ?? []) as MockScript[];
     },
 
-    async setScriptOcr(scriptId, text) {
-      await client.from("mock_scripts").update({ ocr_text: text }).eq("id", scriptId);
+    async setScriptOcr(scriptId, text, boxes) {
+      await client
+        .from("mock_scripts")
+        .update({ ocr_text: text, ocr_boxes: boxes as unknown as Json })
+        .eq("id", scriptId);
     },
 
     async upsertResult(row) {
