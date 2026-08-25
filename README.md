@@ -56,6 +56,10 @@ cannot serve pages until the two Supabase values are set.
 3. In Supabase → Authentication → URL Configuration, set the site URL to your
    Vercel domain and add `https://<domain>/auth/callback` as a redirect URL.
 4. Redeploy.
+5. Configure custom SMTP (Supabase → Authentication → Emails): the built-in
+   sender is capped at ~2 emails/hour, which breaks confirmations and
+   password resets the moment real students sign up. Any transactional
+   provider (Resend, Postmark, SES) works.
 
 ## Ranked Duels
 
