@@ -119,6 +119,10 @@ export type DuelStore = {
     levelCode: LevelCode,
     mode: DuelMode,
   ): Promise<QueueRow[]>;
+  /** Atomically removes BOTH queue rows; false when a concurrent pairing won. */
+  claimPair(userA: string, userB: string, subjectId: string): Promise<boolean>;
+  /** The user's most recent non-complete two-player match, if any. */
+  getActiveMatch(userId: string): Promise<DuelMatch | null>;
 
   // matches
   pickGradableQuestionIds(subjectId: string, count: number): Promise<string[]>;

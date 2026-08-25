@@ -126,6 +126,28 @@ export function createFakeDuelStore(options?: {
           q.mode === mode,
       );
     },
+    async claimPair(userA, userB, subjectId) {
+      const mine = queue.findIndex(
+        (q) => q.user_id === userA && q.subject_id === subjectId,
+      );
+      const theirs = queue.findIndex(
+        (q) => q.user_id === userB && q.subject_id === subjectId,
+      );
+      if (mine < 0 || theirs < 0) return false;
+      for (const index of [mine, theirs].sort((a, b) => b - a)) {
+        queue.splice(index, 1);
+      }
+      return true;
+    },
+    async getActiveMatch(userId) {
+      return (
+        matches.find(
+          (m) =>
+            m.status === "ACTIVE" &&
+            (m.student_a_id === userId || m.student_b_id === userId),
+        ) ?? null
+      );
+    },
     async pickGradableQuestionIds(_subjectId, count) {
       return questions.slice(0, count).map((q) => q.id);
     },

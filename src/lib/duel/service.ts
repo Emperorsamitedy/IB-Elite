@@ -97,6 +97,7 @@ export async function queueForDuel(
   },
   now: Date,
 ): Promise<QueueOutcome> {
+  await assertNotMidMatch(store, input.userId, now);
   const season = await getOrCreateSeason(store, now);
   const rating = await getOrCreateRating(
     store,
@@ -163,6 +164,11 @@ export async function tryPair(
     );
   }
 
+  // Atomic claim: whichever concurrent pairing attempt removes both queue
+  // rows wins; everyone else stays queued and retries on the next poll.
+  const claimed = await store.claimPair(userId, opponent.userId, subjectId);
+  if (!claimed) return { status: "queued" };
+
   const match = await store.createMatch({
     subjectId,
     levelCode,
@@ -174,8 +180,6 @@ export async function tryPair(
     timeLimitSeconds: MATCH_TIME_LIMIT_SECONDS,
   });
 
-  await store.dequeue(userId, subjectId);
-  await store.dequeue(opponent.userId, subjectId);
   await store.notify({
     userId: opponent.userId,
     category: "duels",
@@ -333,6 +337,27 @@ export async function getMatchState(
     verdict,
     review,
   };
+}
+
+/**
+ * One live match at a time. Only blocks while the match clock can still be
+ * running — an abandoned match past its window resolves by forfeit the next
+ * time anyone opens it, so it must never wedge the player out of queueing.
+ */
+async function assertNotMidMatch(
+  store: DuelStore,
+  userId: string,
+  now: Date,
+): Promise<void> {
+  const active = await store.getActiveMatch(userId);
+  if (!active?.started_at) return;
+  const deadline =
+    new Date(active.started_at).getTime() +
+    active.time_limit_seconds * 1000 +
+    FORFEIT_GRACE_MS;
+  if (now.getTime() < deadline) {
+    throw new DuelError("Finish your current duel first", 409);
+  }
 }
 
 export class DuelError extends Error {
@@ -742,6 +767,7 @@ export async function acceptDuelChallenge(
   if (challenge.opponent_id && challenge.opponent_id !== input.userId) {
     throw new DuelError("This challenge names someone else", 403);
   }
+  await assertNotMidMatch(store, input.userId, now);
   // Two accounts on one network can spar, but never for rating.
   if (
     challenge.mode === "ranked" &&

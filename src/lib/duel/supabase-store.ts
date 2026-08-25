@@ -146,6 +146,28 @@ export function createSupabaseDuelStore(
       })) as QueueRow[];
     },
 
+    async claimPair(userA, userB, subjectId) {
+      const { data, error } = await client.rpc("claim_duel_pair", {
+        p_user_a: userA,
+        p_user_b: userB,
+        p_subject: subjectId,
+      });
+      if (error) throw new Error(error.message);
+      return data === true;
+    },
+
+    async getActiveMatch(userId) {
+      const { data } = await client
+        .from("ladder_matches")
+        .select(MATCH_COLUMNS)
+        .eq("status", "ACTIVE")
+        .or(`student_a_id.eq.${userId},student_b_id.eq.${userId}`)
+        .order("started_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data ? asMatch(data) : null;
+    },
+
     async pickGradableQuestionIds(subjectId, count) {
       const { data, error } = await client
         .from("questions")
