@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { EmptyState } from "@/components/ui/misc";
+import { NotificationPrefs } from "@/components/app/notification-prefs";
 import { messages } from "@/lib/i18n/en";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -14,6 +15,11 @@ export const metadata = { title: messages.notifications.title };
 export default async function NotificationsPage() {
   const user = await requireUser();
   const supabase = await createClient();
+
+  const { data: optouts } = await supabase
+    .from("notification_optouts")
+    .select("category")
+    .eq("user_id", user.id);
 
   const { data: rows } = await supabase
     .from("notifications")
@@ -82,6 +88,10 @@ export default async function NotificationsPage() {
           </CardContent>
         </Card>
       )}
+
+      <NotificationPrefs
+        mutedCategories={(optouts ?? []).map((o) => o.category)}
+      />
     </div>
   );
 }

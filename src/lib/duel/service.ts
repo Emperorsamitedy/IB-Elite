@@ -1,5 +1,5 @@
 import type { Json } from "@/lib/supabase/database.types";
-import { gradeAnswer } from "./answers";
+import { gradeAnswer, modelAnswerOf } from "./answers";
 import { ELO_INITIAL, softReset, updateElo, type MatchOutcome } from "./elo";
 import { flagSide, shouldQuarantine, type AnswerTiming } from "./integrity";
 import { pickOpponent } from "./matchmaking";
@@ -217,6 +217,17 @@ export type MatchState = {
     budgetMs: number;
   } | null;
   verdict: { result: "won" | "lost" | "drew"; yourElo?: number; delta?: number } | null;
+  /** Your own answers, revealed only once the match is COMPLETE. */
+  review:
+    | {
+        index: number;
+        prompt: string;
+        yourAnswer: string | null;
+        isCorrect: boolean;
+        modelAnswer: string | null;
+        questionId: string;
+      }[]
+    | null;
 };
 
 /**
@@ -284,6 +295,7 @@ export async function getMatchState(
   const opponent = sides.find((s) => s.studentId !== userId) ?? null;
 
   let verdict: MatchState["verdict"] = null;
+  let review: MatchState["review"] = null;
   if (match.status === "COMPLETE" && opponent) {
     const result = decideMatch(toSideResult(you), toSideResult(opponent));
     verdict = {
@@ -294,6 +306,22 @@ export async function getMatchState(
             ? "won"
             : "lost",
     };
+    review = answers
+      .filter((a) => a.student_id === userId && a.answered_at !== null)
+      .sort((a, b) => a.question_index - b.question_index)
+      .map((row) => {
+        const question = questions.find((q) => q.id === row.question_id);
+        return {
+          index: row.question_index,
+          prompt: question?.prompt ?? "",
+          yourAnswer: row.answer,
+          isCorrect: row.is_correct === true,
+          modelAnswer: question
+            ? modelAnswerOf(question.answer_type, question.answer_key)
+            : null,
+          questionId: row.question_id,
+        };
+      });
   }
 
   return {
@@ -303,6 +331,7 @@ export async function getMatchState(
     totalQuestions: match.question_ids.length,
     currentQuestion,
     verdict,
+    review,
   };
 }
 

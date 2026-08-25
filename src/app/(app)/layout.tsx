@@ -41,7 +41,11 @@ export default async function AppLayout({
             {children}
           </main>
         </div>
-        <MobileNav />
+        <MobileNav
+          mockEnabled={mockEnabled}
+          schoolsEnabled={schoolsEnabled}
+          signalEnabled={signalEnabled}
+        />
         <CommandPalette />
         {/* Only offered when a real model can answer — never a canned stand-in. */}
         {featureFlags.ai && <AssistantDock />}
