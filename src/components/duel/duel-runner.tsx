@@ -190,6 +190,9 @@ export function DuelRunner({ matchId }: { matchId: string }) {
             </span>
             {secondsLeft !== null && !youDone && (
               <span
+                role="timer"
+                aria-live="off"
+                aria-label={t.timeLeft}
                 className={cn(
                   "flex items-center gap-1.5 font-mono text-sm tabular-nums",
                   secondsLeft <= 10 && "text-danger",

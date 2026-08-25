@@ -6,6 +6,7 @@ import { requireAdmin, requireUser } from "@/lib/auth";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { getOrCreateRegionalTeam } from "@/lib/school/service";
 import { BANNER_PRESETS } from "@/lib/school/rivalry";
+import { normalizeCity } from "@/lib/school/city";
 import { logEvent } from "@/lib/actions/analytics";
 
 function slugify(name: string) {
@@ -84,7 +85,7 @@ export async function requestSchool(input: z.infer<typeof requestSchema>) {
 
   const { error } = await admin.from("school_requests").insert({
     name: parsed.data.name.trim(),
-    city: parsed.data.city?.trim() || null,
+    city: normalizeCity(parsed.data.city),
     country: parsed.data.country,
     requested_by: user.id,
   });
@@ -116,7 +117,7 @@ export async function reviewSchoolRequest(id: string, approve: boolean) {
         {
           slug,
           name: request.name,
-          city: request.city,
+          city: normalizeCity(request.city),
           country: request.country,
           verified: true,
           created_by: request.requested_by,

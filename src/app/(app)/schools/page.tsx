@@ -84,7 +84,9 @@ export default async function SchoolsPage({
     );
   }
   if (board === "city" && mySchool?.city) {
-    standingsQuery = standingsQuery.eq("schools.city", mySchool.city);
+    // ilike (no wildcards) = case-insensitive equality, absorbing any
+    // legacy rows written before city normalization.
+    standingsQuery = standingsQuery.ilike("schools.city", mySchool.city);
   }
   const { data: standings } = await standingsQuery;
 

@@ -38,7 +38,15 @@ export function Countdown({
   }, [to, reloadOnZero]);
 
   return (
-    <span className={className} suppressHydrationWarning>
+    <span
+      className={className}
+      suppressHydrationWarning
+      // A live region here would announce every tick; a labelled timer
+      // lets screen readers query it without being shouted at.
+      role="timer"
+      aria-live="off"
+      aria-label={`Time remaining until ${new Date(to).toLocaleString()}`}
+    >
       {format(left)}
     </span>
   );

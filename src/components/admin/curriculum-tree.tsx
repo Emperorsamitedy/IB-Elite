@@ -8,6 +8,8 @@ import {
   Trash2,
   GripVertical,
   ChevronRight,
+  ChevronUp,
+  ChevronDown,
   Pencil,
   Archive,
   ArchiveRestore,
@@ -429,6 +431,12 @@ function Column({
     const to = order.findIndex((n) => n.id === targetId);
     dragging.current = null;
     if (from < 0 || to < 0 || from === to) return;
+    move(from, to);
+  }
+
+  /** Shared by drag-and-drop and the keyboard-reachable menu items. */
+  function move(from: number, to: number) {
+    if (to < 0 || to >= order.length || from === to) return;
     const next = [...order];
     const [moved] = next.splice(from, 1);
     next.splice(to, 0, moved);
@@ -523,6 +531,18 @@ function Column({
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onSelect={() => setEditingId(n.id)}>
                       <Pencil className="h-3.5 w-3.5" /> Rename
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={order.indexOf(n) === 0}
+                      onSelect={() => move(order.indexOf(n), order.indexOf(n) - 1)}
+                    >
+                      <ChevronUp className="h-3.5 w-3.5" /> Move up
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      disabled={order.indexOf(n) === order.length - 1}
+                      onSelect={() => move(order.indexOf(n), order.indexOf(n) + 1)}
+                    >
+                      <ChevronDown className="h-3.5 w-3.5" /> Move down
                     </DropdownMenuItem>
                     {onSetStatus &&
                       (n.status === "archived" ? (
