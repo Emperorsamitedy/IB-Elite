@@ -11,7 +11,6 @@ import type {
   MockStore,
 } from "./store";
 import type { CriterionAward, EntryStatus, MockBand } from "./types";
-import type { OcrWord } from "@/lib/scans/types";
 
 const PAPER_COLUMNS =
   "id, subject_id, level_code, language, title, body, duration_minutes, markscheme, status";
