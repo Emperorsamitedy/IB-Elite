@@ -2,6 +2,7 @@ import { NextResponse, type NextRequest } from "next/server";
 import { z } from "zod";
 import { queueForDuel, tryPair } from "@/lib/duel/service";
 import { createSupabaseDuelStore } from "@/lib/duel/supabase-store";
+import { ipHashFromHeaders } from "@/lib/anti-abuse";
 import { duelErrorResponse, requireUser, track } from "../util";
 
 const bodySchema = z.object({
@@ -21,7 +22,12 @@ export async function POST(request: NextRequest) {
   try {
     const outcome = await queueForDuel(
       createSupabaseDuelStore(),
-      { userId: user.id, subjectId: parsed.data.subjectId, mode: parsed.data.mode },
+      {
+        userId: user.id,
+        subjectId: parsed.data.subjectId,
+        mode: parsed.data.mode,
+        ipHash: ipHashFromHeaders(request.headers),
+      },
       new Date(),
     );
     await track("duel_queued", user.id, {

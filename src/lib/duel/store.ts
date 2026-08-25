@@ -68,6 +68,7 @@ export type QueueRow = {
   level_code: LevelCode;
   elo: number;
   mode: DuelMode;
+  ip_hash: string | null;
   enqueued_at: string;
 };
 
@@ -81,6 +82,7 @@ export type Challenge = {
   mode: DuelMode;
   match_id: string | null;
   claimed_by: string | null;
+  creator_ip_hash: string | null;
   expires_at: string;
 };
 
@@ -151,6 +153,12 @@ export type DuelStore = {
   listAnswers(matchId: string): Promise<MatchAnswerRow[]>;
 
   // ledger, diagnostics, review
+  /** Ranked matches between this exact pair since the cutoff. */
+  countRecentRankedMatches(
+    userA: string,
+    userB: string,
+    sinceIso: string,
+  ): Promise<number>;
   appendEvents(events: PerformanceEventInput[]): Promise<void>;
   historyAccuracy(userId: string, subjectId: string): Promise<number | null>;
   createIntegrityReview(input: {
@@ -177,6 +185,7 @@ export type DuelStore = {
     subjectId: string;
     levelCode: LevelCode;
     mode: DuelMode;
+    creatorIpHash: string | null;
   }): Promise<Challenge>;
   getChallengeByToken(token: string): Promise<Challenge | null>;
   claimChallenge(

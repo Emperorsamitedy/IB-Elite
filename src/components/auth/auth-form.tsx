@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import Link from "next/link";
+import Script from "next/script";
 import { useActionState } from "react";
 import { useFormStatus } from "react-dom";
 import { AlertCircle, CheckCircle2 } from "lucide-react";
@@ -121,6 +122,21 @@ export function AuthForm({
             />
           </div>
         )}
+
+        {mode === "register" &&
+          process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && (
+            <>
+              <Script
+                src="https://challenges.cloudflare.com/turnstile/api.js"
+                strategy="lazyOnload"
+              />
+              <div
+                className="cf-turnstile"
+                data-sitekey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY}
+                data-theme="auto"
+              />
+            </>
+          )}
 
         {mode === "reset" && (
           <div className="flex flex-col gap-1.5">

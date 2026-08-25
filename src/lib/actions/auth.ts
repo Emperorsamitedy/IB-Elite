@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { headers } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { env } from "@/lib/env";
+import { verifyTurnstile } from "@/lib/anti-abuse";
 
 export type AuthState = { error?: string; message?: string } | null;
 
@@ -52,6 +53,14 @@ export async function signUp(
   }
   if (password.length < 8) {
     return { error: "Password must be at least 8 characters." };
+  }
+
+  // Bot check — a no-op until the Turnstile keys are configured.
+  const human = await verifyTurnstile(
+    formData.get("cf-turnstile-response") as string | null,
+  );
+  if (!human) {
+    return { error: "Please complete the verification and try again." };
   }
 
   const supabase = await createClient();

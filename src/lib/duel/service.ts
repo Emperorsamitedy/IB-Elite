@@ -89,7 +89,12 @@ export type QueueOutcome =
  */
 export async function queueForDuel(
   store: DuelStore,
-  input: { userId: string; subjectId: string; mode: DuelMode },
+  input: {
+    userId: string;
+    subjectId: string;
+    mode: DuelMode;
+    ipHash?: string | null;
+  },
   now: Date,
 ): Promise<QueueOutcome> {
   const season = await getOrCreateSeason(store, now);
@@ -107,6 +112,7 @@ export async function queueForDuel(
     level_code: levelCode,
     elo: rating.elo,
     mode: input.mode,
+    ip_hash: input.ipHash ?? null,
   });
 
   return tryPair(store, input.userId, input.subjectId, now);
@@ -133,9 +139,15 @@ export async function tryPair(
     userId: q.user_id,
     elo: q.elo,
     enqueuedAt: q.enqueued_at,
+    ipHash: q.ip_hash,
   }));
   const opponent = pickOpponent(
-    { userId, elo: seeker.elo, enqueuedAt: seeker.enqueued_at },
+    {
+      userId,
+      elo: seeker.elo,
+      enqueuedAt: seeker.enqueued_at,
+      ipHash: seeker.ip_hash,
+    },
     candidates,
     now,
   );
@@ -488,6 +500,29 @@ async function finalize(
   }
   const quarantined = quarantinedSides.size > 0;
 
+  // Elo farming leaves a trail: the same two accounts trading ranked
+  // matches all day. Flag for review — never auto-punish; siblings and
+  // classmates on one subject are legitimate.
+  if (match.mode === "ranked" && match.student_b_id) {
+    const since = new Date(now.getTime() - 24 * 3600_000).toISOString();
+    const recent = await store.countRecentRankedMatches(
+      match.student_a_id,
+      match.student_b_id,
+      since,
+    );
+    if (recent >= 5) {
+      for (const side of sides) {
+        await store.createIntegrityReview({
+          userId: side.studentId,
+          sourceKind: "duel_match",
+          sourceId: match.id,
+          reason: "excessive_rematch",
+          details: { pairMatchesLast24h: recent },
+        });
+      }
+    }
+  }
+
   // Elo — ranked only, withheld entirely when either side is quarantined
   // (an inflated opponent rating would corrupt the honest player too).
   const eloAfter = new Map<string, { before: number; after: number }>();
@@ -630,6 +665,7 @@ export async function createDuelChallenge(
     mode: DuelMode;
     opponentId?: string | null;
     token: string;
+    ipHash?: string | null;
   },
 ): Promise<{ token: string }> {
   const levelCode = await store.getStudentLevel(input.creatorId, input.subjectId);
@@ -640,6 +676,7 @@ export async function createDuelChallenge(
     subjectId: input.subjectId,
     levelCode,
     mode: input.mode,
+    creatorIpHash: input.ipHash ?? null,
   });
   if (input.opponentId) {
     await store.notify({
@@ -659,7 +696,7 @@ export async function createDuelChallenge(
  */
 export async function acceptDuelChallenge(
   store: DuelStore,
-  input: { token: string; userId: string },
+  input: { token: string; userId: string; ipHash?: string | null },
   now: Date,
 ): Promise<DuelMatch> {
   const challenge = await store.getChallengeByToken(input.token);
@@ -675,6 +712,18 @@ export async function acceptDuelChallenge(
   }
   if (challenge.opponent_id && challenge.opponent_id !== input.userId) {
     throw new DuelError("This challenge names someone else", 403);
+  }
+  // Two accounts on one network can spar, but never for rating.
+  if (
+    challenge.mode === "ranked" &&
+    challenge.creator_ip_hash &&
+    input.ipHash &&
+    challenge.creator_ip_hash === input.ipHash
+  ) {
+    throw new DuelError(
+      "Ranked challenges need different networks — play a friendly instead",
+      403,
+    );
   }
 
   const questionIds = await store.pickGradableQuestionIds(

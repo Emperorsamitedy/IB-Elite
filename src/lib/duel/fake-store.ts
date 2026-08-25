@@ -201,6 +201,15 @@ export function createFakeDuelStore(options?: {
     async listAnswers(matchId) {
       return answers.filter((a) => a.match_id === matchId);
     },
+    async countRecentRankedMatches(userA, userB, sinceIso) {
+      return matches.filter(
+        (m) =>
+          m.mode === "ranked" &&
+          ((m.student_a_id === userA && m.student_b_id === userB) ||
+            (m.student_a_id === userB && m.student_b_id === userA)) &&
+          (m.started_at ?? "") >= sinceIso,
+      ).length;
+    },
     async appendEvents(list) {
       events.push(...list);
     },
@@ -239,6 +248,7 @@ export function createFakeDuelStore(options?: {
         id: nextId(),
         token: input.token,
         creator_id: input.creatorId,
+        creator_ip_hash: input.creatorIpHash,
         opponent_id: input.opponentId,
         subject_id: input.subjectId,
         level_code: input.levelCode,

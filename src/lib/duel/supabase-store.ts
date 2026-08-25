@@ -17,7 +17,7 @@ const MATCH_COLUMNS =
 const ANSWER_COLUMNS =
   "id, match_id, student_id, question_id, question_index, answer, is_correct, served_at, answered_at";
 const CHALLENGE_COLUMNS =
-  "id, token, creator_id, opponent_id, subject_id, level_code, mode, match_id, claimed_by, expires_at";
+  "id, token, creator_id, opponent_id, subject_id, level_code, mode, match_id, claimed_by, creator_ip_hash, expires_at";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
 
@@ -109,11 +109,12 @@ export function createSupabaseDuelStore(
             level_code: row.level_code,
             elo: row.elo,
             mode: row.mode,
+            ip_hash: row.ip_hash,
             enqueued_at: new Date().toISOString(),
           },
           { onConflict: "user_id,subject_id" },
         )
-        .select("user_id, subject_id, level_code, elo, mode, enqueued_at")
+        .select("user_id, subject_id, level_code, elo, mode, ip_hash, enqueued_at")
         .single();
       if (error) throw new Error(error.message);
       return { ...data, level_code: asLevel(data.level_code) } as QueueRow;
@@ -130,7 +131,7 @@ export function createSupabaseDuelStore(
     async listQueue(subjectId, levelCode, mode) {
       const { data } = await client
         .from("duel_queue")
-        .select("user_id, subject_id, level_code, elo, mode, enqueued_at")
+        .select("user_id, subject_id, level_code, elo, mode, ip_hash, enqueued_at")
         .eq("subject_id", subjectId)
         .eq("level_code", levelCode)
         .eq("mode", mode)
@@ -291,6 +292,18 @@ export function createSupabaseDuelStore(
       return (data ?? []) as MatchAnswerRow[];
     },
 
+    async countRecentRankedMatches(userA, userB, sinceIso) {
+      const { count } = await client
+        .from("ladder_matches")
+        .select("id", { count: "exact", head: true })
+        .eq("mode", "ranked")
+        .gte("created_at", sinceIso)
+        .or(
+          `and(student_a_id.eq.${userA},student_b_id.eq.${userB}),and(student_a_id.eq.${userB},student_b_id.eq.${userA})`,
+        );
+      return count ?? 0;
+    },
+
     async appendEvents(events) {
       if (events.length === 0) return;
       const { error } = await client.from("performance_events").insert(
@@ -375,6 +388,7 @@ export function createSupabaseDuelStore(
           subject_id: input.subjectId,
           level_code: input.levelCode,
           mode: input.mode,
+          creator_ip_hash: input.creatorIpHash,
         })
         .select(CHALLENGE_COLUMNS)
         .single();
