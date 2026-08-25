@@ -22,7 +22,16 @@ function coerce(row: Record<string, string>) {
     if (NUMERIC.has(key)) out[key] = Number(value);
     else if (key === "tags") out[key] = value.split("|").map((t) => t.trim());
     else if (key === "calculator") out[key] = value.toLowerCase() === "true";
-    else out[key] = value;
+    else if (key === "answer_key") {
+      // JSON in a CSV cell, e.g. {"accept":["x=2"]} or
+      // {"options":["a","b"],"correct":1} — left as-is on a parse error so
+      // the row fails validation with a readable reason.
+      try {
+        out[key] = JSON.parse(value);
+      } catch {
+        out[key] = value;
+      }
+    } else out[key] = value;
   }
   return out;
 }
@@ -78,7 +87,10 @@ export function BulkImportDialog({
           <DialogTitle>Bulk import questions</DialogTitle>
           <DialogDescription>
             CSV with a header row. Required columns: subject_id, topic_id,
-            prompt. Tags are pipe-separated.
+            prompt. Tags are pipe-separated. For Ranked Duels add
+            answer_type (mcq | numeric | exact) and answer_key as JSON, e.g.{" "}
+            <code>{'{"accept":["x=2"]}'}</code> or{" "}
+            <code>{'{"options":["4","8"],"correct":1}'}</code>.
           </DialogDescription>
         </DialogHeader>
 

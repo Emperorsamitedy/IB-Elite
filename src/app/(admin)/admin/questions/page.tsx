@@ -15,7 +15,7 @@ export default async function AdminQuestionsPage() {
     supabase
       .from("questions")
       .select(
-        "id, title, prompt, answer, solution, subject_id, topic_id, subtopic_id, command_term, difficulty, marks, question_type, status",
+        "id, title, prompt, answer, solution, subject_id, topic_id, subtopic_id, command_term, difficulty, marks, question_type, status, answer_type",
       )
       .order("updated_at", { ascending: false })
       .limit(500),

@@ -52,6 +52,9 @@ export async function POST(request: NextRequest) {
 export async function GET(request: NextRequest) {
   const user = await requireUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (!(await rateLimitOk("duelPoll", user.id))) {
+    return NextResponse.json({ error: RATE_LIMITED_MESSAGE }, { status: 429 });
+  }
   const subjectId = request.nextUrl.searchParams.get("subjectId");
   if (!subjectId) {
     return NextResponse.json({ error: "subjectId required" }, { status: 400 });
