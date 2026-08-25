@@ -21,7 +21,9 @@ npm run dev                       # http://localhost:3000
 ```
 
 Stripe and AI keys are optional: billing shows as "not configured" and the tutor
-falls back to deterministic offline hints when no key is present.
+falls back to deterministic offline hints when no key is present. Supabase
+Realtime and Analytics are disabled in `supabase/config.toml` — Ranked Duels
+poll for live state, and Analytics only powers the Studio Logs tab.
 
 ### Environment variables
 
@@ -55,11 +57,90 @@ cannot serve pages until the two Supabase values are set.
    Vercel domain and add `https://<domain>/auth/callback` as a redirect URL.
 4. Redeploy.
 
+## Ranked Duels
+
+`/ladder` is the competitive arena: per-subject Elo (monthly seasons, Bronze →
+Grandmaster leagues, soft rating reset), skill-based matchmaking with a
+widening search window, and server-authoritative play — the server stamps
+per-question timing and grades every answer against a structured key, so the
+client is never trusted. Losses feed the mistake notebook and the
+`performance_events` ledger; statistical outliers (impossible speed, sudden
+accuracy jumps) are flagged into `integrity_reviews` and rating changes are
+withheld pending review. Friendly matches and shareable challenge links
+(`/duel/challenge/<token>`, works logged out and tracks signup attribution)
+carry no rating. Questions enter the duel pool once an admin gives them a
+structured answer key (MCQ / numeric / exact) in the question editor.
+
+## World Mock
+
+A monthly, globally synchronized mock sitting (feature-flagged:
+`app_flags.world_mock`). Admins author an exam-standard paper with a
+per-criterion markscheme at `/admin/mock`, calibrate the AI marker on sample
+scripts, and schedule three timezone-band sittings. The paper body is only
+served at the bell; each student's clock is server-stamped from their own
+start; scripts are handwritten, photographed and submitted before
+`min(own duration, window close) + 60s`. A cron heartbeat
+(`POST /api/mock/cron`, `x-cron-secret`) OCRs and grades scripts per
+criterion overnight, quarantines integrity outliers, then on Results Day
+computes global and country percentiles across all bands (late and
+quarantined scripts get marks but no rank). Free tier: mark + percentiles +
+shareable card (`/api/mock/card/<entryId>`). Pro: criterion breakdown,
+top-decile comparison and a practice plan targeting the weakest criteria.
+Operating guide: `docs/world-mock-runbook.md`.
+
+## School Wars
+
+A persistent school-vs-school ladder (feature-flagged:
+`app_flags.school_wars`). Students opt into a school from a searchable
+registry (`/schools`), request unlisted schools for admin verification
+(`/admin/schools`), or join their country's regional team so nobody is
+locked out. School scores are recomputed each heartbeat
+(`POST /api/school/cron`) from the performance ledger:
+participation-weighted averages with a per-member cap and a breadth boost,
+so an engaged 60-student school beats a passive 2,000-student one and the
+winning strategy is always activating more classmates. The heartbeat also
+pairs similarly ranked schools (same country preferred) into 7-day Rivalry
+Weeks with a live scoreboard, lead-change notifications, a
+participation-gap recruitment prompt with attributed invite links, and
+preset-only inter-school banners (no free text ever crosses school lines).
+Seasons align with duel seasons; a Top-100 snapshot is written when each
+season ends.
+
+## The Signal
+
+A verified, versioned academic rating per subject (feature-flagged:
+`app_flags.signal`), derived entirely from the immutable
+`performance_events` ledger: World Mock percentiles weigh most, ranked duel
+Elo next, graded practice least. Each rating carries a confidence (grows
+with sample size and evidence diversity), a trajectory
+(improving/stable/declining), and a verification tier — Verified requires a
+body of clean evidence across two evidence kinds and zero pending or upheld
+integrity reviews; Proctored is reserved for supervised sittings. Ratings
+are recomputed by `POST /api/signal/cron` under a versioned algorithm
+(`rating_algorithm_versions`) so any rating can be recomputed and
+explained. Public profiles are opt-in and field-by-field student-controlled
+(`/signal`, public page `/signal/p/<id>` shows the pseudonym only; private
+profiles 404). Voluntary calibration receipts freeze the prediction at
+report time and power public accuracy stats. The scout-portal data model
+(institutions, approval-gated contact requests, immutable audit log) ships
+now but stays behind `app_flags.scout_portal`.
+
+## Scout portal
+
+A separate institutional surface (`/scout`, feature-flagged off:
+`app_flags.scout_portal`). Approved institutions (created at
+`/admin/institutions`) search **opted-in public Signal profiles only**, by
+subject, rating band, trajectory and country; results are pseudonymous.
+Identity moves solely through contact requests the student approves on
+their Signal page — approval shares the name with that one institution;
+scanned work is never shared. Every search, request and response is
+recorded in the immutable `institution_audit_log`.
+
 ## Whiteboard & scanning
 
 `/whiteboard` is a pressure-sensitive scratch sheet (pen, highlighter, eraser,
-ruled/grid/plain paper, undo/redo, PNG export) that saves to the browser as you
-work. Two buttons run OCR through the `/api/scan` route:
+ruled/grid/plain paper, undo/redo, PNG export) that autosaves to your account
+as you work. Two buttons run OCR through the `/api/scan` route:
 
 - **Scan a question** — photograph a past paper; the photo is placed on the
   sheet and its text is transcribed.
@@ -86,7 +167,7 @@ without touching application code:
 Subject → Theme → Topic → Subtopic (optional) → Questions
 ```
 
-Admins manage the tree at `/admin/syllabus` (add, rename, reorder, merge,
+Admins manage the tree at `/admin/curriculum` (add, rename, reorder, merge,
 archive) and questions at `/admin/questions`. Publishing a question makes it
 appear under its subject, theme, topic and subtopic automatically.
 

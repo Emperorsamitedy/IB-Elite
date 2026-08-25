@@ -13,6 +13,7 @@ import {
   MAX_FEATURES,
   PRICING,
 } from "@/lib/constants";
+import { FREE_LIMITS } from "@/lib/plans";
 
 const FEATURES = [
   {
@@ -249,7 +250,8 @@ export default async function LandingPage() {
                 cadence="forever"
                 features={[
                   "Browse all subjects & topics",
-                  "10 practice questions per day",
+                  `${FREE_LIMITS.practiceQuestionsPerDay} practice questions per day`,
+                  `${FREE_LIMITS.aiMessagesPerDay} AI tutor messages per day`,
                   "Basic mistake notebook",
                   "1 exam countdown",
                 ]}

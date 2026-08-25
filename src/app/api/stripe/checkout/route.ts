@@ -60,8 +60,12 @@ export async function POST(request: NextRequest) {
     customer: sub?.stripe_customer_id ?? undefined,
     customer_email: sub?.stripe_customer_id ? undefined : (user.email ?? undefined),
     client_reference_id: user.id,
-    metadata: { user_id: user.id },
-    subscription_data: { metadata: { user_id: user.id } },
+    metadata: { user_id: user.id, plan: parsed.data.plan },
+    // The plan travels with the subscription so the webhook can record the
+    // purchased tier directly instead of inferring it from the price ID.
+    subscription_data: {
+      metadata: { user_id: user.id, plan: parsed.data.plan },
+    },
     success_url: `${env.siteUrl}/settings/billing?status=success`,
     cancel_url: `${env.siteUrl}/settings/billing?status=cancelled`,
     allow_promotion_codes: true,

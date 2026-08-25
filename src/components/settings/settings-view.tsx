@@ -30,7 +30,7 @@ export function SettingsView({
   userSubjectIds,
   exams,
 }: {
-  profile: { fullName: string; email: string };
+  profile: { fullName: string; displayName: string; email: string };
   preferences: {
     intensity: PlanIntensity;
     dailyTarget: number;
@@ -68,9 +68,10 @@ export function SettingsView({
 function ProfileTab({
   profile,
 }: {
-  profile: { fullName: string; email: string };
+  profile: { fullName: string; displayName: string; email: string };
 }) {
   const [name, setName] = React.useState(profile.fullName);
+  const [displayName, setDisplayName] = React.useState(profile.displayName);
   const [pending, start] = React.useTransition();
   return (
     <Card>
@@ -84,6 +85,18 @@ function ProfileTab({
           />
         </div>
         <div className="flex flex-col gap-1.5">
+          <Label htmlFor="display_name">Display name</Label>
+          <Input
+            id="display_name"
+            value={displayName}
+            maxLength={40}
+            onChange={(e) => setDisplayName(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Shown on duels and leaderboards instead of your real name.
+          </p>
+        </div>
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
           <Input id="email" value={profile.email} disabled />
         </div>
@@ -92,7 +105,7 @@ function ProfileTab({
           disabled={pending}
           onClick={() =>
             start(async () => {
-              await updateProfile({ fullName: name });
+              await updateProfile({ fullName: name, displayName });
               toast.success("Profile updated");
             })
           }

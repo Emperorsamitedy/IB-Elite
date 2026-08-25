@@ -10,15 +10,15 @@ export default async function AdminCurriculumPage() {
     supabase.from("subjects").select("id, name, slug").order("sort_order"),
     supabase
       .from("themes")
-      .select("id, name, slug, subject_id")
+      .select("id, name, slug, subject_id, status")
       .order("sort_order"),
     supabase
       .from("topics")
-      .select("id, name, slug, subject_id, theme_id")
+      .select("id, name, slug, subject_id, theme_id, status")
       .order("sort_order"),
     supabase
       .from("subtopics")
-      .select("id, name, slug, topic_id")
+      .select("id, name, slug, topic_id, status")
       .order("sort_order"),
   ]);
 

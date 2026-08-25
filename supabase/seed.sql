@@ -132,3 +132,15 @@ where not exists (
   select 1 from public.questions ex
   where ex.topic_id = tp.id and ex.prompt = q.prompt
 );
+
+-- ---------------------------------------------------------------
+-- Dev convenience: make short-answer seed questions duel-gradable
+-- so Ranked Duels are playable on a fresh local stack. Real content
+-- gets proper keys through the admin editor.
+-- ---------------------------------------------------------------
+update public.questions
+set answer_type = 'exact',
+    answer_key = jsonb_build_object('accept', jsonb_build_array(answer))
+where answer_type = 'free'
+  and answer is not null
+  and length(answer) <= 40;

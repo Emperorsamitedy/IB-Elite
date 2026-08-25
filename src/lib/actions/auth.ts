@@ -89,8 +89,10 @@ export async function requestPasswordReset(
 
   const supabase = await createClient();
   const origin = await siteOrigin();
+  // The link signs the user in with a recovery session, so send them straight
+  // to the form that sets the new password rather than into the app.
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${origin}/auth/callback?next=/app`,
+    redirectTo: `${origin}/auth/callback?next=/reset-password`,
   });
 
   if (error) return { error: error.message };
@@ -99,16 +101,53 @@ export async function requestPasswordReset(
   };
 }
 
-export async function signInWithGoogle() {
-  if (!env.configured) return;
+/** Sets a new password for the signed-in (or recovery-session) user. */
+export async function updatePassword(
+  _prev: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const password = String(formData.get("password") ?? "");
+  const confirm = String(formData.get("confirm") ?? "");
+
+  if (!env.configured) return { error: NOT_CONFIGURED };
+  if (password.length < 8) {
+    return { error: "Password must be at least 8 characters." };
+  }
+  if (password !== confirm) return { error: "Passwords don't match." };
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) {
+    return {
+      error: "Your reset link has expired. Request a new one to continue.",
+    };
+  }
+
+  const { error } = await supabase.auth.updateUser({ password });
+  if (error) return { error: error.message };
+
+  revalidatePath("/", "layout");
+  redirect("/app?password=updated");
+}
+
+export async function signInWithGoogle(
+  _prev: AuthState,
+  formData: FormData,
+): Promise<AuthState> {
+  const next = String(formData.get("next") ?? "/app");
+  if (!env.configured) return { error: NOT_CONFIGURED };
   const supabase = await createClient();
   const origin = await siteOrigin();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
-    options: { redirectTo: `${origin}/auth/callback?next=/app` },
+    options: { redirectTo: `${origin}/auth/callback?next=${next}` },
   });
-  if (error) return;
-  if (data.url) redirect(data.url);
+  // A misconfigured provider must say so, not fail silently.
+  if (error) return { error: error.message };
+  if (!data.url) return { error: "Google sign-in is not available right now." };
+  redirect(data.url);
 }
 
 export async function signOut() {

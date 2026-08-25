@@ -20,6 +20,10 @@ export const subjectSchema = z.object({
   sort_order: z.number().int().min(0).max(9999).optional(),
 });
 
+/** Themes, topics and subtopics can be archived; subjects cannot. */
+export const statusSchema = z.enum(["draft", "published", "archived"]);
+export type CurriculumStatus = z.infer<typeof statusSchema>;
+
 export const themeSchema = z.object({
   subject_id: z.string().uuid(),
   slug: z.string().min(1).max(80),
@@ -27,6 +31,7 @@ export const themeSchema = z.object({
   description: z.string().nullable().optional(),
   level_code: z.enum(["SL", "HL"]).nullable().optional(),
   sort_order: z.number().int().min(0).max(9999).optional(),
+  status: statusSchema.optional(),
 });
 
 export const topicSchema = z.object({
@@ -36,6 +41,7 @@ export const topicSchema = z.object({
   name: z.string().min(1).max(160),
   description: z.string().nullable().optional(),
   sort_order: z.number().int().min(0).max(9999).optional(),
+  status: statusSchema.optional(),
 });
 
 export const subtopicSchema = z.object({
@@ -44,7 +50,17 @@ export const subtopicSchema = z.object({
   name: z.string().min(1).max(160),
   description: z.string().nullable().optional(),
   sort_order: z.number().int().min(0).max(9999).optional(),
+  status: statusSchema.optional(),
 });
+
+export const mergeSchema = z
+  .object({
+    source_id: z.string().uuid(),
+    target_id: z.string().uuid(),
+  })
+  .refine((v) => v.source_id !== v.target_id, {
+    message: "Pick two different topics.",
+  });
 
 export const SCHEMAS = {
   subjects: subjectSchema,

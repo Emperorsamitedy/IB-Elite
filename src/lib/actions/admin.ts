@@ -21,6 +21,19 @@ const questionSchema = z.object({
   difficulty: z.enum(["easy", "medium", "hard"]),
   marks: z.number().int().min(0).max(100),
   questionType: z.string().min(1),
+  answerType: z.enum(["free", "mcq", "numeric", "exact"]).default("free"),
+  // Validated per type: the duel pool only draws structured questions.
+  answerKey: z
+    .union([
+      z.object({
+        options: z.array(z.string().min(1)).min(2).max(8),
+        correct: z.number().int().min(0),
+      }),
+      z.object({ value: z.number(), tolerance: z.number().min(0) }),
+      z.object({ accept: z.array(z.string().min(1)).min(1).max(20) }),
+    ])
+    .nullable()
+    .optional(),
   calculator: z.boolean().nullable().optional(),
   year: z.number().int().nullable().optional(),
   paper: z.string().nullable().optional(),
@@ -47,6 +60,8 @@ function toRow(v: QuestionFormValues) {
     difficulty: v.difficulty,
     marks: v.marks,
     question_type: v.questionType,
+    answer_type: v.answerType,
+    answer_key: v.answerKey ?? null,
     calculator: v.calculator ?? null,
     year: v.year ?? null,
     paper: v.paper ?? null,
@@ -56,10 +71,32 @@ function toRow(v: QuestionFormValues) {
   };
 }
 
+function answerKeyError(v: QuestionFormValues): string | null {
+  if (v.answerType === "free") return null;
+  const key = v.answerKey as Record<string, unknown> | null | undefined;
+  if (!key) return "A structured answer needs its key filled in.";
+  if (v.answerType === "mcq") {
+    const options = key.options as string[] | undefined;
+    const correct = key.correct as number | undefined;
+    if (!options || correct === undefined || correct >= options.length) {
+      return "MCQ needs options and a correct option among them.";
+    }
+  }
+  if (v.answerType === "numeric" && typeof key.value !== "number") {
+    return "Numeric answers need a target value.";
+  }
+  if (v.answerType === "exact" && !Array.isArray(key.accept)) {
+    return "Exact answers need at least one accepted string.";
+  }
+  return null;
+}
+
 export async function createQuestion(input: QuestionFormValues) {
   await requireAdmin();
   const parsed = questionSchema.safeParse(input);
   if (!parsed.success) return { error: "Please check the form and try again." };
+  const keyError = answerKeyError(parsed.data);
+  if (keyError) return { error: keyError };
 
   const supabase = await createClient();
   const { data, error } = await supabase
@@ -76,6 +113,8 @@ export async function updateQuestion(id: string, input: QuestionFormValues) {
   await requireAdmin();
   const parsed = questionSchema.safeParse(input);
   if (!parsed.success) return { error: "Please check the form and try again." };
+  const keyError = answerKeyError(parsed.data);
+  if (keyError) return { error: keyError };
 
   const supabase = await createClient();
   const { error } = await supabase
@@ -86,161 +125,6 @@ export async function updateQuestion(id: string, input: QuestionFormValues) {
   revalidatePath("/admin/questions");
   revalidatePath(`/questions/${id}`);
   return { ok: true, id };
-}
-
-// ---------------------------------------------------------------
-// Syllabus tree — themes, topics and subtopics are edited here so no
-// code change is ever needed to restructure a subject.
-// ---------------------------------------------------------------
-
-const themeSchema = z.object({
-  subjectId: z.string().uuid(),
-  slug: z.string().min(1).max(80),
-  name: z.string().min(1).max(160),
-  description: z.string().nullable().optional(),
-  levelCode: z.enum(["SL", "HL"]).nullable().optional(),
-  sortOrder: z.number().int().min(0).max(999),
-});
-
-const topicSchema = themeSchema.extend({
-  themeId: z.string().uuid().nullable().optional(),
-});
-
-const subtopicSchema = z.object({
-  topicId: z.string().uuid(),
-  slug: z.string().min(1).max(80),
-  name: z.string().min(1).max(160),
-  sortOrder: z.number().int().min(0).max(999),
-});
-
-export type ThemeFormValues = z.infer<typeof themeSchema>;
-export type TopicFormValues = z.infer<typeof topicSchema>;
-export type SubtopicFormValues = z.infer<typeof subtopicSchema>;
-
-function revalidateSyllabus() {
-  revalidatePath("/admin/curriculum");
-  revalidatePath("/subjects", "layout");
-}
-
-export async function saveTheme(id: string | null, input: ThemeFormValues) {
-  await requireAdmin();
-  const parsed = themeSchema.safeParse(input);
-  if (!parsed.success) return { error: "Please check the theme details." };
-  const v = parsed.data;
-  const row = {
-    subject_id: v.subjectId,
-    slug: v.slug,
-    name: v.name,
-    description: v.description ?? null,
-    level_code: v.levelCode ?? null,
-    sort_order: v.sortOrder,
-  };
-
-  const supabase = await createClient();
-  const { error } = id
-    ? await supabase.from("themes").update(row).eq("id", id)
-    : await supabase.from("themes").insert(row);
-  if (error) return { error: error.message };
-  revalidateSyllabus();
-  return { ok: true };
-}
-
-export async function saveTopic(id: string | null, input: TopicFormValues) {
-  await requireAdmin();
-  const parsed = topicSchema.safeParse(input);
-  if (!parsed.success) return { error: "Please check the topic details." };
-  const v = parsed.data;
-  const row = {
-    subject_id: v.subjectId,
-    theme_id: v.themeId ?? null,
-    slug: v.slug,
-    name: v.name,
-    description: v.description ?? null,
-    level_code: v.levelCode ?? null,
-    sort_order: v.sortOrder,
-  };
-
-  const supabase = await createClient();
-  const { error } = id
-    ? await supabase.from("topics").update(row).eq("id", id)
-    : await supabase.from("topics").insert(row);
-  if (error) return { error: error.message };
-  revalidateSyllabus();
-  return { ok: true };
-}
-
-export async function saveSubtopic(
-  id: string | null,
-  input: SubtopicFormValues,
-) {
-  await requireAdmin();
-  const parsed = subtopicSchema.safeParse(input);
-  if (!parsed.success) return { error: "Please check the subtopic details." };
-  const v = parsed.data;
-  const row = {
-    topic_id: v.topicId,
-    slug: v.slug,
-    name: v.name,
-    sort_order: v.sortOrder,
-  };
-
-  const supabase = await createClient();
-  const { error } = id
-    ? await supabase.from("subtopics").update(row).eq("id", id)
-    : await supabase.from("subtopics").insert(row);
-  if (error) return { error: error.message };
-  revalidateSyllabus();
-  return { ok: true };
-}
-
-export async function setSyllabusStatus(
-  kind: "themes" | "topics" | "subtopics",
-  id: string,
-  status: ContentStatus,
-) {
-  await requireAdmin();
-  const supabase = await createClient();
-  const { error } = await supabase.from(kind).update({ status }).eq("id", id);
-  if (error) return { error: error.message };
-  revalidateSyllabus();
-  return { ok: true };
-}
-
-export async function moveSyllabusNode(
-  kind: "themes" | "topics" | "subtopics",
-  id: string,
-  sortOrder: number,
-) {
-  await requireAdmin();
-  const supabase = await createClient();
-  const { error } = await supabase
-    .from(kind)
-    .update({ sort_order: sortOrder })
-    .eq("id", id);
-  if (error) return { error: error.message };
-  revalidateSyllabus();
-  return { ok: true };
-}
-
-/** Moves every question from one topic into another, then archives the source. */
-export async function mergeTopics(sourceId: string, targetId: string) {
-  await requireAdmin();
-  if (sourceId === targetId) return { error: "Pick two different topics." };
-
-  const supabase = await createClient();
-  const { error: moveError } = await supabase
-    .from("questions")
-    .update({ topic_id: targetId, subtopic_id: null })
-    .eq("topic_id", sourceId);
-  if (moveError) return { error: moveError.message };
-
-  const { error } = await supabase
-    .from("topics")
-    .update({ status: "archived" })
-    .eq("id", sourceId);
-  if (error) return { error: error.message };
-  revalidateSyllabus();
-  return { ok: true };
 }
 
 export async function setQuestionStatus(id: string, status: ContentStatus) {

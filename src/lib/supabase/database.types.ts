@@ -125,6 +125,27 @@ export type Database = {
         }
         Relationships: []
       }
+      app_flags: {
+        Row: {
+          config: Json
+          enabled: boolean
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          config?: Json
+          enabled?: boolean
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          config?: Json
+          enabled?: boolean
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bookmarks: {
         Row: {
           created_at: string
@@ -147,6 +168,85 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calibration_reports: {
+        Row: {
+          created_at: string
+          exam_session: string
+          id: string
+          official_grade: number
+          predicted_confidence: number
+          predicted_rating: number
+          subject_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          exam_session: string
+          id?: string
+          official_grade: number
+          predicted_confidence: number
+          predicted_rating: number
+          subject_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          exam_session?: string
+          id?: string
+          official_grade?: number
+          predicted_confidence?: number
+          predicted_rating?: number
+          subject_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calibration_reports_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      contact_requests: {
+        Row: {
+          created_at: string
+          id: string
+          institution_id: string
+          message: string | null
+          responded_at: string | null
+          status: string
+          student_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          institution_id: string
+          message?: string | null
+          responded_at?: string | null
+          status?: string
+          student_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          institution_id?: string
+          message?: string | null
+          responded_at?: string | null
+          status?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contact_requests_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
             referencedColumns: ["id"]
           },
         ]
@@ -182,6 +282,98 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "deadlines_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      duel_challenges: {
+        Row: {
+          claimed_by: string | null
+          created_at: string
+          creator_id: string
+          expires_at: string
+          id: string
+          level_code: string
+          match_id: string | null
+          mode: string
+          opponent_id: string | null
+          subject_id: string
+          token: string
+        }
+        Insert: {
+          claimed_by?: string | null
+          created_at?: string
+          creator_id: string
+          expires_at?: string
+          id?: string
+          level_code?: string
+          match_id?: string | null
+          mode?: string
+          opponent_id?: string | null
+          subject_id: string
+          token: string
+        }
+        Update: {
+          claimed_by?: string | null
+          created_at?: string
+          creator_id?: string
+          expires_at?: string
+          id?: string
+          level_code?: string
+          match_id?: string | null
+          mode?: string
+          opponent_id?: string | null
+          subject_id?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duel_challenges_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "ladder_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "duel_challenges_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      duel_queue: {
+        Row: {
+          elo: number
+          enqueued_at: string
+          level_code: string
+          mode: string
+          subject_id: string
+          user_id: string
+        }
+        Insert: {
+          elo?: number
+          enqueued_at?: string
+          level_code?: string
+          mode?: string
+          subject_id: string
+          user_id: string
+        }
+        Update: {
+          elo?: number
+          enqueued_at?: string
+          level_code?: string
+          mode?: string
+          subject_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "duel_queue_subject_id_fkey"
             columns: ["subject_id"]
             isOneToOne: false
             referencedRelation: "subjects"
@@ -234,6 +426,133 @@ export type Database = {
           },
         ]
       }
+      institution_audit_log: {
+        Row: {
+          action: string
+          actor_id: string | null
+          created_at: string
+          details: Json
+          id: string
+          institution_id: string
+        }
+        Insert: {
+          action: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          institution_id: string
+        }
+        Update: {
+          action?: string
+          actor_id?: string | null
+          created_at?: string
+          details?: Json
+          id?: string
+          institution_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "institution_audit_log_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      institution_members: {
+        Row: {
+          created_at: string
+          institution_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          institution_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          institution_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "institution_members_institution_id_fkey"
+            columns: ["institution_id"]
+            isOneToOne: false
+            referencedRelation: "institutions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      institutions: {
+        Row: {
+          approved: boolean
+          created_at: string
+          id: string
+          kind: string
+          name: string
+        }
+        Insert: {
+          approved?: boolean
+          created_at?: string
+          id?: string
+          kind?: string
+          name: string
+        }
+        Update: {
+          approved?: boolean
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      integrity_reviews: {
+        Row: {
+          created_at: string
+          details: Json
+          id: string
+          reason: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          source_id: string
+          source_kind: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          details?: Json
+          id?: string
+          reason: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id: string
+          source_kind: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          details?: Json
+          id?: string
+          reason?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          source_id?: string
+          source_kind?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       ladder_leaderboard: {
         Row: {
           country: string | null
@@ -270,41 +589,60 @@ export type Database = {
           ended_at: string | null
           id: string
           level_code: string
+          mode: string
           paper_ref: string | null
           paper_year: number | null
+          question_ids: string[]
+          season_id: string | null
           started_at: string | null
           status: Database["public"]["Enums"]["ladder_status"]
           student_a_id: string
           student_b_id: string | null
           subject_id: string
+          time_limit_seconds: number
         }
         Insert: {
           created_at?: string
           ended_at?: string | null
           id?: string
           level_code?: string
+          mode?: string
           paper_ref?: string | null
           paper_year?: number | null
+          question_ids?: string[]
+          season_id?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["ladder_status"]
           student_a_id: string
           student_b_id?: string | null
           subject_id: string
+          time_limit_seconds?: number
         }
         Update: {
           created_at?: string
           ended_at?: string | null
           id?: string
           level_code?: string
+          mode?: string
           paper_ref?: string | null
           paper_year?: number | null
+          question_ids?: string[]
+          season_id?: string | null
           started_at?: string | null
           status?: Database["public"]["Enums"]["ladder_status"]
           student_a_id?: string
           student_b_id?: string | null
           subject_id?: string
+          time_limit_seconds?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "ladder_matches_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "ladder_matches_subject_id_fkey"
             columns: ["subject_id"]
@@ -387,6 +725,57 @@ export type Database = {
           },
         ]
       }
+      match_answers: {
+        Row: {
+          answer: string | null
+          answered_at: string | null
+          id: string
+          is_correct: boolean | null
+          match_id: string
+          question_id: string
+          question_index: number
+          served_at: string
+          student_id: string
+        }
+        Insert: {
+          answer?: string | null
+          answered_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          match_id: string
+          question_id: string
+          question_index: number
+          served_at?: string
+          student_id: string
+        }
+        Update: {
+          answer?: string | null
+          answered_at?: string | null
+          id?: string
+          is_correct?: boolean | null
+          match_id?: string
+          question_id?: string
+          question_index?: number
+          served_at?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "match_answers_match_id_fkey"
+            columns: ["match_id"]
+            isOneToOne: false
+            referencedRelation: "ladder_matches"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "match_answers_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mistakes: {
         Row: {
           created_at: string
@@ -432,6 +821,220 @@ export type Database = {
           },
         ]
       }
+      mock_entries: {
+        Row: {
+          created_at: string
+          id: string
+          sitting_id: string
+          started_at: string | null
+          status: string
+          submitted_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          sitting_id: string
+          started_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          sitting_id?: string
+          started_at?: string | null
+          status?: string
+          submitted_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_entries_sitting_id_fkey"
+            columns: ["sitting_id"]
+            isOneToOne: false
+            referencedRelation: "mock_sittings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_papers: {
+        Row: {
+          body: string
+          created_at: string
+          duration_minutes: number
+          id: string
+          language: string
+          level_code: string
+          markscheme: Json
+          status: string
+          subject_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          language?: string
+          level_code?: string
+          markscheme?: Json
+          status?: string
+          subject_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          duration_minutes?: number
+          id?: string
+          language?: string
+          level_code?: string
+          markscheme?: Json
+          status?: string
+          subject_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_papers_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_results: {
+        Row: {
+          country_percentile: number | null
+          country_rank: number | null
+          created_at: string
+          criteria: Json
+          entry_id: string
+          global_percentile: number | null
+          grader: string
+          released: boolean
+          total_awarded: number
+          total_max: number
+          updated_at: string
+        }
+        Insert: {
+          country_percentile?: number | null
+          country_rank?: number | null
+          created_at?: string
+          criteria?: Json
+          entry_id: string
+          global_percentile?: number | null
+          grader?: string
+          released?: boolean
+          total_awarded?: number
+          total_max?: number
+          updated_at?: string
+        }
+        Update: {
+          country_percentile?: number | null
+          country_rank?: number | null
+          created_at?: string
+          criteria?: Json
+          entry_id?: string
+          global_percentile?: number | null
+          grader?: string
+          released?: boolean
+          total_awarded?: number
+          total_max?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_results_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: true
+            referencedRelation: "mock_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_scripts: {
+        Row: {
+          created_at: string
+          entry_id: string
+          id: string
+          image_path: string
+          ocr_text: string | null
+          page_index: number
+        }
+        Insert: {
+          created_at?: string
+          entry_id: string
+          id?: string
+          image_path: string
+          ocr_text?: string | null
+          page_index?: number
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string
+          id?: string
+          image_path?: string
+          ocr_text?: string | null
+          page_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_scripts_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "mock_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      mock_sittings: {
+        Row: {
+          band: string
+          closes_at: string
+          created_at: string
+          id: string
+          opens_at: string
+          paper_id: string
+          results_at: string
+          status: string
+        }
+        Insert: {
+          band: string
+          closes_at: string
+          created_at?: string
+          id?: string
+          opens_at: string
+          paper_id: string
+          results_at: string
+          status?: string
+        }
+        Update: {
+          band?: string
+          closes_at?: string
+          created_at?: string
+          id?: string
+          opens_at?: string
+          paper_id?: string
+          results_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_sittings_paper_id_fkey"
+            columns: ["paper_id"]
+            isOneToOne: false
+            referencedRelation: "mock_papers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       notes: {
         Row: {
           body: string
@@ -463,6 +1066,95 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_optouts: {
+        Row: {
+          category: string
+          user_id: string
+        }
+        Insert: {
+          category: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      notifications: {
+        Row: {
+          body: string | null
+          category: string
+          created_at: string
+          href: string | null
+          id: string
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          category: string
+          created_at?: string
+          href?: string | null
+          id?: string
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          href?: string | null
+          id?: string
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      performance_events: {
+        Row: {
+          created_at: string
+          id: string
+          integrity_flags: Json
+          kind: string
+          payload: Json
+          quarantined: boolean
+          subject_id: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          integrity_flags?: Json
+          kind: string
+          payload?: Json
+          quarantined?: boolean
+          subject_id?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          integrity_flags?: Json
+          kind?: string
+          payload?: Json
+          quarantined?: boolean
+          subject_id?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "performance_events_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
             referencedColumns: ["id"]
           },
         ]
@@ -571,7 +1263,9 @@ export type Database = {
       profiles: {
         Row: {
           avatar_url: string | null
+          country: string | null
           created_at: string
+          display_name: string
           full_name: string | null
           id: string
           onboarded: boolean
@@ -580,7 +1274,9 @@ export type Database = {
         }
         Insert: {
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
+          display_name: string
           full_name?: string | null
           id: string
           onboarded?: boolean
@@ -589,7 +1285,9 @@ export type Database = {
         }
         Update: {
           avatar_url?: string | null
+          country?: string | null
           created_at?: string
+          display_name?: string
           full_name?: string | null
           id?: string
           onboarded?: boolean
@@ -699,6 +1397,8 @@ export type Database = {
       questions: {
         Row: {
           answer: string | null
+          answer_key: Json | null
+          answer_type: string
           calculator: boolean | null
           command_term: string | null
           created_at: string
@@ -729,6 +1429,8 @@ export type Database = {
         }
         Insert: {
           answer?: string | null
+          answer_key?: Json | null
+          answer_type?: string
           calculator?: boolean | null
           command_term?: string | null
           created_at?: string
@@ -759,6 +1461,8 @@ export type Database = {
         }
         Update: {
           answer?: string | null
+          answer_key?: Json | null
+          answer_type?: string
           calculator?: boolean | null
           command_term?: string | null
           created_at?: string
@@ -818,6 +1522,136 @@ export type Database = {
           },
         ]
       }
+      rating_algorithm_versions: {
+        Row: {
+          config: Json
+          created_at: string
+          id: string
+          name: string
+          version: number
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          id?: string
+          name: string
+          version: number
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          id?: string
+          name?: string
+          version?: number
+        }
+        Relationships: []
+      }
+      rivalries: {
+        Row: {
+          a_score: number
+          b_score: number
+          created_at: string
+          ends_at: string
+          id: string
+          last_leader: string | null
+          school_a: string
+          school_b: string
+          season_id: string
+          starts_at: string
+          status: string
+        }
+        Insert: {
+          a_score?: number
+          b_score?: number
+          created_at?: string
+          ends_at: string
+          id?: string
+          last_leader?: string | null
+          school_a: string
+          school_b: string
+          season_id: string
+          starts_at: string
+          status?: string
+        }
+        Update: {
+          a_score?: number
+          b_score?: number
+          created_at?: string
+          ends_at?: string
+          id?: string
+          last_leader?: string | null
+          school_a?: string
+          school_b?: string
+          season_id?: string
+          starts_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rivalries_school_a_fkey"
+            columns: ["school_a"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rivalries_school_b_fkey"
+            columns: ["school_b"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rivalries_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      rivalry_banners: {
+        Row: {
+          created_at: string
+          id: string
+          preset_key: string
+          rivalry_id: string
+          school_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          preset_key: string
+          rivalry_id: string
+          school_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          preset_key?: string
+          rivalry_id?: string
+          school_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "rivalry_banners_rivalry_id_fkey"
+            columns: ["rivalry_id"]
+            isOneToOne: false
+            referencedRelation: "rivalries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "rivalry_banners_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       scans: {
         Row: {
           annotation_result: Json | null
@@ -864,6 +1698,351 @@ export type Database = {
             columns: ["question_id"]
             isOneToOne: false
             referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_members: {
+        Row: {
+          joined_at: string
+          school_id: string
+          user_id: string
+        }
+        Insert: {
+          joined_at?: string
+          school_id: string
+          user_id: string
+        }
+        Update: {
+          joined_at?: string
+          school_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_members_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_requests: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          id: string
+          name: string
+          requested_by: string
+          reviewed_at: string | null
+          reviewed_by: string | null
+          school_id: string | null
+          status: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          name: string
+          requested_by: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          school_id?: string | null
+          status?: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          name?: string
+          requested_by?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          school_id?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_requests_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      school_scores: {
+        Row: {
+          active_members: number
+          member_count: number
+          school_id: string
+          score: number
+          season_id: string
+          updated_at: string
+        }
+        Insert: {
+          active_members?: number
+          member_count?: number
+          school_id: string
+          score?: number
+          season_id: string
+          updated_at?: string
+        }
+        Update: {
+          active_members?: number
+          member_count?: number
+          school_id?: string
+          score?: number
+          season_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "school_scores_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "school_scores_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schools: {
+        Row: {
+          city: string | null
+          color: string
+          country: string | null
+          created_at: string
+          created_by: string | null
+          crest_emoji: string
+          id: string
+          kind: string
+          name: string
+          slug: string
+          verified: boolean
+        }
+        Insert: {
+          city?: string | null
+          color?: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          crest_emoji?: string
+          id?: string
+          kind?: string
+          name: string
+          slug: string
+          verified?: boolean
+        }
+        Update: {
+          city?: string | null
+          color?: string
+          country?: string | null
+          created_at?: string
+          created_by?: string | null
+          crest_emoji?: string
+          id?: string
+          kind?: string
+          name?: string
+          slug?: string
+          verified?: boolean
+        }
+        Relationships: []
+      }
+      season_placements: {
+        Row: {
+          created_at: string
+          elo: number
+          league: string
+          rank: number
+          season_id: string
+          subject_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          elo: number
+          league: string
+          rank: number
+          season_id: string
+          subject_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          elo?: number
+          league?: string
+          rank?: number
+          season_id?: string
+          subject_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_placements_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_placements_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      season_school_snapshots: {
+        Row: {
+          active_members: number
+          created_at: string
+          rank: number
+          school_id: string
+          score: number
+          season_id: string
+        }
+        Insert: {
+          active_members: number
+          created_at?: string
+          rank: number
+          school_id: string
+          score: number
+          season_id: string
+        }
+        Update: {
+          active_members?: number
+          created_at?: string
+          rank?: number
+          school_id?: string
+          score?: number
+          season_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "season_school_snapshots_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "season_school_snapshots_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      seasons: {
+        Row: {
+          created_at: string
+          ends_at: string
+          id: string
+          slug: string
+          starts_at: string
+        }
+        Insert: {
+          created_at?: string
+          ends_at: string
+          id?: string
+          slug: string
+          starts_at: string
+        }
+        Update: {
+          created_at?: string
+          ends_at?: string
+          id?: string
+          slug?: string
+          starts_at?: string
+        }
+        Relationships: []
+      }
+      signal_profiles: {
+        Row: {
+          created_at: string
+          public: boolean
+          show_country: boolean
+          show_history: boolean
+          show_trajectory: boolean
+          subject_ids: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          public?: boolean
+          show_country?: boolean
+          show_history?: boolean
+          show_trajectory?: boolean
+          subject_ids?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          public?: boolean
+          show_country?: boolean
+          show_history?: boolean
+          show_trajectory?: boolean
+          subject_ids?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      signal_ratings: {
+        Row: {
+          algorithm_version: number
+          computed_at: string
+          confidence: number
+          rating: number
+          sample_size: number
+          subject_id: string
+          trajectory: string
+          user_id: string
+          verification_tier: string
+        }
+        Insert: {
+          algorithm_version?: number
+          computed_at?: string
+          confidence: number
+          rating: number
+          sample_size: number
+          subject_id: string
+          trajectory: string
+          user_id: string
+          verification_tier?: string
+        }
+        Update: {
+          algorithm_version?: number
+          computed_at?: string
+          confidence?: number
+          rating?: number
+          sample_size?: number
+          subject_id?: string
+          trajectory?: string
+          user_id?: string
+          verification_tier?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "signal_ratings_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
             referencedColumns: ["id"]
           },
         ]
@@ -1023,6 +2202,57 @@ export type Database = {
         }
         Relationships: []
       }
+      subject_ratings: {
+        Row: {
+          draws: number
+          elo: number
+          losses: number
+          matches_played: number
+          season_id: string
+          subject_id: string
+          updated_at: string
+          user_id: string
+          wins: number
+        }
+        Insert: {
+          draws?: number
+          elo?: number
+          losses?: number
+          matches_played?: number
+          season_id: string
+          subject_id: string
+          updated_at?: string
+          user_id: string
+          wins?: number
+        }
+        Update: {
+          draws?: number
+          elo?: number
+          losses?: number
+          matches_played?: number
+          season_id?: string
+          subject_id?: string
+          updated_at?: string
+          user_id?: string
+          wins?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "subject_ratings_season_id_fkey"
+            columns: ["season_id"]
+            isOneToOne: false
+            referencedRelation: "seasons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "subject_ratings_subject_id_fkey"
+            columns: ["subject_id"]
+            isOneToOne: false
+            referencedRelation: "subjects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       subjects: {
         Row: {
           color: string
@@ -1060,6 +2290,7 @@ export type Database = {
         Row: {
           cancel_at_period_end: boolean
           current_period_end: string | null
+          plan: string
           price_id: string | null
           status: string
           stripe_customer_id: string | null
@@ -1070,6 +2301,7 @@ export type Database = {
         Insert: {
           cancel_at_period_end?: boolean
           current_period_end?: string | null
+          plan?: string
           price_id?: string | null
           status?: string
           stripe_customer_id?: string | null
@@ -1080,6 +2312,7 @@ export type Database = {
         Update: {
           cancel_at_period_end?: boolean
           current_period_end?: string | null
+          plan?: string
           price_id?: string | null
           status?: string
           stripe_customer_id?: string | null
@@ -1228,47 +2461,6 @@ export type Database = {
           },
         ]
       }
-      whiteboards: {
-        Row: {
-          canvas_data: Json
-          created_at: string
-          id: string
-          question_id: string | null
-          student_id: string
-          thumbnail_path: string | null
-          title: string | null
-          updated_at: string
-        }
-        Insert: {
-          canvas_data?: Json
-          created_at?: string
-          id?: string
-          question_id?: string | null
-          student_id: string
-          thumbnail_path?: string | null
-          title?: string | null
-          updated_at?: string
-        }
-        Update: {
-          canvas_data?: Json
-          created_at?: string
-          id?: string
-          question_id?: string | null
-          student_id?: string
-          thumbnail_path?: string | null
-          title?: string | null
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "whiteboards_question_id_fkey"
-            columns: ["question_id"]
-            isOneToOne: false
-            referencedRelation: "questions"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       user_preferences: {
         Row: {
           daily_target: number
@@ -1335,11 +2527,70 @@ export type Database = {
           },
         ]
       }
+      whiteboards: {
+        Row: {
+          canvas_data: Json
+          created_at: string
+          id: string
+          question_id: string | null
+          student_id: string
+          thumbnail_path: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          canvas_data?: Json
+          created_at?: string
+          id?: string
+          question_id?: string | null
+          student_id: string
+          thumbnail_path?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          canvas_data?: Json
+          created_at?: string
+          id?: string
+          question_id?: string | null
+          student_id?: string
+          thumbnail_path?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whiteboards_question_id_fkey"
+            columns: ["question_id"]
+            isOneToOne: false
+            referencedRelation: "questions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
+      claim_mock_entries: {
+        Args: { batch: number }
+        Returns: {
+          created_at: string
+          id: string
+          sitting_id: string
+          started_at: string | null
+          status: string
+          submitted_at: string | null
+          user_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "mock_entries"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       is_admin: { Args: never; Returns: boolean }
     }
     Enums: {

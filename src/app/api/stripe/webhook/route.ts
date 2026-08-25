@@ -3,6 +3,7 @@ import type Stripe from "stripe";
 import { getStripe } from "@/lib/stripe";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { serverEnv } from "@/lib/env";
+import { isPlan, planForPriceId } from "@/lib/plans";
 
 export async function POST(request: NextRequest) {
   const stripe = getStripe();
@@ -32,12 +33,43 @@ export async function POST(request: NextRequest) {
 
   const admin = createAdminClient();
 
-  const upsertFromSubscription = async (sub: Stripe.Subscription) => {
+  const prices = {
+    proMonthly: serverEnv.stripePriceProMonthly,
+    proAnnual: serverEnv.stripePriceProAnnual,
+    maxMonthly: serverEnv.stripePriceMaxMonthly,
+  };
+
+  /** Tier stamped at checkout, falling back to the price lookup. */
+  const planOf = (sub: Stripe.Subscription) => {
+    const stamped = sub.metadata?.plan;
+    return isPlan(stamped) && stamped !== "free"
+      ? stamped
+      : planForPriceId(sub.items.data[0]?.price.id, prices);
+  };
+
+  /**
+   * Who owns this subscription. Metadata on the subscription is set at
+   * checkout; the customer's metadata and our own stored subscription ID
+   * cover subscriptions created or edited outside that flow.
+   */
+  const resolveUserId = async (sub: Stripe.Subscription) => {
+    const fromSub = sub.metadata?.user_id as string | undefined;
+    if (fromSub) return fromSub;
     const customerMeta =
       typeof sub.customer !== "string" && !sub.customer.deleted
         ? sub.customer.metadata?.user_id
         : undefined;
-    const userId = (sub.metadata?.user_id as string | undefined) ?? customerMeta;
+    if (customerMeta) return customerMeta;
+    const { data } = await admin
+      .from("subscriptions")
+      .select("user_id")
+      .eq("stripe_subscription_id", sub.id)
+      .maybeSingle();
+    return data?.user_id;
+  };
+
+  const upsertFromSubscription = async (sub: Stripe.Subscription) => {
+    const userId = await resolveUserId(sub);
     if (!userId) return;
     await admin
       .from("subscriptions")
@@ -46,6 +78,7 @@ export async function POST(request: NextRequest) {
           typeof sub.customer === "string" ? sub.customer : sub.customer.id,
         stripe_subscription_id: sub.id,
         status: sub.status,
+        plan: planOf(sub),
         price_id: sub.items.data[0]?.price.id ?? null,
         current_period_end: new Date(
           sub.items.data[0].current_period_end * 1000,
@@ -72,6 +105,7 @@ export async function POST(request: NextRequest) {
             stripe_customer_id: session.customer as string,
             stripe_subscription_id: sub.id,
             status: sub.status,
+            plan: planOf(sub),
             price_id: sub.items.data[0]?.price.id ?? null,
             current_period_end: new Date(
               sub.items.data[0].current_period_end * 1000,
@@ -88,14 +122,18 @@ export async function POST(request: NextRequest) {
       await upsertFromSubscription(event.data.object);
       break;
     case "customer.subscription.deleted": {
+      // A cancellation must always land: a miss here leaves the user on Pro
+      // forever, so resolve the owner every way we can.
       const sub = event.data.object;
-      const userId = sub.metadata?.user_id as string | undefined;
+      const userId = await resolveUserId(sub);
       if (userId) {
         await admin
           .from("subscriptions")
           .update({
             status: "free",
+            plan: "free",
             stripe_subscription_id: null,
+            price_id: null,
             cancel_at_period_end: false,
             updated_at: new Date().toISOString(),
           })

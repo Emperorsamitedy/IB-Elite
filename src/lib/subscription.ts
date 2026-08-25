@@ -2,7 +2,14 @@ import "server-only";
 import { cache } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { serverEnv } from "@/lib/env";
-import { planForPriceId, type Plan } from "@/lib/plans";
+import {
+  FREE_LIMITS,
+  planAtLeast,
+  resolvePlan,
+  type Plan,
+} from "@/lib/plans";
+
+export { FREE_LIMITS };
 
 export type Entitlement = {
   plan: Plan;
@@ -26,7 +33,7 @@ export const getEntitlement = cache(
     const { data } = await supabase
       .from("subscriptions")
       .select(
-        "status, price_id, current_period_end, cancel_at_period_end",
+        "status, plan, price_id, current_period_end, cancel_at_period_end",
       )
       .eq("user_id", userId)
       .maybeSingle();
@@ -39,7 +46,7 @@ export const getEntitlement = cache(
         status !== "free");
 
     const plan: Plan = active
-      ? planForPriceId(data?.price_id, {
+      ? resolvePlan(data?.plan, data?.price_id, {
           proMonthly: serverEnv.stripePriceProMonthly,
           proAnnual: serverEnv.stripePriceProAnnual,
           maxMonthly: serverEnv.stripePriceMaxMonthly,
@@ -49,16 +56,10 @@ export const getEntitlement = cache(
     return {
       plan,
       isPro: active,
-      isMax: plan === "max",
+      isMax: planAtLeast(plan, "max"),
       status,
       currentPeriodEnd: data?.current_period_end ?? null,
       cancelAtPeriodEnd: data?.cancel_at_period_end ?? false,
     };
   },
 );
-
-/** Free-tier limits enforced server-side. */
-export const FREE_LIMITS = {
-  aiMessagesPerDay: 10,
-  practiceQuestionsPerDay: 30,
-};

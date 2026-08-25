@@ -1,8 +1,15 @@
 import Link from "next/link";
-import { Swords } from "lucide-react";
+import { Swords, Trophy } from "lucide-react";
 import { requireUser } from "@/lib/auth";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+import { getOrCreateSeason } from "@/lib/duel/service";
+import { createSupabaseDuelStore } from "@/lib/duel/supabase-store";
+import { leagueFor } from "@/lib/duel/elo";
+import { Badge } from "@/components/ui/badge";
+import { messages } from "@/lib/i18n/en";
 import { EmptyState } from "@/components/ui/misc";
+import { Card, CardContent } from "@/components/ui/card";
 
 export const metadata = { title: "World Ladder" };
 
@@ -18,6 +25,12 @@ export default async function LadderIndexPage() {
       .order("sort_order"),
   ]);
 
+  const season = await getOrCreateSeason(createSupabaseDuelStore(), new Date());
+  const { data: myRatings } = await createAdminClient()
+    .from("subject_ratings")
+    .select("subject_id, elo, wins, losses, draws")
+    .eq("user_id", user.id)
+    .eq("season_id", season.id);
   const mineSet = new Set((mine ?? []).map((m) => m.subject_id));
   const all = subjects ?? [];
   const listed = all.filter((s) => mineSet.has(s.id));
@@ -58,6 +71,34 @@ export default async function LadderIndexPage() {
           title="No subjects yet"
           description="Pick your subjects in settings to enter the ladder."
         />
+      )}
+
+      {(myRatings ?? []).length > 0 && (
+        <div>
+          <h2 className="flex items-center gap-2 text-lg font-extrabold tracking-tight">
+            <Trophy className="h-4 w-4 text-accent" /> {messages.duel.yourRatings}
+          </h2>
+          <Card className="mt-3">
+            <CardContent className="flex flex-wrap gap-3 p-4">
+              {(myRatings ?? []).map((r) => {
+                const subject = all.find((s) => s.id === r.subject_id);
+                return (
+                  <div
+                    key={r.subject_id}
+                    className="flex items-center gap-2 rounded-lg border border-border px-3 py-2 text-sm"
+                  >
+                    <span className="font-medium">{subject?.name ?? "—"}</span>
+                    <Badge variant="accent">{r.elo}</Badge>
+                    <Badge variant="outline">{leagueFor(r.elo)}</Badge>
+                    <span className="text-xs text-muted-foreground">
+                      {r.wins}W · {r.losses}L · {r.draws}D
+                    </span>
+                  </div>
+                );
+              })}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   );

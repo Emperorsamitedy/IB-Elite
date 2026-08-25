@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { planAtLeast, planForPriceId } from "@/lib/plans";
+import { planAtLeast, planForPriceId, resolvePlan } from "@/lib/plans";
 
 const PRICES = {
   proMonthly: "price_pro_m",
@@ -34,5 +34,26 @@ describe("planAtLeast", () => {
     expect(planAtLeast("pro", "max")).toBe(false);
     expect(planAtLeast("free", "pro")).toBe(false);
     expect(planAtLeast("pro", "pro")).toBe(true);
+  });
+});
+
+describe("resolvePlan", () => {
+  // The tier stamped at checkout must win: price IDs rotate, metadata doesn't.
+  it("prefers the plan recorded on the subscription row", () => {
+    expect(resolvePlan("max", "price_pro_m", PRICES)).toBe("max");
+    expect(resolvePlan("pro", "price_max_m", PRICES)).toBe("pro");
+  });
+
+  it("keeps a Max subscriber on Max even when the Max price is unset", () => {
+    expect(resolvePlan("max", "price_max_m", { ...PRICES, maxMonthly: "" })).toBe(
+      "max",
+    );
+  });
+
+  it("falls back to the price lookup for rows without a recorded plan", () => {
+    expect(resolvePlan(null, "price_max_m", PRICES)).toBe("max");
+    expect(resolvePlan(undefined, "price_pro_y", PRICES)).toBe("pro");
+    expect(resolvePlan("free", "price_max_m", PRICES)).toBe("max");
+    expect(resolvePlan("garbage", "price_pro_m", PRICES)).toBe("pro");
   });
 });
