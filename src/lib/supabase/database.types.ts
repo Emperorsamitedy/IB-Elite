@@ -294,6 +294,7 @@ export type Database = {
           claimed_by: string | null
           created_at: string
           creator_id: string
+          creator_ip_hash: string | null
           expires_at: string
           id: string
           level_code: string
@@ -307,6 +308,7 @@ export type Database = {
           claimed_by?: string | null
           created_at?: string
           creator_id: string
+          creator_ip_hash?: string | null
           expires_at?: string
           id?: string
           level_code?: string
@@ -320,6 +322,7 @@ export type Database = {
           claimed_by?: string | null
           created_at?: string
           creator_id?: string
+          creator_ip_hash?: string | null
           expires_at?: string
           id?: string
           level_code?: string
@@ -350,6 +353,7 @@ export type Database = {
         Row: {
           elo: number
           enqueued_at: string
+          ip_hash: string | null
           level_code: string
           mode: string
           subject_id: string
@@ -358,6 +362,7 @@ export type Database = {
         Insert: {
           elo?: number
           enqueued_at?: string
+          ip_hash?: string | null
           level_code?: string
           mode?: string
           subject_id: string
@@ -366,6 +371,7 @@ export type Database = {
         Update: {
           elo?: number
           enqueued_at?: string
+          ip_hash?: string | null
           level_code?: string
           mode?: string
           subject_id?: string

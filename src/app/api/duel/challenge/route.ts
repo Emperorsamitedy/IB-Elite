@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createDuelChallenge } from "@/lib/duel/service";
 import { createSupabaseDuelStore } from "@/lib/duel/supabase-store";
 import { env } from "@/lib/env";
+import { ipHashFromHeaders } from "@/lib/anti-abuse";
 import { duelErrorResponse, requireUser, track } from "../util";
 
 const bodySchema = z.object({
@@ -28,6 +29,7 @@ export async function POST(request: NextRequest) {
       mode: parsed.data.mode,
       opponentId: parsed.data.opponentId ?? null,
       token: randomBytes(16).toString("hex"),
+      ipHash: ipHashFromHeaders(request.headers),
     });
     await track("challenge_created", user.id, {
       subjectId: parsed.data.subjectId,

@@ -228,3 +228,49 @@ describe("integrity flags", () => {
     expect(flagSide([normal, normal], null)).toEqual([]);
   });
 });
+
+describe("same-network collusion defense", () => {
+  const at = (secondsAgo: number, now: Date) =>
+    new Date(now.getTime() - secondsAgo * 1000).toISOString();
+
+  it("never pairs two queued accounts sharing a network hash", () => {
+    const now = new Date("2026-09-01T10:00:00Z");
+    const seeker = {
+      userId: "s",
+      elo: 1500,
+      enqueuedAt: at(10, now),
+      ipHash: "net-1",
+    };
+    const alt = {
+      userId: "alt",
+      elo: 1500,
+      enqueuedAt: at(10, now),
+      ipHash: "net-1",
+    };
+    const stranger = {
+      userId: "x",
+      elo: 1490,
+      enqueuedAt: at(10, now),
+      ipHash: "net-2",
+    };
+    expect(pickOpponent(seeker, [alt], now)).toBeNull();
+    expect(pickOpponent(seeker, [alt, stranger], now)?.userId).toBe("x");
+  });
+
+  it("still pairs when either side has no network hash", () => {
+    const now = new Date("2026-09-01T10:00:00Z");
+    const seeker = {
+      userId: "s",
+      elo: 1500,
+      enqueuedAt: at(10, now),
+      ipHash: null,
+    };
+    const other = {
+      userId: "o",
+      elo: 1500,
+      enqueuedAt: at(10, now),
+      ipHash: "net-1",
+    };
+    expect(pickOpponent(seeker, [other], now)?.userId).toBe("o");
+  });
+});

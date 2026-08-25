@@ -53,6 +53,12 @@ export const serverEnv = {
   stripePriceProAnnual:
     process.env.STRIPE_PRICE_PRO_ANNUAL ?? process.env.STRIPE_PRICE_ANNUAL ?? "",
   stripePriceMaxMonthly: process.env.STRIPE_PRICE_MAX_MONTHLY ?? "",
+  // Cloudflare Turnstile bot check on signup; off until both keys exist.
+  turnstileSecretKey: process.env.TURNSTILE_SECRET_KEY ?? "",
+  // Salts duel IP hashes; falls back to the service key so hashes are
+  // never unsalted, but set IP_HASH_SALT explicitly in production.
+  ipHashSalt:
+    process.env.IP_HASH_SALT ?? process.env.SUPABASE_SERVICE_ROLE_KEY ?? "atlas",
 };
 
 export const featureFlags = {
@@ -60,4 +66,8 @@ export const featureFlags = {
   stripe: Boolean(process.env.STRIPE_SECRET_KEY),
   // Scanning always works — the OCR.space demo key needs no configuration.
   scan: true,
+  turnstile: Boolean(
+    process.env.TURNSTILE_SECRET_KEY &&
+      process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+  ),
 };

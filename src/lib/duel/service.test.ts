@@ -337,3 +337,80 @@ describe("challenges", () => {
     expect(alice.wins).toBe(1);
   });
 });
+
+describe("collusion defenses", () => {
+  it("blocks ranked challenge acceptance from the creator's own network", async () => {
+    const clock = makeClock();
+    const store = createFakeDuelStore({ clock: clock.now });
+    const { token } = await createDuelChallenge(store, {
+      creatorId: ALICE,
+      subjectId: SUBJECT,
+      mode: "ranked",
+      opponentId: BOB,
+      token: "tok-net",
+      ipHash: "net-1",
+    });
+    await expect(
+      acceptDuelChallenge(
+        store,
+        { token, userId: BOB, ipHash: "net-1" },
+        clock.now(),
+      ),
+    ).rejects.toThrow(/different networks/i);
+    // A different network accepts fine.
+    const match = await acceptDuelChallenge(
+      store,
+      { token, userId: BOB, ipHash: "net-2" },
+      clock.now(),
+    );
+    expect(match.status).toBe("ACTIVE");
+  });
+
+  it("friendly challenges are fine on one network", async () => {
+    const clock = makeClock();
+    const store = createFakeDuelStore({ clock: clock.now });
+    const { token } = await createDuelChallenge(store, {
+      creatorId: ALICE,
+      subjectId: SUBJECT,
+      mode: "friendly",
+      token: "tok-friendly",
+      ipHash: "net-1",
+    });
+    const match = await acceptDuelChallenge(
+      store,
+      { token, userId: BOB, ipHash: "net-1" },
+      clock.now(),
+    );
+    expect(match.mode).toBe("friendly");
+  });
+
+  it("flags the same pair trading many ranked matches in a day", async () => {
+    const clock = makeClock();
+    const store = createFakeDuelStore({ clock: clock.now });
+    for (let i = 0; i < 5; i++) {
+      const second = await (async () => {
+        await queueForDuel(
+          store,
+          { userId: ALICE, subjectId: SUBJECT, mode: "ranked" },
+          clock.now(),
+        );
+        return queueForDuel(
+          store,
+          { userId: BOB, subjectId: SUBJECT, mode: "ranked" },
+          clock.now(),
+        );
+      })();
+      if (second.status !== "matched") throw new Error("expected match");
+      // Draws keep ratings level, so matchmaking keeps pairing them —
+      // exactly how a cautious farmer would fly under the Elo radar.
+      await playSide(store, clock, second.match.id, ALICE, 3);
+      await playSide(store, clock, second.match.id, BOB, 3);
+      await getMatchState(store, second.match.id, ALICE, clock.now());
+    }
+    const flags = store.reviews.filter((r) => r.reason === "excessive_rematch");
+    expect(flags.length).toBeGreaterThan(0);
+    // Review only — matches still count; farming is investigated, not assumed.
+    const alice = store.ratings.find((r) => r.user_id === ALICE)!;
+    expect(alice.matches_played).toBe(5);
+  });
+});

@@ -1,10 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { acceptDuelChallenge } from "@/lib/duel/service";
 import { createSupabaseDuelStore } from "@/lib/duel/supabase-store";
+import { ipHashFromHeaders } from "@/lib/anti-abuse";
 import { duelErrorResponse, requireUser, track } from "../../../util";
 
 export async function POST(
-  _request: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ token: string }> },
 ) {
   const user = await requireUser();
@@ -14,7 +15,7 @@ export async function POST(
   try {
     const match = await acceptDuelChallenge(
       createSupabaseDuelStore(),
-      { token, userId: user.id },
+      { token, userId: user.id, ipHash: ipHashFromHeaders(request.headers) },
       new Date(),
     );
     // Attribution: an account younger than an hour accepting a link means

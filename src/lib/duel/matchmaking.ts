@@ -19,6 +19,8 @@ export type QueueCandidate = {
   userId: string;
   elo: number;
   enqueuedAt: string;
+  /** Salted network hash; equal hashes never pair in ranked play. */
+  ipHash?: string | null;
 };
 
 /**
@@ -37,6 +39,14 @@ export function pickOpponent(
 
   for (const candidate of candidates) {
     if (candidate.userId === seeker.userId) continue;
+    // Two accounts on one network smell like one person; never pair them.
+    if (
+      seeker.ipHash &&
+      candidate.ipHash &&
+      seeker.ipHash === candidate.ipHash
+    ) {
+      continue;
+    }
     const gap = Math.abs(candidate.elo - seeker.elo);
     if (gap > seekerWindow) continue;
     if (gap > windowFor(waitedSeconds(candidate, now))) continue;
