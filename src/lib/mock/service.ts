@@ -124,6 +124,43 @@ export async function submitEntry(
 
 export type GradeBatchResult = { graded: number; quarantined: number };
 
+/** How long a claim may hold an entry before it counts as abandoned. */
+export const GRADING_STALE_MINUTES = 15;
+
+/**
+ * Requeues entries a dead worker left in 'grading'. Their submitted/late
+ * status is recomputed from timestamps, so nothing is lost — the next
+ * grading pass simply picks them up again. Without this, one crashed
+ * worker could block a paper's Results Day forever.
+ */
+export async function requeueStuckEntries(
+  store: MockStore,
+  now: Date,
+  staleMinutes: number = GRADING_STALE_MINUTES,
+): Promise<{ requeued: number }> {
+  const cutoff = new Date(now.getTime() - staleMinutes * 60_000).toISOString();
+  const stuck = await store.listStuckGrading(cutoff);
+  let requeued = 0;
+  for (const entry of stuck) {
+    const sitting = await store.getSitting(entry.sitting_id);
+    const paper = sitting ? await store.getPaper(sitting.paper_id) : null;
+    const late =
+      Boolean(sitting && paper && entry.started_at && entry.submitted_at) &&
+      isLate(
+        new Date(entry.submitted_at!),
+        entry.started_at!,
+        paper!.duration_minutes,
+        sitting!.closes_at,
+      );
+    await store.updateEntry(entry.id, {
+      status: late ? "late" : "submitted",
+      grading_started_at: null,
+    });
+    requeued += 1;
+  }
+  return { requeued };
+}
+
 /**
  * Claims a batch and grades each script end to end: OCR any page that still
  * needs it, mark per criterion, run integrity checks, write the (unreleased)

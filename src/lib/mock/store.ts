@@ -30,6 +30,7 @@ export type MockEntry = {
   status: EntryStatus;
   started_at: string | null;
   submitted_at: string | null;
+  grading_started_at: string | null;
 };
 
 export type MockScript = {
@@ -77,11 +78,18 @@ export type MockStore = {
   createEntry(sittingId: string, userId: string): Promise<MockEntry>;
   updateEntry(
     id: string,
-    patch: Partial<Pick<MockEntry, "status" | "started_at" | "submitted_at">>,
+    patch: Partial<
+      Pick<
+        MockEntry,
+        "status" | "started_at" | "submitted_at" | "grading_started_at"
+      >
+    >,
   ): Promise<MockEntry>;
   listEntriesForPaper(paperId: string): Promise<EntryWithSitting[]>;
   /** Atomically claims submitted/late entries for grading (SKIP LOCKED). */
   claimEntries(batch: number): Promise<MockEntry[]>;
+  /** Entries a dead worker left in 'grading' since before the cutoff. */
+  listStuckGrading(cutoffIso: string): Promise<MockEntry[]>;
 
   addScript(
     entryId: string,

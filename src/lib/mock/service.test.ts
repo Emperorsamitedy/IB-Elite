@@ -5,6 +5,7 @@ import {
   enterSitting,
   gradeBatch,
   releaseDueResults,
+  requeueStuckEntries,
   startEntry,
   submitEntry,
 } from "./service";
@@ -292,5 +293,59 @@ describe("results day", () => {
     const etEntry = store.entries.find((e) => e.user_id === "s0")!;
     const etResult = store.results.find((r) => r.entry_id === etEntry.id)!;
     expect(etResult.country_percentile).not.toBeNull();
+  });
+});
+
+describe("stuck-grading recovery", () => {
+  it("requeues abandoned claims and Results Day still happens", async () => {
+    const store = makeStore();
+    await sitAndSubmit(store, "alice");
+
+    // A worker claims the entry, then dies before writing a result.
+    const claimed = await store.claimEntries(10);
+    expect(claimed).toHaveLength(1);
+    expect(store.entries[0].status).toBe("grading");
+
+    // Too fresh to touch…
+    let swept = await requeueStuckEntries(store, new Date(), 15);
+    expect(swept.requeued).toBe(0);
+
+    // …but after the stale window it goes back to the queue.
+    const later = new Date(Date.now() + 20 * 60_000);
+    swept = await requeueStuckEntries(store, later, 15);
+    expect(swept.requeued).toBe(1);
+    expect(store.entries[0].status).toBe("submitted");
+    expect(store.entries[0].grading_started_at).toBeNull();
+
+    // The next heartbeat grades it and the paper can release.
+    await gradeBatch(store, lengthGrader(), readScript, 10, later);
+    const out = await releaseDueResults(
+      store,
+      [PAPER.id],
+      new Date("2026-09-06T08:00:00Z"),
+    );
+    expect(out).toEqual({ papersReleased: 1, entriesReleased: 1 });
+  });
+
+  it("restores the late status for a stuck late submission", async () => {
+    const store = makeStore();
+    await sitAndSubmit(store, "tardy", {
+      startIso: "2026-09-05T16:00:00Z",
+      submitIso: "2026-09-05T18:00:00Z", // past the 90min paper
+    });
+    expect(store.entries[0].status).toBe("late");
+    await store.claimEntries(10);
+    const later = new Date(Date.now() + 20 * 60_000);
+    await requeueStuckEntries(store, later, 15);
+    expect(store.entries[0].status).toBe("late");
+  });
+
+  it("never touches entries a live worker is holding", async () => {
+    const store = makeStore();
+    await sitAndSubmit(store, "alice");
+    await store.claimEntries(10);
+    const swept = await requeueStuckEntries(store, new Date(), 15);
+    expect(swept.requeued).toBe(0);
+    expect(store.entries[0].status).toBe("grading");
   });
 });

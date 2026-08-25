@@ -1,7 +1,11 @@
 import { NextResponse, type NextRequest } from "next/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createMockGrader } from "@/lib/mock/grade";
-import { gradeBatch, releaseDueResults } from "@/lib/mock/service";
+import {
+  gradeBatch,
+  releaseDueResults,
+  requeueStuckEntries,
+} from "@/lib/mock/service";
 import { createSupabaseMockStore } from "@/lib/mock/supabase-store";
 import { createScanOcr, isScanOcrConfigured } from "@/lib/scans/ocr";
 import { createSupabaseScanStorage } from "@/lib/scans/supabase-store";
@@ -44,6 +48,9 @@ export async function POST(request: NextRequest) {
     ? async (path: string) => (await createScanOcr(storage).read(path)).text
     : async () => "";
 
+  // Recover entries a crashed worker left claimed, then grade.
+  const { requeued } = await requeueStuckEntries(store, new Date());
+
   // Grade in slices until the time budget is nearly spent.
   const startedAt = Date.now();
   let graded = 0;
@@ -64,5 +71,5 @@ export async function POST(request: NextRequest) {
   const paperIds = [...new Set((due ?? []).map((s) => s.paper_id))];
   const released = await releaseDueResults(store, paperIds, new Date());
 
-  return NextResponse.json({ graded, quarantined, ...released });
+  return NextResponse.json({ requeued, graded, quarantined, ...released });
 }

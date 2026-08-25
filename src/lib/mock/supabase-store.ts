@@ -16,7 +16,8 @@ const PAPER_COLUMNS =
   "id, subject_id, level_code, language, title, body, duration_minutes, markscheme, status";
 const SITTING_COLUMNS =
   "id, paper_id, band, opens_at, closes_at, results_at, status";
-const ENTRY_COLUMNS = "id, sitting_id, user_id, status, started_at, submitted_at";
+const ENTRY_COLUMNS =
+  "id, sitting_id, user_id, status, started_at, submitted_at, grading_started_at";
 const RESULT_COLUMNS =
   "entry_id, total_awarded, total_max, criteria, grader, global_percentile, country_percentile, country_rank, released";
 
@@ -129,6 +130,15 @@ export function createSupabaseMockStore(
           band: sitting.band,
         } as EntryWithSitting;
       });
+    },
+
+    async listStuckGrading(cutoffIso) {
+      const { data } = await client
+        .from("mock_entries")
+        .select(ENTRY_COLUMNS)
+        .eq("status", "grading")
+        .lt("grading_started_at", cutoffIso);
+      return (data ?? []).map(asEntry);
     },
 
     async claimEntries(batch) {
