@@ -3,7 +3,11 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import { getOrCreateSeason } from "@/lib/duel/service";
 import { createSupabaseDuelStore } from "@/lib/duel/supabase-store";
 import { pointsForEvent, schoolScore, type MemberActivity } from "./scoring";
-import { detectLeadChange, pairRivals } from "./rivalry";
+import {
+  detectLeadChange,
+  pairRivals,
+  shouldNotifyLeadChange,
+} from "./rivalry";
 
 const RIVALRY_DAYS = 7;
 /** Rivalries only make sense between schools with a pulse. */
@@ -19,10 +23,15 @@ async function memberActivity(
   admin: Admin,
   fromIso: string,
   toIso: string,
+  onlySchoolIds?: string[],
 ): Promise<Map<string, MemberActivity[]>> {
-  const { data: memberships } = await admin
+  let membershipQuery = admin
     .from("school_members")
     .select("user_id, school_id");
+  if (onlySchoolIds && onlySchoolIds.length > 0) {
+    membershipQuery = membershipQuery.in("school_id", onlySchoolIds);
+  }
+  const { data: memberships } = await membershipQuery;
   const schoolOf = new Map(
     (memberships ?? []).map((m) => [m.user_id, m.school_id]),
   );
@@ -73,15 +82,52 @@ export async function schoolHeartbeat(now: Date): Promise<{
   const admin = createAdminClient();
   const season = await getOrCreateSeason(createSupabaseDuelStore(), now);
 
-  // ---- seasonal scores ----
-  const activity = await memberActivity(
-    admin,
-    season.starts_at,
-    season.ends_at,
-  );
+  // ---- seasonal scores, incrementally ----
+  // A score only moves when a member's ledger moved, so recompute just the
+  // schools with recent member activity, schools not yet scored this
+  // season, and schools inside an active rivalry. Work stays proportional
+  // to *active* schools, not all schools ever registered.
+  const recentCutoff = new Date(now.getTime() - 25 * 3600_000).toISOString();
+  const [
+    { data: recentEvents },
+    { data: allMemberships },
+    { data: scoredRows },
+    { data: activeRivalries },
+  ] = await Promise.all([
+    admin
+      .from("performance_events")
+      .select("user_id")
+      .gte("created_at", recentCutoff),
+    admin.from("school_members").select("user_id, school_id"),
+    admin
+      .from("school_scores")
+      .select("school_id")
+      .eq("season_id", season.id),
+    admin.from("rivalries").select("school_a, school_b").eq("status", "active"),
+  ]);
+  const activeUsers = new Set((recentEvents ?? []).map((e) => e.user_id));
+  const alreadyScored = new Set((scoredRows ?? []).map((r) => r.school_id));
+  const dirty = new Set<string>();
+  for (const m of allMemberships ?? []) {
+    if (activeUsers.has(m.user_id) || !alreadyScored.has(m.school_id)) {
+      dirty.add(m.school_id);
+    }
+  }
+  for (const r of activeRivalries ?? []) {
+    dirty.add(r.school_a);
+    dirty.add(r.school_b);
+  }
+
+  const activity =
+    dirty.size > 0
+      ? await memberActivity(admin, season.starts_at, season.ends_at, [
+          ...dirty,
+        ])
+      : new Map<string, MemberActivity[]>();
   const { data: schools } = await admin
     .from("schools")
-    .select("id, country, name");
+    .select("id, country, name")
+    .in("id", dirty.size > 0 ? [...dirty] : ["00000000-0000-0000-0000-000000000000"]);
   let scored = 0;
   for (const school of schools ?? []) {
     const members = activity.get(school.id) ?? [];
@@ -100,15 +146,19 @@ export async function schoolHeartbeat(now: Date): Promise<{
   // ---- rivalries: update live scores, notify lead flips, finish ----
   const { data: active } = await admin
     .from("rivalries")
-    .select("id, school_a, school_b, starts_at, ends_at, last_leader")
+    .select(
+      "id, school_a, school_b, starts_at, ends_at, last_leader, last_lead_notified_at",
+    )
     .eq("status", "active");
   let leadChanges = 0;
   let finished = 0;
   for (const rivalry of active ?? []) {
+    // Scoped to the two schools — never the whole roster.
     const window = await memberActivity(
       admin,
       rivalry.starts_at,
       rivalry.ends_at,
+      [rivalry.school_a, rivalry.school_b],
     );
     const a = schoolScore(window.get(rivalry.school_a) ?? []);
     const b = schoolScore(window.get(rivalry.school_b) ?? []);
@@ -119,6 +169,10 @@ export async function schoolHeartbeat(now: Date): Promise<{
       b.score,
       (rivalry.last_leader as "a" | "b" | null) ?? null,
     );
+    const mayNotify =
+      change !== null &&
+      !over &&
+      shouldNotifyLeadChange(rivalry.last_lead_notified_at, now);
     await admin
       .from("rivalries")
       .update({
@@ -126,6 +180,7 @@ export async function schoolHeartbeat(now: Date): Promise<{
         b_score: b.score,
         last_leader: change?.newLeader ?? rivalry.last_leader,
         status: over ? "finished" : "active",
+        ...(mayNotify ? { last_lead_notified_at: now.toISOString() } : {}),
       })
       .eq("id", rivalry.id);
 
@@ -137,7 +192,7 @@ export async function schoolHeartbeat(now: Date): Promise<{
         "Rivalry Week is over — see the final score",
         `/schools`,
       );
-    } else if (change) {
+    } else if (mayNotify) {
       leadChanges += 1;
       const leaderId =
         change.newLeader === "a" ? rivalry.school_a : rivalry.school_b;

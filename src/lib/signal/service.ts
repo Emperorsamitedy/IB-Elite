@@ -15,16 +15,30 @@ import {
 export async function recomputeSignals(now: Date): Promise<{ rated: number }> {
   const admin = createAdminClient();
 
+  // Incremental: a rating only moves when its user's ledger moved, so only
+  // users with events since the last daily-ish run are recomputed — their
+  // FULL history is still loaded (trajectory needs it), but work is bounded
+  // by active users rather than the entire ledger.
+  const cutoff = new Date(now.getTime() - 25 * 3600_000).toISOString();
+  const { data: recent } = await admin
+    .from("performance_events")
+    .select("user_id")
+    .gte("created_at", cutoff);
+  const activeUsers = [...new Set((recent ?? []).map((e) => e.user_id))];
+  if (activeUsers.length === 0) return { rated: 0 };
+
   const { data: events } = await admin
     .from("performance_events")
     .select("user_id, subject_id, kind, payload, quarantined, created_at")
+    .in("user_id", activeUsers)
     .order("created_at");
   if (!events || events.length === 0) return { rated: 0 };
 
   // Integrity posture per user feeds the verification tier.
   const { data: reviews } = await admin
     .from("integrity_reviews")
-    .select("user_id, status");
+    .select("user_id, status")
+    .in("user_id", activeUsers);
   const reviewsByUser = new Map<string, { upheld: number; pending: number }>();
   for (const review of reviews ?? []) {
     const entry = reviewsByUser.get(review.user_id) ?? { upheld: 0, pending: 0 };

@@ -5,7 +5,11 @@ import {
   pointsForEvent,
   schoolScore,
 } from "./scoring";
-import { detectLeadChange, pairRivals } from "./rivalry";
+import {
+  detectLeadChange,
+  pairRivals,
+  shouldNotifyLeadChange,
+} from "./rivalry";
 
 const members = (n: number, points: number) =>
   Array.from({ length: n }, (_, i) => ({ userId: `u${i}`, points }));
@@ -117,5 +121,15 @@ describe("lead changes", () => {
     expect(detectLeadChange(10, 5, "a")).toBeNull();
     expect(detectLeadChange(4, 5, "a")).toEqual({ newLeader: "b" });
     expect(detectLeadChange(5, 5, "b")).toBeNull();
+  });
+});
+
+describe("lead-change cooldown", () => {
+  const now = new Date("2026-09-10T12:00:00Z");
+
+  it("always notifies the first flip, then respects the cooldown", () => {
+    expect(shouldNotifyLeadChange(null, now)).toBe(true);
+    expect(shouldNotifyLeadChange("2026-09-10T11:30:00Z", now)).toBe(false);
+    expect(shouldNotifyLeadChange("2026-09-10T09:59:00Z", now)).toBe(true);
   });
 });
