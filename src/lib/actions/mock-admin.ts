@@ -93,6 +93,8 @@ const sittingSchema = z.object({
   opensAt: z.string().datetime({ offset: true }).or(z.string().datetime()),
   closesAt: z.string().datetime({ offset: true }).or(z.string().datetime()),
   resultsAt: z.string().datetime({ offset: true }).or(z.string().datetime()),
+  // Optional per-band paper variant; blank means the shared body.
+  bodyOverride: z.string().max(60_000).optional(),
 });
 
 export async function scheduleMockSittings(
@@ -118,6 +120,7 @@ export async function scheduleMockSittings(
       opens_at: s.opensAt,
       closes_at: s.closesAt,
       results_at: s.resultsAt,
+      body_override: s.bodyOverride?.trim() || null,
       status: "scheduled",
     })),
     { onConflict: "paper_id,band" },

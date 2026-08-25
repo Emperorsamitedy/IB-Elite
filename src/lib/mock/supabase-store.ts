@@ -15,7 +15,7 @@ import type { CriterionAward, EntryStatus, MockBand } from "./types";
 const PAPER_COLUMNS =
   "id, subject_id, level_code, language, title, body, duration_minutes, markscheme, status";
 const SITTING_COLUMNS =
-  "id, paper_id, band, opens_at, closes_at, results_at, status";
+  "id, paper_id, band, opens_at, closes_at, results_at, status, body_override";
 const ENTRY_COLUMNS =
   "id, sitting_id, user_id, status, started_at, submitted_at, grading_started_at";
 const RESULT_COLUMNS =
@@ -226,6 +226,19 @@ export function createSupabaseMockStore(
         return (payload.totalAwarded ?? 0) / max;
       });
       return shares.reduce((a, b) => a + b, 0) / shares.length;
+    },
+
+    async priorScriptPath(userId, excludeEntryId) {
+      const { data } = await client
+        .from("mock_scripts")
+        .select("image_path, created_at, mock_entries!inner(user_id, status, id)")
+        .eq("mock_entries.user_id", userId)
+        .neq("entry_id", excludeEntryId)
+        .in("mock_entries.status", ["graded", "quarantined"])
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      return data?.image_path ?? null;
     },
 
     async appendEvents(events) {

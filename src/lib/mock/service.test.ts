@@ -36,6 +36,7 @@ const SITTING = {
   closes_at: "2026-09-05T18:30:00Z",
   results_at: "2026-09-06T07:00:00Z",
   status: "scheduled" as const,
+  body_override: null,
 };
 
 /** Grader that awards marks proportional to transcript length, capped. */
@@ -414,5 +415,66 @@ describe("annotated script anchoring", () => {
     expect(second.box).toEqual({ x: 5, y: 300, width: 180, height: 22 });
     // Boxes survive the store round-trip on the scripts too.
     expect(store.scripts[0].ocr_boxes).toHaveLength(1);
+  });
+});
+
+describe("band variants and handwriting screening", () => {
+  it("serves the band's own body when a variant is set", async () => {
+    const store = createFakeMockStore({
+      papers: [PAPER],
+      sittings: [
+        { ...SITTING, id: "sit-apac", band: "apac", body_override: "APAC variant: Q1…" },
+        SITTING,
+      ],
+    });
+    const apac = await startEntry(
+      store,
+      { sittingId: "sit-apac", userId: "kai" },
+      new Date("2026-09-05T16:05:00Z"),
+    );
+    expect(apac.paper.body).toBe("APAC variant: Q1…");
+    // The shared band still gets the shared paper.
+    const emea = await startEntry(
+      store,
+      { sittingId: SITTING.id, userId: "ana" },
+      new Date("2026-09-05T16:05:00Z"),
+    );
+    expect(emea.paper.body).toBe(PAPER.body);
+  });
+
+  it("a confident handwriting mismatch files a review but never quarantines", async () => {
+    const store = makeStore();
+    await sitAndSubmit(store, "alice");
+    const check = async () => ({
+      consistent: false,
+      detail: "confidence 0.85: slant reversed",
+    });
+    const out = await gradeBatch(
+      store,
+      lengthGrader(),
+      readScript,
+      10,
+      new Date("2026-09-06T02:00:00Z"),
+      check,
+    );
+    expect(out.quarantined).toBe(0);
+    expect(store.entries[0].status).toBe("graded");
+    expect(
+      store.reviews.some((r) => r.reason === "handwriting_mismatch"),
+    ).toBe(true);
+  });
+
+  it("no verdict means no flag", async () => {
+    const store = makeStore();
+    await sitAndSubmit(store, "alice");
+    await gradeBatch(
+      store,
+      lengthGrader(),
+      readScript,
+      10,
+      new Date("2026-09-06T02:00:00Z"),
+      async () => null,
+    );
+    expect(store.reviews).toHaveLength(0);
   });
 });

@@ -22,6 +22,8 @@ export type MockSitting = {
   closes_at: string;
   results_at: string;
   status: "scheduled" | "cancelled";
+  /** Per-band paper variant; null falls back to the shared paper body. */
+  body_override: string | null;
 };
 
 export type MockEntry = {
@@ -113,6 +115,8 @@ export type MockStore = {
   /** Mean score share over the user's prior released mock results. */
   historyScoreShare(userId: string): Promise<number | null>;
 
+  /** Latest script image from an earlier graded/quarantined entry. */
+  priorScriptPath(userId: string, excludeEntryId: string): Promise<string | null>;
   appendEvents(events: MockEventInput[]): Promise<void>;
   createIntegrityReview(input: {
     userId: string;

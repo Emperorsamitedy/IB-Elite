@@ -148,6 +148,19 @@ export function createFakeMockStore(seed: {
       });
       return shares.reduce((a, b) => a + b, 0) / shares.length;
     },
+    async priorScriptPath(userId, excludeEntryId) {
+      const mine = entries.filter(
+        (e) =>
+          e.user_id === userId &&
+          e.id !== excludeEntryId &&
+          ["graded", "quarantined"].includes(e.status),
+      );
+      for (const entry of mine.reverse()) {
+        const page = scripts.find((s) => s.entry_id === entry.id);
+        if (page) return page.image_path;
+      }
+      return null;
+    },
     async appendEvents(list) {
       events.push(...list);
     },

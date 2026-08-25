@@ -47,6 +47,11 @@ Window = paper duration + 30 min entry slack. Results day = next morning
 public announcement: the sitting appears on `/mock` with its countdown.
 (Set live refuses until a markscheme and at least one sitting exist.)
 
+**Leak containment**: earlier bands can post the paper before later bands
+sit. For high-stakes papers, open "Per-band paper variants" in the sitting
+editor and give the later bands their own body — same markscheme skeleton,
+different numbers. Blank variants fall back to the shared paper.
+
 ## 4. Sitting day
 
 Nothing to do. The bell is enforced by the server: the paper body is only
@@ -65,6 +70,12 @@ in `integrity_reviews` (impossible write speed and scored-but-empty scripts
 are auto-quarantined and excluded from rankings; score-history outliers are
 flagged for review only). To force a manual pass, POST `/api/mock/cron` as
 an admin.
+
+When `GEMINI_API_KEY` is set, grading also screens handwriting against the
+student's earlier scripts; a confident mismatch lands in
+`integrity_reviews` as `handwriting_mismatch` — flag-only, never an
+automatic penalty. New pens and bad photos are expected; treat the flag as
+a reason to look, not a verdict.
 
 Check progress:
 
