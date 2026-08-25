@@ -47,6 +47,38 @@ function normalise(text: string): string {
   return text.toLowerCase().replace(/\s+/g, "");
 }
 
+/**
+ * Human-readable model answer for the post-match review. Only ever shown
+ * once the match is COMPLETE — the same information the public question
+ * bank already displays.
+ */
+export function modelAnswerOf(
+  answerType: AnswerType,
+  answerKey: Json | null,
+): string | null {
+  const key = (answerKey ?? null) as Record<string, unknown> | null;
+  if (!key) return null;
+  switch (answerType) {
+    case "mcq": {
+      const options = key.options;
+      const correct = key.correct;
+      return Array.isArray(options) && Number.isInteger(correct)
+        ? String(options[correct as number] ?? "")
+        : null;
+    }
+    case "numeric":
+      return key.value !== undefined ? String(key.value) : null;
+    case "exact": {
+      const accept = key.accept;
+      return Array.isArray(accept) && accept.length > 0
+        ? String(accept[0])
+        : null;
+    }
+    default:
+      return null;
+  }
+}
+
 /** Whether a question can back a server-graded (ranked or friendly) duel. */
 export function isDuelGradable(
   answerType: string | null,

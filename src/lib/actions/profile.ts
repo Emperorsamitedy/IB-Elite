@@ -8,19 +8,47 @@ import type { PlanIntensity } from "@/lib/types";
 export async function updateProfile(input: {
   fullName: string;
   displayName?: string;
+  country?: string;
 }) {
   const user = await requireUser();
   const supabase = await createClient();
   const displayName = input.displayName?.trim().slice(0, 40);
+  const country = input.country?.trim().toUpperCase();
+  if (country && !/^[A-Z]{2}$/.test(country)) {
+    return { error: "Country must be a two-letter code, e.g. ET." };
+  }
   await supabase
     .from("profiles")
     .update({
       full_name: input.fullName.trim() || null,
       // Public pseudonym — the only name other students ever see.
       ...(displayName ? { display_name: displayName } : {}),
+      // Opt-in; powers country percentiles and regional teams.
+      country: country || null,
     })
     .eq("id", user.id);
   revalidatePath("/settings");
+  return { ok: true };
+}
+
+/** A row in notification_optouts means "muted"; absence means on. */
+export async function setNotificationOptout(category: string, muted: boolean) {
+  const allowed = ["duels", "mock", "school", "season", "system"];
+  if (!allowed.includes(category)) return { error: "Unknown category." };
+  const user = await requireUser();
+  const supabase = await createClient();
+  if (muted) {
+    await supabase
+      .from("notification_optouts")
+      .upsert({ user_id: user.id, category });
+  } else {
+    await supabase
+      .from("notification_optouts")
+      .delete()
+      .eq("user_id", user.id)
+      .eq("category", category);
+  }
+  revalidatePath("/notifications");
   return { ok: true };
 }
 

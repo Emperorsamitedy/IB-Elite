@@ -37,6 +37,15 @@ type CurrentQuestion = {
   budgetMs: number;
 };
 
+type ReviewRow = {
+  index: number;
+  prompt: string;
+  yourAnswer: string | null;
+  isCorrect: boolean;
+  modelAnswer: string | null;
+  questionId: string;
+};
+
 type MatchPayload = {
   match: {
     id: string;
@@ -49,6 +58,7 @@ type MatchPayload = {
   totalQuestions: number;
   currentQuestion: CurrentQuestion | null;
   verdict: { result: "won" | "lost" | "drew" } | null;
+  review: ReviewRow[] | null;
 };
 
 export function DuelRunner({ matchId }: { matchId: string }) {
@@ -307,6 +317,43 @@ export function DuelRunner({ matchId }: { matchId: string }) {
                 <Copy className="mr-2 size-4" /> {t.challengeFriend}
               </Button>
             </div>
+          </CardContent>
+        </Card>
+      )}
+      {state.match.status === "COMPLETE" && state.review && state.review.length > 0 && (
+        <Card>
+          <CardContent className="flex flex-col gap-4 py-6">
+            <h2 className="text-sm font-semibold">{t.reviewTitle}</h2>
+            {state.review.map((row) => (
+              <div
+                key={row.index}
+                className="flex flex-col gap-1.5 border-t border-border pt-3 first:border-0 first:pt-0"
+              >
+                <div className="flex items-start justify-between gap-3">
+                  <MathText className="min-w-0 flex-1 text-sm">
+                    {row.prompt}
+                  </MathText>
+                  {row.isCorrect ? (
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-success" />
+                  ) : (
+                    <X className="mt-0.5 h-4 w-4 shrink-0 text-danger" />
+                  )}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t.yourAnswer}:{" "}
+                  <span className={cn(row.isCorrect ? "text-success" : "text-danger")}>
+                    {row.yourAnswer || "—"}
+                  </span>
+                  {!row.isCorrect && row.modelAnswer && (
+                    <>
+                      {" · "}
+                      {t.correctAnswer}:{" "}
+                      <span className="text-foreground">{row.modelAnswer}</span>
+                    </>
+                  )}
+                </p>
+              </div>
+            ))}
           </CardContent>
         </Card>
       )}

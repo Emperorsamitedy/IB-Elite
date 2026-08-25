@@ -414,3 +414,23 @@ describe("collusion defenses", () => {
     expect(alice.matches_played).toBe(5);
   });
 });
+
+describe("post-match review", () => {
+  it("reveals your answers and the model answer only after COMPLETE", async () => {
+    const { store, clock, match } = await startMatch();
+    // Mid-match: no review, no answers in the payload.
+    let state = await getMatchState(store, match.id, ALICE, clock.now());
+    expect(state.review).toBeNull();
+
+    await playSide(store, clock, match.id, ALICE, 4);
+    await playSide(store, clock, match.id, BOB, 2);
+
+    state = await getMatchState(store, match.id, ALICE, clock.now());
+    expect(state.review).toHaveLength(5);
+    const wrong = state.review!.find((r) => !r.isCorrect)!;
+    expect(wrong.yourAnswer).toBe("wrong");
+    expect(wrong.modelAnswer).toBe("a5");
+    // Only your own side — Bob's answers never appear in Alice's payload.
+    expect(JSON.stringify(state.review)).not.toContain('"studentId"');
+  });
+});

@@ -30,7 +30,12 @@ export function SettingsView({
   userSubjectIds,
   exams,
 }: {
-  profile: { fullName: string; displayName: string; email: string };
+  profile: {
+    fullName: string;
+    displayName: string;
+    country: string;
+    email: string;
+  };
   preferences: {
     intensity: PlanIntensity;
     dailyTarget: number;
@@ -68,10 +73,16 @@ export function SettingsView({
 function ProfileTab({
   profile,
 }: {
-  profile: { fullName: string; displayName: string; email: string };
+  profile: {
+    fullName: string;
+    displayName: string;
+    country: string;
+    email: string;
+  };
 }) {
   const [name, setName] = React.useState(profile.fullName);
   const [displayName, setDisplayName] = React.useState(profile.displayName);
+  const [country, setCountry] = React.useState(profile.country);
   const [pending, start] = React.useTransition();
   return (
     <Card>
@@ -97,6 +108,21 @@ function ProfileTab({
           </p>
         </div>
         <div className="flex flex-col gap-1.5">
+          <Label htmlFor="country">Country (optional)</Label>
+          <Input
+            id="country"
+            value={country}
+            maxLength={2}
+            placeholder="ET"
+            className="w-24 uppercase"
+            onChange={(e) => setCountry(e.target.value)}
+          />
+          <p className="text-xs text-muted-foreground">
+            Two-letter code. Powers country percentiles on World Mock and
+            regional teams in School Wars.
+          </p>
+        </div>
+        <div className="flex flex-col gap-1.5">
           <Label htmlFor="email">Email</Label>
           <Input id="email" value={profile.email} disabled />
         </div>
@@ -105,7 +131,15 @@ function ProfileTab({
           disabled={pending}
           onClick={() =>
             start(async () => {
-              await updateProfile({ fullName: name, displayName });
+              const res = await updateProfile({
+                fullName: name,
+                displayName,
+                country,
+              });
+              if (res?.error) {
+                toast.error(res.error);
+                return;
+              }
               toast.success("Profile updated");
             })
           }

@@ -42,6 +42,7 @@ export default async function SettingsPage() {
         profile={{
           fullName: profile?.full_name ?? "",
           displayName: profile?.display_name ?? "",
+          country: profile?.country ?? "",
           email: user.email ?? "",
         }}
         preferences={{
