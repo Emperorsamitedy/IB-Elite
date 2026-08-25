@@ -434,3 +434,62 @@ describe("post-match review", () => {
     expect(JSON.stringify(state.review)).not.toContain('"studentId"');
   });
 });
+
+describe("pairing race and mid-match guard", () => {
+  it("a lost pair claim leaves the seeker queued instead of double-matching", async () => {
+    const clock = makeClock();
+    const store = createFakeDuelStore({ clock: clock.now });
+    await queueForDuel(
+      store,
+      { userId: ALICE, subjectId: SUBJECT, mode: "ranked" },
+      clock.now(),
+    );
+    // A concurrent pairing snatches Alice's queue row first.
+    const stolen = await store.claimPair(ALICE, "someone-else", SUBJECT);
+    expect(stolen).toBe(false); // partner row absent → claim refuses cleanly
+    await store.dequeue(ALICE, SUBJECT);
+
+    const second = await queueForDuel(
+      store,
+      { userId: BOB, subjectId: SUBJECT, mode: "ranked" },
+      clock.now(),
+    );
+    expect(second.status).toBe("queued");
+    expect(store.matches).toHaveLength(0);
+  });
+
+  it("blocks queueing mid-match, then frees the player after the window", async () => {
+    const { store, clock, match } = await startMatch();
+    expect(match.status).toBe("ACTIVE");
+
+    await expect(
+      queueForDuel(
+        store,
+        { userId: ALICE, subjectId: SUBJECT, mode: "ranked" },
+        clock.now(),
+      ),
+    ).rejects.toThrow(/current duel first/i);
+
+    // Past limit + grace the abandoned match no longer wedges the player.
+    clock.advance(600_000);
+    const outcome = await queueForDuel(
+      store,
+      { userId: ALICE, subjectId: SUBJECT, mode: "ranked" },
+      clock.now(),
+    );
+    expect(outcome.status).toBe("queued");
+  });
+
+  it("blocks accepting a challenge while a live match is running", async () => {
+    const { store, clock } = await startMatch();
+    const { token } = await createDuelChallenge(store, {
+      creatorId: "carol",
+      subjectId: SUBJECT,
+      mode: "friendly",
+      token: "tok-mid",
+    });
+    await expect(
+      acceptDuelChallenge(store, { token, userId: ALICE }, clock.now()),
+    ).rejects.toThrow(/current duel first/i);
+  });
+});

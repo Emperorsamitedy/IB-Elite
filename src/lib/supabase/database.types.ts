@@ -2607,6 +2607,10 @@ export type Database = {
         Args: { p_key: string; p_max: number; p_window_seconds: number }
         Returns: boolean
       }
+      claim_duel_pair: {
+        Args: { p_subject: string; p_user_a: string; p_user_b: string }
+        Returns: boolean
+      }
       claim_mock_entries: {
         Args: { batch: number }
         Returns: {
