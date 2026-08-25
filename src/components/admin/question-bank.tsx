@@ -47,6 +47,8 @@ export type BankQuestion = {
   marks: number;
   question_type: string;
   status: ContentStatus;
+  /** Present on the list view only; the quick editor never writes it. */
+  answer_type?: string;
 };
 
 const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
@@ -259,6 +261,15 @@ export function QuestionBank({
                           title="Maths here is plain text, not LaTeX"
                         >
                           Plain maths
+                        </Badge>
+                      )}
+                      {q.answer_type && q.answer_type !== "free" && (
+                        <Badge
+                          variant="success"
+                          className="shrink-0"
+                          title="Has a structured answer key — eligible for Ranked Duels"
+                        >
+                          Duel-ready
                         </Badge>
                       )}
                     </span>

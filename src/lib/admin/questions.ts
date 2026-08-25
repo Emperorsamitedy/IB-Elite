@@ -37,7 +37,41 @@ export const questionInputSchema = z.object({
   tags: z.array(z.string()).default([]),
   estimated_minutes: z.coerce.number().int().min(1).max(240).nullable().optional(),
   status: z.enum(["draft", "published", "archived"]).default("draft"),
+  // Structured answers make a question duel-eligible (server-graded).
+  answer_type: z.enum(["free", "mcq", "numeric", "exact"]).default("free"),
+  answer_key: z
+    .union([
+      z.object({
+        options: z.array(z.string().min(1)).min(2).max(8),
+        correct: z.number().int().min(0),
+      }),
+      z.object({ value: z.number(), tolerance: z.number().min(0).default(0) }),
+      z.object({ accept: z.array(z.string().min(1)).min(1).max(20) }),
+    ])
+    .nullable()
+    .optional(),
 });
+
+/** A structured answer_type must carry a key whose shape matches it. */
+export function answerKeyProblem(row: QuestionInput): string | null {
+  if (row.answer_type === "free") return null;
+  const key = row.answer_key as Record<string, unknown> | null | undefined;
+  if (!key) return `answer_type '${row.answer_type}' needs an answer_key`;
+  if (row.answer_type === "mcq") {
+    const options = key.options as string[] | undefined;
+    const correct = key.correct as number | undefined;
+    if (!options || correct === undefined || correct >= options.length) {
+      return "mcq answer_key needs options and a correct index among them";
+    }
+  }
+  if (row.answer_type === "numeric" && typeof key.value !== "number") {
+    return "numeric answer_key needs a value";
+  }
+  if (row.answer_type === "exact" && !Array.isArray(key.accept)) {
+    return "exact answer_key needs an accept array";
+  }
+  return null;
+}
 
 export type QuestionInput = z.infer<typeof questionInputSchema>;
 
@@ -70,6 +104,12 @@ export async function importQuestionRows(
       continue;
     }
     const value = parsed.data;
+
+    const keyProblem = answerKeyProblem(value);
+    if (keyProblem) {
+      failures.push({ row: i + 1, reason: keyProblem });
+      continue;
+    }
 
     if (!(await deps.subjectExists(value.subject_id))) {
       failures.push({

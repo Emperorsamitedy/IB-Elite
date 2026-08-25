@@ -121,3 +121,60 @@ describe("admin API guard", () => {
     expect(gate.ok).toBe(true);
   });
 });
+
+describe("keyed bulk import", () => {
+  const base = {
+    subject_id: "11111111-1111-4111-8111-111111111111",
+    topic_id: "22222222-2222-4222-8222-222222222222",
+    prompt: "Solve 4^x = 16",
+  };
+  const deps = () => {
+    const inserted: unknown[] = [];
+    return {
+      inserted,
+      subjectExists: async () => true,
+      topicExists: async () => true,
+      insert: async (row: unknown) => {
+        inserted.push(row);
+        return {};
+      },
+    };
+  };
+
+  it("imports structured answers with matching keys", async () => {
+    const d = deps();
+    const result = await importQuestionRows(
+      [
+        { ...base, answer_type: "exact", answer_key: { accept: ["2"] } },
+        {
+          ...base,
+          answer_type: "mcq",
+          answer_key: { options: ["1", "2", "3"], correct: 1 },
+        },
+        { ...base }, // plain free-text row still fine
+      ],
+      d,
+    );
+    expect(result.inserted).toBe(3);
+    expect(result.failed).toBe(0);
+  });
+
+  it("rejects a structured type whose key is missing or mismatched", async () => {
+    const d = deps();
+    const result = await importQuestionRows(
+      [
+        { ...base, answer_type: "mcq" }, // no key at all
+        {
+          ...base,
+          answer_type: "mcq",
+          answer_key: { options: ["a", "b"], correct: 5 }, // out of range
+        },
+        { ...base, answer_type: "numeric", answer_key: { accept: ["2"] } }, // wrong shape
+      ],
+      d,
+    );
+    expect(result.inserted).toBe(0);
+    expect(result.failed).toBe(3);
+    expect(result.failures[0].reason).toMatch(/answer_key/);
+  });
+});

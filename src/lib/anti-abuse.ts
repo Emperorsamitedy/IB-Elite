@@ -61,6 +61,8 @@ export const RATE_LIMITS = {
   duelAnswer: { max: 120, windowSeconds: 600 },
   challengeCreate: { max: 15, windowSeconds: 3600 },
   mockScript: { max: 40, windowSeconds: 3600 },
+  mockAction: { max: 60, windowSeconds: 600 },
+  duelPoll: { max: 200, windowSeconds: 600 },
 } satisfies Record<string, RateLimitRule>;
 
 /**
