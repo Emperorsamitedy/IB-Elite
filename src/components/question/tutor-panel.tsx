@@ -2,12 +2,17 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { MessageSquareText, Send, Lightbulb } from "lucide-react";
+import { MessageSquareText, Send, Lightbulb, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/misc";
 import { cn } from "@/lib/utils";
 
-type Msg = { role: "user" | "assistant"; content: string };
+type Msg = {
+  role: "user" | "assistant";
+  content: string;
+  /** Set on assistant replies assembled from the mark scheme rather than generated. */
+  fromMarkScheme?: boolean;
+};
 
 const QUICK = [
   "Give me a hint",
@@ -63,7 +68,14 @@ export function TutorPanel({
       if (!res.ok) throw new Error();
       setConversationId(data.conversationId);
       setHintLevel(data.hintLevel);
-      setMessages((m) => [...m, { role: "assistant", content: data.reply }]);
+      setMessages((m) => [
+        ...m,
+        {
+          role: "assistant",
+          content: data.reply,
+          fromMarkScheme: data.source === "heuristic",
+        },
+      ]);
     } catch {
       setMessages((m) => [
         ...m,
@@ -111,6 +123,12 @@ export function TutorPanel({
             )}
           >
             <p className="whitespace-pre-wrap">{m.content}</p>
+            {m.fromMarkScheme && (
+              <p className="mt-2 flex items-center gap-1.5 border-t border-border pt-1.5 text-2xs text-muted-foreground">
+                <BookOpen className="h-3 w-3" />
+                Guided from the mark scheme
+              </p>
+            )}
           </div>
         ))}
         {loading && (
